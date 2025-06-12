@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Menu, X } from 'lucide-react'
 import { ThemeSelect } from '@/components/theme-select'
 import { ClusterUiSelect } from './cluster/cluster-ui'
-import { WalletButton } from '@/components/solana/solana-provider'
 import { ParaButton } from './para-modal'
 export function AppHeader({ links = [] }: { links: { label: string; path: string }[] }) {
   const pathname = usePathname()
@@ -66,7 +65,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
                 ))}
               </ul>
               <div className="flex flex-col gap-4">
-                <WalletButton />
+                <ParaButton />
                 <ClusterUiSelect />
                 <ThemeSelect />
               </div>
