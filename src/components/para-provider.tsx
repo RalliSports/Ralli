@@ -1,13 +1,13 @@
 "use client";
 
+import React from "react"; // Explicitly import React for ReactNode type
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Environment, ExternalWallet, ParaProvider } from "@getpara/react-sdk";
+import { AuthLayout, ExternalWallet, ParaProvider, Environment } from "@getpara/react-sdk";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import "@getpara/react-sdk/styles.css";
+import { ENVIRONMENT, API_KEY } from "@/constants";
 
 const queryClient = new QueryClient();
-
-
 
 export function Providers({
   children,
@@ -18,8 +18,8 @@ export function Providers({
     <QueryClientProvider client={queryClient}>
       <ParaProvider
         paraClientConfig={{
-          apiKey: process.env.NEXT_PUBLIC_PARA_API_KEY || "",
-          env: Environment.BETA,
+          apiKey: API_KEY, // Ensure this matches your API key
+          env: ENVIRONMENT, // Updated to match production environment
         }}
         config={{
           appName: "TradeTalk",
@@ -27,13 +27,14 @@ export function Providers({
         paraModalConfig={{
           logo: "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
           oAuthMethods: ["GOOGLE", "TWITTER", "DISCORD"],
+          authLayout: ["AUTH:FULL", "EXTERNAL:CONDENSED"] 
         }}
         externalWalletConfig={{
-          appUrl: "http://localhost:3000/", // <-- Replace with your app's real URL
+          appUrl: "http://localhost:3000/", // Ensure this matches your app's real URL
           wallets: [ExternalWallet.BACKPACK, ExternalWallet.PHANTOM],
           solanaConnector: {
             config: {
-              endpoint: "https://api.devnet.solana.com", // <-- Use your desired cluster
+              endpoint: "https://api.devnet.solana.com", // Ensure this matches your desired cluster
               chain: WalletAdapterNetwork.Devnet, // Devnet | Mainnet | Testnet
             },
           },
