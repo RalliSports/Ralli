@@ -22,7 +22,7 @@ export function Providers({
           env: ENVIRONMENT, // Updated to match production environment
         }}
         config={{
-          appName: "TradeTalk",
+          appName: "Ralli",
         }}
         paraModalConfig={{
           logo: "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
