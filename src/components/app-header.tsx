@@ -1,147 +1,136 @@
-'use client'
-import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Menu, X } from 'lucide-react'
-import { ThemeSelect } from '@/components/theme-select'
-import { ClusterUiSelect } from './cluster/cluster-ui'
-import { ParaButton } from './para-modal'
+"use client";
 
-export function AppHeader({ links = [] }: { links: { label: string; path: string }[] }) {
-  const pathname = usePathname()
-  const [showMenu, setShowMenu] = useState(false)
+import Link from "next/link";
+import Logo from "./ui/logo";
+import { useState, useEffect } from "react";
+import { ParaButton } from "./para-modal";
 
-  function isActive(path: string) {
-    return path === '/' ? pathname === '/' : pathname.startsWith(path)
-  }
-
+export function AppHeader() {
   return (
-    <header className="fixed top-4 left-4 right-4 z-50 mx-auto max-w-7xl">
-      <div className="relative px-6 py-4 bg-gradient-to-r from-orange-200/95 via-teal-400/95 to-yellow-100/95 backdrop-blur-xl rounded-3xl border border-teal-300/30 shadow-2xl shadow-teal-500/20">
-        {/* Animated background glow */}
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-300/20 via-teal-300/20 to-yellow-200/20 animate-pulse rounded-3xl"></div>
-      
-        <div className="relative mx-auto flex justify-between items-center">
-        {/* Logo Section */}
-        <div className="flex items-center gap-8">
-          <Link className="group flex items-center gap-3 hover:scale-105 transition-all duration-300" href="/">
-            <div className="relative">
-              <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-600 via-orange-600 to-yellow-700 group-hover:from-teal-500 group-hover:via-orange-500 group-hover:to-yellow-600 transition-all duration-300">
-                🎯 RALLI
-              </div>
-              <div className="absolute -inset-1 bg-gradient-to-r from-teal-400/30 via-orange-400/30 to-yellow-400/30 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </div>
-          </Link>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center">
-            <nav className="flex gap-2">
-              {links.map(({ label, path }) => (
+    <>
+      {/* Floating Header Container */}
+      <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-6xl px-4">
+        <header className="relative bg-white/90 backdrop-blur-xl border border-gray-200/30 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              {/* Logo */}
+              <div className="flex items-center">
+                <Logo />
+              </div>{" "}
+              {/* Desktop Navigation */}
+              <nav className="hidden lg:flex items-center space-x-8">
                 <Link
-                  key={path}
-                  className={`relative px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105 ${
-                    isActive(path)
-                      ? 'text-white bg-gradient-to-r from-teal-600 to-orange-600 shadow-lg shadow-teal-500/30'
-                      : 'text-gray-700 hover:text-gray-900 hover:bg-white/40 backdrop-blur-sm'
-                  }`}
-                  href={path}
+                  href="/nfl"
+                  className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
                 >
-                  {/* Active indicator */}
-                  {isActive(path) && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-teal-600 via-orange-600 to-yellow-600 rounded-xl blur-sm opacity-50 animate-pulse"></div>
-                  )}
-                  <span className="relative z-10">{label}</span>
+                  NFL
                 </Link>
-              ))}
-            </nav>
-          </div>
-        </div>
 
-        {/* Mobile Menu Button */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="lg:hidden text-gray-700 hover:bg-white/40 hover:scale-110 transition-all duration-300 rounded-xl p-3" 
-          onClick={() => setShowMenu(!showMenu)}
-        >
-          <div className="relative">
-            {showMenu ? (
-              <X className="h-6 w-6 transform rotate-180 transition-transform duration-300" />
-            ) : (
-              <Menu className="h-6 w-6 transition-transform duration-300" />
-            )}
-          </div>
-        </Button>
+                <Link
+                  href="/nba"
+                  className="text-gray-700 hover:text-orange-600 font-medium transition-colors duration-200"
+                >
+                  NBA
+                </Link>
 
-        {/* Desktop Controls */}
-        <div className="hidden lg:flex items-center gap-4">
-          <div className="flex items-center gap-3 p-2 bg-white/30 backdrop-blur-sm rounded-2xl border border-teal-300/40">
-            <ParaButton />
-            <div className="w-px h-6 bg-teal-400/40"></div>
-            <ClusterUiSelect />
-            <div className="w-px h-6 bg-teal-400/40"></div>
-            <ThemeSelect />
-          </div>
-          
-          {/* CTA Button */}
-          <Button className="bg-gradient-to-r from-teal-500 via-orange-500 to-yellow-500 hover:from-teal-600 hover:via-orange-600 hover:to-yellow-600 text-white font-black px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1 transition-all duration-300">
-            🚀 START BETTING
-          </Button>
-        </div>
+                <Link
+                  href="/soccer"
+                  className="text-gray-700 hover:text-green-600 font-medium transition-colors duration-200"
+                >
+                  Soccer
+                </Link>
 
-        {/* Mobile Menu Overlay */}
-        {showMenu && (
-          <>
-            {/* Backdrop */}
-            <div 
-              className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
-              onClick={() => setShowMenu(false)}
-            ></div>
-            
-            {/* Menu Panel */}
-            <div className="lg:hidden fixed inset-x-4 top-28 bg-gradient-to-br from-orange-200/98 via-teal-300/98 to-yellow-100/98 backdrop-blur-xl rounded-3xl border border-teal-300/40 shadow-2xl animate-in slide-in-from-top duration-300">
-              <div className="p-8">
-                {/* Mobile Navigation */}
-                <nav className="mb-8">
-                  <ul className="space-y-3">
-                    {links.map(({ label, path }) => (
-                      <li key={path}>
-                        <Link
-                          className={`block px-6 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 ${
-                            isActive(path)
-                              ? 'text-white bg-gradient-to-r from-teal-600 to-orange-600 shadow-lg shadow-teal-500/30'
-                              : 'text-gray-700 hover:text-gray-900 hover:bg-white/40'
-                          }`}
-                          href={path}
-                          onClick={() => setShowMenu(false)}
-                        >
-                          {label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-                
-                {/* Mobile Controls */}
-                <div className="space-y-4 pt-6 border-t border-teal-400/30">
-                  <div className="grid grid-cols-3 gap-3">
-                    <ParaButton />
-                    <ClusterUiSelect />
-                    <ThemeSelect />
-                  </div>
-                  
-                  {/* Mobile CTA */}
-                  <Button className="w-full bg-gradient-to-r from-teal-500 via-orange-500 to-yellow-500 hover:from-teal-600 hover:via-orange-600 hover:to-yellow-600 text-white font-black py-4 rounded-2xl shadow-lg text-lg">
-                    🚀 START BETTING NOW
-                  </Button>
-                </div>
+                <Link
+                  href="/baseball"
+                  className="text-gray-700 hover:text-red-600 font-medium transition-colors duration-200"
+                >
+                  Baseball
+                </Link>
+
+                <div className="h-6 w-px bg-gray-300"></div>
+
+                <Link
+                  href="/compy"
+                  className="group relative overflow-hidden px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl shadow-md hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 transform hover:scale-105"
+                >
+                  <span className="relative z-10 flex items-center space-x-1.5">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                      />
+                    </svg>
+                    <span>Components</span>
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                </Link>
+
+                <div className="h-6 w-px bg-gray-300"></div>
+
+                <Link
+                  href="/leaderboard"
+                  className="text-gray-700 hover:text-amber-600 font-medium transition-colors duration-200"
+                >
+                  Leaderboard
+                </Link>
+              </nav>{" "}
+              {/* Desktop Auth Buttons */}
+              <div className="hidden lg:flex items-center space-x-4">
+                <ParaButton></ParaButton>
+
+                <Link
+                  href="/signup"
+                  className="group relative overflow-hidden px-8 py-3 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 transform hover:scale-105"
+                >
+                  <span className="relative z-10 flex items-center space-x-2">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
+                    </svg>
+                    <span>Get Started</span>
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                </Link>
               </div>
+              {/* Mobile menu button */}
+              <button className="lg:hidden p-2 text-gray-700 hover:text-gray-900 transition-colors duration-200">
+                <span className="sr-only">Open menu</span>
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
             </div>
-          </>
-        )}
-        </div>
+          </div>{" "}
+        </header>
       </div>
-    </header>
-  )
+    </>
+  );
 }
