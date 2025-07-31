@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import BoxingLogo from "/images/boxing.svg";
-import F1Logo from "/images/F1.svg";
-import IPLLogo from "/images/IPL.svg";
-import NBALogo from "/images/nba-6.svg";
-import OlympicsLogo from "/images/olympics-1.svg";
-import WBCLogo from "/images/WBC_logo.svg";
+import BoxingLogo from "@/public/images/boxing.svg";
+import F1Logo from "@/public/images/F1.svg";
+import IPLLogo from "@/public/images/IPL.svg";
+import NBALogo from "@/public/images/nba-6.svg";
+import OlympicsLogo from "@/public/images/olympics-1.svg";
+import WBCLogo from "@/public/images/WBC_logo.svg";
 
 interface LiveMatch {
   sport: string;

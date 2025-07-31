@@ -249,7 +249,7 @@ export default function CompactPlayerCards() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       {players.map((player) => {
         const currentIndex = currentStatIndex[player.id] || 0;
         const currentStat = player.stats[currentIndex];
@@ -257,112 +257,73 @@ export default function CompactPlayerCards() {
         return (
           <div
             key={player.id}
-            className="group relative bg-gradient-to-br from-slate-800/98 to-slate-900/98 backdrop-blur-xl rounded-3xl p-6 border border-slate-700/40 shadow-2xl hover:shadow-[#00CED1]/25 transition-all duration-500 hover:scale-[1.03] hover:border-slate-600/60 overflow-hidden"
+            className="group relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-xl border border-slate-700/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-slate-600/60 overflow-hidden"
           >
-            {/* Enhanced Background Pattern */}
-            <div className="absolute inset-0 opacity-[0.02] group-hover:opacity-[0.08] transition-opacity duration-500">
-              <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full blur-3xl"></div>
-              <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-[#FFAB91] to-[#00CED1] rounded-full blur-2xl"></div>
-            </div>
+            {/* Subtle background glow */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#00CED1]/3 via-transparent to-[#FFAB91]/3 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-            {/* Subtle Inner Glow */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/[0.02] via-transparent to-white/[0.01] group-hover:from-white/[0.04] group-hover:to-white/[0.02] transition-all duration-500"></div>
-
-            {/* Enhanced Compact Header */}
-            <div className="relative z-10 flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-2xl flex items-center justify-center shadow-xl shadow-[#00CED1]/20 group-hover:scale-110 group-hover:shadow-[#00CED1]/30 transition-all duration-500">
-                    <span className="text-white font-bold text-lg tracking-tight">
-                      {player.avatar}
-                    </span>
-                  </div>
-                  <div
-                    className={`absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full border-2 border-slate-800 flex items-center justify-center shadow-lg transition-all duration-300 ${
-                      player.status === "confirmed"
-                        ? "bg-emerald-500 shadow-emerald-500/30"
-                        : player.status === "probable"
-                          ? "bg-yellow-500 shadow-yellow-500/30"
-                          : "bg-orange-500 shadow-orange-500/30"
-                    }`}
-                  >
-                    {player.status === "confirmed" ? (
-                      <svg
-                        className="w-3 h-3 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    ) : player.status === "probable" ? (
-                      <svg
-                        className="w-3 h-3 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        className="w-3 h-3 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-white font-bold text-lg truncate mb-1.5">
-                    {player.name}
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <span className="text-slate-300 font-semibold text-base">
-                      {player.team}
-                    </span>
+            <div className="relative z-10 p-5">
+              {/* Header Section */}
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center space-x-3">
+                  {/* Player Avatar */}
+                  <div className="relative flex-shrink-0">
+                    <div className="w-14 h-14 backdrop-blur-lg bg-white/10 border border-white/20 rounded-xl flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold text-lg tracking-tight">
+                        {player.avatar}
+                      </span>
+                    </div>
                     <div
-                      className={`px-3 py-1.5 bg-gradient-to-r ${getPositionColor(
-                        player.position
-                      )} border rounded-full text-sm font-bold shadow-sm`}
-                    >
-                      {player.position}
+                      className={`absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-slate-800 ${
+                        player.status === "confirmed"
+                          ? "bg-emerald-500"
+                          : player.status === "probable"
+                            ? "bg-yellow-500"
+                            : "bg-orange-500"
+                      }`}
+                    ></div>
+                  </div>
+
+                  {/* Player Details */}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-white font-bold text-lg mb-1 truncate">
+                      {player.name}
+                    </h3>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-slate-300 font-semibold text-sm">
+                        {player.team}
+                      </span>
+                      <div
+                        className={`px-2 py-1 bg-gradient-to-r ${getPositionColor(
+                          player.position
+                        )} border rounded text-xs font-bold`}
+                      >
+                        {player.position}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="text-slate-400 text-base text-right font-medium">
-                {player.matchup}
-              </div>
-            </div>
 
-            {/* Enhanced Swipeable Stat Prediction Section */}
-            <div className="relative z-10 mb-6">
+                {/* Matchup */}
+                <div className="text-slate-400 font-medium text-sm">
+                  {player.matchup}
+                </div>
+              </div>
+
+              {/* Enhanced Stats Section */}
               <div
-                className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-5 border border-slate-700/40 cursor-pointer touch-pan-y shadow-inner hover:border-slate-600/50 transition-all duration-300"
+                className="bg-gradient-to-br from-slate-800/80 to-slate-900/60 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-6 mb-6 cursor-pointer touch-pan-y"
                 onTouchStart={(e) => handleTouchStart(e, player.id)}
                 onTouchEnd={(e) => handleTouchEnd(e, player.id, player.stats)}
               >
-                {/* Redesigned Stat Navigation */}
-                <div className="flex items-center justify-between mb-5">
+                {/* Stat Navigation Header */}
+                <div className="flex items-center justify-between mb-4">
                   <button
                     onClick={() => prevStat(player.id, player.stats)}
-                    className="group w-10 h-10 bg-gradient-to-r from-slate-700/60 to-slate-600/60 hover:from-[#00CED1]/30 hover:to-[#00CED1]/20 rounded-full flex items-center justify-center transition-all duration-400 hover:scale-110 shadow-lg backdrop-blur-sm border border-slate-600/40 hover:border-[#00CED1]/50"
+                    className="w-9 h-9 bg-gradient-to-r from-slate-700/60 to-slate-600/60 hover:from-[#00CED1]/30 hover:to-[#00CED1]/20 rounded-lg flex items-center justify-center transition-all duration-300 border border-slate-600/40 hover:border-[#00CED1]/50"
                   >
                     <svg
-                      className="w-5 h-5 text-slate-300 group-hover:text-[#00CED1] transition-colors duration-300"
+                      className="w-5 h-5 text-slate-300 hover:text-[#00CED1] transition-colors"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -376,28 +337,21 @@ export default function CompactPlayerCards() {
                     </svg>
                   </button>
 
-                  <div className="flex items-center space-x-5">
-                    <div className="w-14 h-14 bg-gradient-to-br from-[#00CED1]/20 to-[#FFAB91]/20 rounded-2xl flex items-center justify-center shadow-xl border border-[#00CED1]/30 backdrop-blur-sm">
-                      <span className="text-2xl filter drop-shadow-sm">
-                        {currentStat.icon}
-                      </span>
+                  <div className="text-center flex-1 px-4">
+                    <div className="text-slate-200 font-bold text-lg mb-2 tracking-wide">
+                      {currentStat.type}
                     </div>
-                    <div className="text-center">
-                      <div className="text-white/90 font-semibold text-base mb-2 tracking-wide uppercase">
-                        {currentStat.type}
-                      </div>
-                      <div className="text-[#00CED1] font-bold text-3xl tracking-tight drop-shadow-sm">
-                        {currentStat.line}
-                      </div>
+                    <div className="text-[#00CED1] font-black text-4xl tracking-tight drop-shadow-lg">
+                      {currentStat.line}
                     </div>
                   </div>
 
                   <button
                     onClick={() => nextStat(player.id, player.stats)}
-                    className="group w-10 h-10 bg-gradient-to-r from-slate-700/60 to-slate-600/60 hover:from-[#00CED1]/30 hover:to-[#00CED1]/20 rounded-full flex items-center justify-center transition-all duration-400 hover:scale-110 shadow-lg backdrop-blur-sm border border-slate-600/40 hover:border-[#00CED1]/50"
+                    className="w-9 h-9 bg-gradient-to-r from-slate-700/60 to-slate-600/60 hover:from-[#00CED1]/30 hover:to-[#00CED1]/20 rounded-lg flex items-center justify-center transition-all duration-300 border border-slate-600/40 hover:border-[#00CED1]/50"
                   >
                     <svg
-                      className="w-5 h-5 text-slate-300 group-hover:text-[#00CED1] transition-colors duration-300"
+                      className="w-5 h-5 text-slate-300 hover:text-[#00CED1] transition-colors"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -412,8 +366,8 @@ export default function CompactPlayerCards() {
                   </button>
                 </div>
 
-                {/* Redesigned Stat Indicator Dots */}
-                <div className="flex justify-center space-x-2 mb-5">
+                {/* Enhanced Progress Indicators */}
+                <div className="flex justify-center space-x-2">
                   {player.stats.map((_, index) => (
                     <button
                       key={index}
@@ -423,97 +377,68 @@ export default function CompactPlayerCards() {
                           [player.id]: index,
                         }))
                       }
-                      className={`relative transition-all duration-400 ${
+                      className={`transition-all duration-500 rounded-full ${
                         index === currentIndex
-                          ? "w-8 h-3 bg-[#00CED1] rounded-full shadow-lg shadow-[#00CED1]/50"
-                          : "w-3 h-3 bg-slate-500/60 hover:bg-slate-400/80 rounded-full hover:scale-125"
+                          ? "w-6 h-1.5 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] shadow-lg shadow-[#00CED1]/30"
+                          : "w-1.5 h-1.5 bg-slate-600/60 hover:bg-slate-500/80 hover:scale-150 shadow-md"
                       }`}
-                    >
-                      {index === currentIndex && (
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full animate-pulse"></div>
-                      )}
-                    </button>
+                    ></button>
                   ))}
                 </div>
-
-                {/* Completely Redesigned Higher/Lower Buttons */}
-                <div className="flex space-x-4">
-                  <button className="group/higher flex-1 relative overflow-hidden bg-gradient-to-br from-emerald-500/15 via-emerald-500/10 to-emerald-600/5 border border-emerald-400/30 rounded-2xl p-5 hover:from-emerald-500/25 hover:via-emerald-500/20 hover:to-emerald-600/15 hover:border-emerald-400/50 transition-all duration-400 hover:scale-[1.02] hover:shadow-lg hover:shadow-emerald-500/20">
-                    {/* Background Animation */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/5 to-transparent opacity-0 group-hover/higher:opacity-100 transition-opacity duration-500 animate-pulse"></div>
-
-                    {/* Arrow Icon */}
-                    <div className="relative z-10 flex flex-col items-center space-y-3">
-                      <div className="w-10 h-10 bg-gradient-to-t from-emerald-500/20 to-emerald-400/30 rounded-xl flex items-center justify-center group-hover/higher:scale-110 transition-transform duration-300 shadow-inner">
-                        <svg
-                          className="w-6 h-6 text-emerald-400 group-hover/higher:text-emerald-300 transition-colors duration-300"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={3}
-                            d="M5 10l7-7m0 0l7 7m-7-7v18"
-                          />
-                        </svg>
-                      </div>
-                      <span className="text-emerald-400 group-hover/higher:text-emerald-300 font-bold text-base tracking-widest transition-colors duration-300">
-                        HIGHER
-                      </span>
-                    </div>
-                  </button>
-
-                  <button className="group/lower flex-1 relative overflow-hidden bg-gradient-to-br from-red-500/15 via-red-500/10 to-red-600/5 border border-red-400/30 rounded-2xl p-5 hover:from-red-500/25 hover:via-red-500/20 hover:to-red-600/15 hover:border-red-400/50 transition-all duration-400 hover:scale-[1.02] hover:shadow-lg hover:shadow-red-500/20">
-                    {/* Background Animation */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/5 to-transparent opacity-0 group-hover/lower:opacity-100 transition-opacity duration-500 animate-pulse"></div>
-
-                    {/* Arrow Icon */}
-                    <div className="relative z-10 flex flex-col items-center space-y-3">
-                      <div className="w-10 h-10 bg-gradient-to-b from-red-500/20 to-red-400/30 rounded-xl flex items-center justify-center group-hover/lower:scale-110 transition-transform duration-300 shadow-inner">
-                        <svg
-                          className="w-6 h-6 text-red-400 group-hover/lower:text-red-300 transition-colors duration-300"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={3}
-                            d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                          />
-                        </svg>
-                      </div>
-                      <span className="text-red-400 group-hover/lower:text-red-300 font-bold text-base tracking-widest transition-colors duration-300">
-                        LOWER
-                      </span>
-                    </div>
-                  </button>
-                </div>
               </div>
-            </div>
 
-            {/* Enhanced Compact Action Button */}
-            <div className="relative z-10">
-              <button className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white font-bold py-3.5 rounded-2xl hover:shadow-xl hover:shadow-[#00CED1]/25 transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center space-x-2.5 group/action relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover/action:opacity-100 transition-opacity duration-300"></div>
-                <svg
-                  className="w-5 h-5 relative z-10 group-hover/action:scale-110 transition-transform duration-300"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <span className="text-sm font-bold tracking-wide relative z-10">
-                  Add Player
-                </span>
-              </button>
+              {/* Over/Under Buttons Below Stats */}
+              <div className="grid grid-cols-2 gap-4">
+                <button className="bg-gradient-to-r from-emerald-500/25 to-emerald-600/15 border-2 border-emerald-400/40 rounded-xl py-6 px-8 hover:from-emerald-500/35 hover:to-emerald-600/25 hover:border-emerald-400/60 transition-all duration-300 group shadow-lg hover:shadow-emerald-500/20">
+                  <div className="flex items-center justify-center space-x-3">
+                    <div className="w-8 h-8 bg-emerald-400/20 rounded-xl flex items-center justify-center group-hover:bg-emerald-400/30 transition-colors">
+                      <svg
+                        className="w-6 h-6 text-emerald-400 group-hover:scale-125 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={3}
+                          d="M5 10l7-7m0 0l7 7m-7-7v18"
+                        />
+                      </svg>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-emerald-400 font-black text-lg tracking-wider">
+                        OVER
+                      </div>
+                    </div>
+                  </div>
+                </button>
+
+                <button className="bg-gradient-to-r from-red-500/25 to-red-600/15 border-2 border-red-400/40 rounded-xl py-6 px-8 hover:from-red-500/35 hover:to-red-600/25 hover:border-red-400/60 transition-all duration-300 group shadow-lg hover:shadow-red-500/20">
+                  <div className="flex items-center justify-center space-x-3">
+                    <div className="w-8 h-8 bg-red-400/20 rounded-xl flex items-center justify-center group-hover:bg-red-400/30 transition-colors">
+                      <svg
+                        className="w-6 h-6 text-red-400 group-hover:scale-125 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={3}
+                          d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                        />
+                      </svg>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-red-400 font-black text-lg tracking-wider">
+                        UNDER
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         );

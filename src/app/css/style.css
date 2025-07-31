@@ -1,8 +1,8 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Additional styles */
-@import "./additional-styles/utility-patterns.css" layer(components);
-@import "./additional-styles/theme.css";
+@import './additional-styles/utility-patterns.css' layer(components);
+@import './additional-styles/theme.css';
 
 /* Float animation keyframes */
 @keyframes float {
@@ -28,6 +28,16 @@
   }
   .animate-float-3s {
     animation: float 4s ease-in-out infinite 3s both;
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -277,12 +287,7 @@
   }
   .animate-shimmer {
     animation: shimmer 2s linear infinite;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.4),
-      transparent
-    );
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
     background-size: 1000px 100%;
   }
 }

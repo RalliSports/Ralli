@@ -1,4 +1,10 @@
 import Image from "next/image";
+import Avatar01 from "@/public/images/avatar-01.jpg";
+import Avatar02 from "@/public/images/avatar-02.jpg";
+import Avatar03 from "@/public/images/avatar-03.jpg";
+import Avatar04 from "@/public/images/avatar-04.jpg";
+import Avatar05 from "@/public/images/avatar-05.jpg";
+import Avatar06 from "@/public/images/avatar-06.jpg";
 
 export default function PvPFeatures() {
   return (
@@ -39,7 +45,7 @@ export default function PvPFeatures() {
                     <div className="flex items-center space-x-3">
                       <Image
                         className="w-10 h-10 rounded-full"
-                        src="/images/avatar-01.jpg"
+                        src={Avatar01}
                         width={40}
                         height={40}
                         alt="Jake"
@@ -64,7 +70,7 @@ export default function PvPFeatures() {
                     <div className="flex items-center space-x-3">
                       <Image
                         className="w-10 h-10 rounded-full"
-                        src="/images/avatar-02.jpg"
+                        src={Avatar02}
                         width={40}
                         height={40}
                         alt="Sarah"
@@ -89,7 +95,7 @@ export default function PvPFeatures() {
                     <div className="flex items-center space-x-3">
                       <Image
                         className="w-10 h-10 rounded-full"
-                        src="/images/avatar-03.jpg"
+                        src={Avatar03}
                         width={40}
                         height={40}
                         alt="Mike"
@@ -112,7 +118,7 @@ export default function PvPFeatures() {
                     <div className="flex items-center space-x-3">
                       <Image
                         className="w-10 h-10 rounded-full"
-                        src="/images/avatar-04.jpg"
+                        src={Avatar04}
                         width={40}
                         height={40}
                         alt="Emma"
@@ -137,7 +143,7 @@ export default function PvPFeatures() {
                     <div className="flex items-center space-x-3">
                       <Image
                         className="w-10 h-10 rounded-full"
-                        src="/images/avatar-05.jpg"
+                        src={Avatar05}
                         width={40}
                         height={40}
                         alt="Alex"
@@ -162,7 +168,7 @@ export default function PvPFeatures() {
                     <div className="flex items-center space-x-3">
                       <Image
                         className="w-10 h-10 rounded-full"
-                        src="/images/avatar-06.jpg"
+                        src={Avatar06}
                         width={40}
                         height={40}
                         alt="Chris"

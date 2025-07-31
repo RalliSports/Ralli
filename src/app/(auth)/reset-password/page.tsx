@@ -1,41 +1,31 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState } from 'react'
+import Link from 'next/link'
 
 export default function ResetPassword() {
-  const [email, setEmail] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('')
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
 
     // Simulate API call
     setTimeout(() => {
-      setIsLoading(false);
-      setIsSubmitted(true);
-    }, 2000);
-  };
+      setIsLoading(false)
+      setIsSubmitted(true)
+    }, 2000)
+  }
 
   if (isSubmitted) {
     return (
       <>
         <div className="text-center">
           <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
-            <svg
-              className="h-8 w-8 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
+            <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
 
@@ -52,11 +42,7 @@ export default function ResetPassword() {
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8">
             <div className="flex items-start">
               <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-blue-400 mt-0.5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
+                <svg className="h-5 w-5 text-blue-400 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                   <path
                     fillRule="evenodd"
                     d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -65,9 +51,7 @@ export default function ResetPassword() {
                 </svg>
               </div>
               <div className="ml-3 text-left">
-                <h3 className="text-sm font-medium text-blue-800">
-                  Didn't receive the email?
-                </h3>
+                <h3 className="text-sm font-medium text-blue-800">Didn't receive the email?</h3>
                 <div className="mt-2 text-sm text-blue-700">
                   <ul className="list-disc list-inside space-y-1">
                     <li>Check your spam or junk folder</li>
@@ -96,19 +80,14 @@ export default function ResetPassword() {
           </div>
         </div>
       </>
-    );
+    )
   }
 
   return (
     <>
       <div className="mb-10">
         <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-[#00CED1]/10 mb-6">
-          <svg
-            className="h-8 w-8 text-[#00CED1]"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="h-8 w-8 text-[#00CED1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -121,21 +100,14 @@ export default function ResetPassword() {
         <h1 className="text-3xl font-bold bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent mb-2">
           Reset your password
         </h1>
-        <p className="text-gray-600">
-          Enter your email address and we'll send you a link to reset your
-          password
-        </p>
+        <p className="text-gray-600">Enter your email address and we&apos;ll send you a link to reset your password</p>
       </div>
 
       {/* Security notice */}
       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-8">
         <div className="flex items-start">
           <div className="flex-shrink-0">
-            <svg
-              className="h-5 w-5 text-yellow-400 mt-0.5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
+            <svg className="h-5 w-5 text-yellow-400 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
               <path
                 fillRule="evenodd"
                 d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
@@ -144,12 +116,9 @@ export default function ResetPassword() {
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-yellow-800">
-              Account Security
-            </h3>
+            <h3 className="text-sm font-medium text-yellow-800">Account Security</h3>
             <div className="mt-1 text-sm text-yellow-700">
-              For your security, password reset links expire in 15 minutes and
-              can only be used once.
+              For your security, password reset links expire in 15 minutes and can only be used once.
             </div>
           </div>
         </div>
@@ -158,10 +127,7 @@ export default function ResetPassword() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label
-            className="block text-sm font-medium text-gray-700 mb-2"
-            htmlFor="email"
-          >
+          <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="email">
             Email Address
           </label>
           <div className="relative">
@@ -176,12 +142,7 @@ export default function ResetPassword() {
               required
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -206,14 +167,7 @@ export default function ResetPassword() {
                 fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path
                   className="opacity-75"
                   fill="currentColor"
@@ -223,7 +177,7 @@ export default function ResetPassword() {
               Sending reset link...
             </div>
           ) : (
-            "Send Reset Link"
+            'Send Reset Link'
           )}
         </button>
       </form>
@@ -241,21 +195,15 @@ export default function ResetPassword() {
 
         <div className="mt-6 text-center space-y-4">
           <p className="text-sm text-gray-600">
-            Remember your password?{" "}
-            <Link
-              href="/signin"
-              className="font-medium text-[#00CED1] hover:text-[#00CED1]/80 underline"
-            >
+            Remember your password?{' '}
+            <Link href="/signin" className="font-medium text-[#00CED1] hover:text-[#00CED1]/80 underline">
               Sign in
             </Link>
           </p>
 
           <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Link
-              href="/signup"
-              className="font-medium text-[#00CED1] hover:text-[#00CED1]/80 underline"
-            >
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className="font-medium text-[#00CED1] hover:text-[#00CED1]/80 underline">
               Create one now
             </Link>
           </p>
@@ -265,22 +213,13 @@ export default function ResetPassword() {
       {/* Help section */}
       <div className="mt-8 bg-gray-50 border border-gray-200 rounded-xl p-4">
         <div className="text-center">
-          <h3 className="text-sm font-medium text-gray-800 mb-2">
-            Still having trouble?
-          </h3>
-          <p className="text-sm text-gray-600 mb-3">
-            Contact our support team for assistance
-          </p>
+          <h3 className="text-sm font-medium text-gray-800 mb-2">Still having trouble?</h3>
+          <p className="text-sm text-gray-600 mb-3">Contact our support team for assistance</p>
           <button
             type="button"
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-[#00CED1] bg-white hover:bg-gray-50 transition-all duration-200"
           >
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -293,5 +232,5 @@ export default function ResetPassword() {
         </div>
       </div>
     </>
-  );
+  )
 }

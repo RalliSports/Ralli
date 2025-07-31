@@ -1,443 +1,441 @@
-"use client";
+'use client'
 
-import Image from "next/image";
-import Link from "next/link";
-import { useState, useEffect } from "react";
+import Image from 'next/image'
+import Link from 'next/link'
+import { useState, useEffect } from 'react'
 
 export default function HeroProfessional() {
-  const [currentBetIndex, setCurrentBetIndex] = useState(0);
-  const [liveCount, setLiveCount] = useState(2847);
-  const [activityScrollOffset, setActivityScrollOffset] = useState(0);
-  const [chartData, setChartData] = useState([
-    45, 52, 48, 61, 70, 65, 78, 82, 75, 88, 95, 92,
-  ]);
+  const [currentBetIndex, setCurrentBetIndex] = useState(0)
+  const [liveCount, setLiveCount] = useState(2847)
+  const [activityScrollOffset, setActivityScrollOffset] = useState(0)
+  const [chartData, setChartData] = useState([45, 52, 48, 61, 70, 65, 78, 82, 75, 88, 95, 92])
 
   // Mock data for rotating dashboard content
   const liveBets = [
     {
-      match: "Chiefs vs Bills",
-      sport: "NFL",
-      user: "Jake M.",
-      amount: "+$150",
-      status: "Leading",
-      color: "green",
+      match: 'Chiefs vs Bills',
+      sport: 'NFL',
+      user: 'Jake M.',
+      amount: '+$150',
+      status: 'Leading',
+      color: 'green',
     },
     {
-      match: "Lakers vs Warriors",
-      sport: "NBA",
-      user: "Sarah C.",
-      amount: "$75",
-      status: "Q3 Live",
-      color: "orange",
+      match: 'Lakers vs Warriors',
+      sport: 'NBA',
+      user: 'Sarah C.',
+      amount: '$75',
+      status: 'Q3 Live',
+      color: 'orange',
     },
     {
-      match: "Arsenal vs Chelsea",
-      sport: "EPL",
-      user: "Mike R.",
-      amount: "$100",
-      status: "Starting",
-      color: "blue",
+      match: 'Arsenal vs Chelsea',
+      sport: 'EPL',
+      user: 'Mike R.',
+      amount: '$100',
+      status: 'Starting',
+      color: 'blue',
     },
     {
-      match: "Cowboys vs Giants",
-      sport: "NFL",
-      user: "Alex K.",
-      amount: "+$89",
-      status: "Won",
-      color: "green",
+      match: 'Cowboys vs Giants',
+      sport: 'NFL',
+      user: 'Alex K.',
+      amount: '+$89',
+      status: 'Won',
+      color: 'green',
     },
     {
-      match: "Heat vs Celtics",
-      sport: "NBA",
-      user: "Emma L.",
-      amount: "$125",
-      status: "Live",
-      color: "orange",
+      match: 'Heat vs Celtics',
+      sport: 'NBA',
+      user: 'Emma L.',
+      amount: '$125',
+      status: 'Live',
+      color: 'orange',
     },
-  ];
+  ]
   const recentWins = [
-    "$247",
-    "$156",
-    "$89",
-    "$312",
-    "$78",
-    "$445",
-    "$123",
-    "$267",
-    "$534",
-    "$92",
-    "$188",
-    "$376",
-    "$221",
-    "$99",
-    "$467",
-    "$143",
-    "$298",
-    "$67",
-    "$512",
-    "$184",
-    "$329",
-    "$458",
-    "$76",
-    "$234",
-    "$389",
-    "$145",
-    "$678",
-    "$203",
-    "$87",
-    "$356",
-    "$412",
-    "$129",
-    "$245",
-    "$567",
-    "$98",
-    "$423",
-    "$178",
-    "$301",
-    "$489",
-    "$156",
-    "$267",
-    "$334",
-    "$125",
-    "$478",
-    "$201",
-    "$89",
-    "$356",
-    "$412",
-    "$234",
-    "$567",
-    "$134",
-    "$298",
-    "$189",
-    "$445",
-    "$278",
-    "$367",
-    "$123",
-    "$489",
-    "$167",
-    "$334",
-    "$256",
-    "$398",
-    "$145",
-    "$567",
-    "$789",
-    "$234",
-    "$456",
-    "$123",
-    "$678",
-    "$345",
-    "$567",
-    "$189",
-    "$334",
-    "$567",
-    "$123",
-    "$445",
-    "$278",
-    "$389",
-    "$156",
-    "$423",
-    "$267",
-    "$534",
-    "$189",
-    "$367",
-    "$234",
-    "$578",
-    "$145",
-    "$356",
-    "$423",
-    "$189",
-    "$567",
-    "$234",
-    "$445",
-    "$178",
-    "$389",
-    "$267",
-    "$534",
-    "$123",
-    "$367",
-    "$245",
-    "$578",
-    "$156",
-    "$423",
-    "$289",
-    "$567",
-    "$134",
-    "$445",
-    "$278",
-    "$389",
-    "$167",
-    "$534",
-    "$245",
-    "$367",
-    "$189",
-    "$578",
-    "$234",
-    "$445",
-    "$156",
-    "$389",
-    "$278",
-    "$534",
-    "$167",
-    "$367",
-    "$245",
-    "$578",
-    "$189",
-    "$445",
-    "$234",
-    "$389",
-    "$156",
-    "$534",
-    "$278",
-    "$367",
-    "$167",
-    "$578",
-    "$245",
-    "$445",
-    "$189",
-    "$389",
-    "$234",
-    "$534",
-    "$156",
-    "$367",
-    "$278",
-    "$578",
-    "$167",
-    "$445",
-    "$245",
-    "$389",
-    "$189",
-    "$534",
-    "$234",
-  ];
+    '$247',
+    '$156',
+    '$89',
+    '$312',
+    '$78',
+    '$445',
+    '$123',
+    '$267',
+    '$534',
+    '$92',
+    '$188',
+    '$376',
+    '$221',
+    '$99',
+    '$467',
+    '$143',
+    '$298',
+    '$67',
+    '$512',
+    '$184',
+    '$329',
+    '$458',
+    '$76',
+    '$234',
+    '$389',
+    '$145',
+    '$678',
+    '$203',
+    '$87',
+    '$356',
+    '$412',
+    '$129',
+    '$245',
+    '$567',
+    '$98',
+    '$423',
+    '$178',
+    '$301',
+    '$489',
+    '$156',
+    '$267',
+    '$334',
+    '$125',
+    '$478',
+    '$201',
+    '$89',
+    '$356',
+    '$412',
+    '$234',
+    '$567',
+    '$134',
+    '$298',
+    '$189',
+    '$445',
+    '$278',
+    '$367',
+    '$123',
+    '$489',
+    '$167',
+    '$334',
+    '$256',
+    '$398',
+    '$145',
+    '$567',
+    '$789',
+    '$234',
+    '$456',
+    '$123',
+    '$678',
+    '$345',
+    '$567',
+    '$189',
+    '$334',
+    '$567',
+    '$123',
+    '$445',
+    '$278',
+    '$389',
+    '$156',
+    '$423',
+    '$267',
+    '$534',
+    '$189',
+    '$367',
+    '$234',
+    '$578',
+    '$145',
+    '$356',
+    '$423',
+    '$189',
+    '$567',
+    '$234',
+    '$445',
+    '$178',
+    '$389',
+    '$267',
+    '$534',
+    '$123',
+    '$367',
+    '$245',
+    '$578',
+    '$156',
+    '$423',
+    '$289',
+    '$567',
+    '$134',
+    '$445',
+    '$278',
+    '$389',
+    '$167',
+    '$534',
+    '$245',
+    '$367',
+    '$189',
+    '$578',
+    '$234',
+    '$445',
+    '$156',
+    '$389',
+    '$278',
+    '$534',
+    '$167',
+    '$367',
+    '$245',
+    '$578',
+    '$189',
+    '$445',
+    '$234',
+    '$389',
+    '$156',
+    '$534',
+    '$278',
+    '$367',
+    '$167',
+    '$578',
+    '$245',
+    '$445',
+    '$189',
+    '$389',
+    '$234',
+    '$534',
+    '$156',
+    '$367',
+    '$278',
+    '$578',
+    '$167',
+    '$445',
+    '$245',
+    '$389',
+    '$189',
+    '$534',
+    '$234',
+  ]
 
   // Massive activity feed for scrolling
   const activityFeed = [
     {
-      user: "Mike R.",
-      action: "won",
-      amount: "$247",
-      game: "Lakers ML",
-      time: "2s",
+      user: 'Mike R.',
+      action: 'won',
+      amount: '$247',
+      game: 'Lakers ML',
+      time: '2s',
     },
     {
-      user: "Sarah K.",
-      action: "placed",
-      amount: "$89",
-      game: "Chiefs -3.5",
-      time: "5s",
+      user: 'Sarah K.',
+      action: 'placed',
+      amount: '$89',
+      game: 'Chiefs -3.5',
+      time: '5s',
     },
     {
-      user: "Alex T.",
-      action: "won",
-      amount: "$156",
-      game: "Arsenal Win",
-      time: "8s",
+      user: 'Alex T.',
+      action: 'won',
+      amount: '$156',
+      game: 'Arsenal Win',
+      time: '8s',
     },
     {
-      user: "Emma L.",
-      action: "placed",
-      amount: "$123",
-      game: "Cowboys +7",
-      time: "12s",
+      user: 'Emma L.',
+      action: 'placed',
+      amount: '$123',
+      game: 'Cowboys +7',
+      time: '12s',
     },
     {
-      user: "Jake M.",
-      action: "won",
-      amount: "$334",
-      game: "Heat ML",
-      time: "15s",
+      user: 'Jake M.',
+      action: 'won',
+      amount: '$334',
+      game: 'Heat ML',
+      time: '15s',
     },
     {
-      user: "Lisa P.",
-      action: "placed",
-      amount: "$67",
-      game: "Celtics U210",
-      time: "18s",
+      user: 'Lisa P.',
+      action: 'placed',
+      amount: '$67',
+      game: 'Celtics U210',
+      time: '18s',
     },
     {
-      user: "Ryan D.",
-      action: "won",
-      amount: "$445",
-      game: "Warriors -5.5",
-      time: "22s",
+      user: 'Ryan D.',
+      action: 'won',
+      amount: '$445',
+      game: 'Warriors -5.5',
+      time: '22s',
     },
     {
-      user: "Maya S.",
-      action: "placed",
-      amount: "$189",
-      game: "Bills +3",
-      time: "25s",
+      user: 'Maya S.',
+      action: 'placed',
+      amount: '$189',
+      game: 'Bills +3',
+      time: '25s',
     },
     {
-      user: "Tom B.",
-      action: "won",
-      amount: "$278",
-      game: "Chelsea Draw",
-      time: "28s",
+      user: 'Tom B.',
+      action: 'won',
+      amount: '$278',
+      game: 'Chelsea Draw',
+      time: '28s',
     },
     {
-      user: "Anna K.",
-      action: "placed",
-      amount: "$234",
-      game: "Cowboys O47.5",
-      time: "31s",
+      user: 'Anna K.',
+      action: 'placed',
+      amount: '$234',
+      game: 'Cowboys O47.5',
+      time: '31s',
     },
     {
-      user: "Chris W.",
-      action: "won",
-      amount: "$567",
-      game: "Lakers -4",
-      time: "34s",
+      user: 'Chris W.',
+      action: 'won',
+      amount: '$567',
+      game: 'Lakers -4',
+      time: '34s',
     },
     {
-      user: "Kelly R.",
-      action: "placed",
-      amount: "$145",
-      game: "Arsenal -1",
-      time: "37s",
+      user: 'Kelly R.',
+      action: 'placed',
+      amount: '$145',
+      game: 'Arsenal -1',
+      time: '37s',
     },
     {
-      user: "Mark L.",
-      action: "won",
-      amount: "$389",
-      game: "Heat +8.5",
-      time: "40s",
+      user: 'Mark L.',
+      action: 'won',
+      amount: '$389',
+      game: 'Heat +8.5',
+      time: '40s',
     },
     {
-      user: "Sophie M.",
-      action: "placed",
-      amount: "$298",
-      game: "Bills U51.5",
-      time: "43s",
+      user: 'Sophie M.',
+      action: 'placed',
+      amount: '$298',
+      game: 'Bills U51.5',
+      time: '43s',
     },
     {
-      user: "Dave N.",
-      action: "won",
-      amount: "$456",
-      game: "Warriors ML",
-      time: "46s",
+      user: 'Dave N.',
+      action: 'won',
+      amount: '$456',
+      game: 'Warriors ML',
+      time: '46s',
     },
     {
-      user: "Nina T.",
-      action: "placed",
-      amount: "$167",
-      game: "Chiefs -7",
-      time: "49s",
+      user: 'Nina T.',
+      action: 'placed',
+      amount: '$167',
+      game: 'Chiefs -7',
+      time: '49s',
     },
     {
-      user: "Paul J.",
-      action: "won",
-      amount: "$623",
-      game: "Celtics +3.5",
-      time: "52s",
+      user: 'Paul J.',
+      action: 'won',
+      amount: '$623',
+      game: 'Celtics +3.5',
+      time: '52s',
     },
     {
-      user: "Zoe H.",
-      action: "placed",
-      amount: "$134",
-      game: "Arsenal O2.5",
-      time: "55s",
+      user: 'Zoe H.',
+      action: 'placed',
+      amount: '$134',
+      game: 'Arsenal O2.5',
+      time: '55s',
     },
     {
-      user: "Sam K.",
-      action: "won",
-      amount: "$345",
-      game: "Lakers ML",
-      time: "58s",
+      user: 'Sam K.',
+      action: 'won',
+      amount: '$345',
+      game: 'Lakers ML',
+      time: '58s',
     },
     {
-      user: "Bella R.",
-      action: "placed",
-      amount: "$289",
-      game: "Heat O108.5",
-      time: "61s",
+      user: 'Bella R.',
+      action: 'placed',
+      amount: '$289',
+      game: 'Heat O108.5',
+      time: '61s',
     },
     {
-      user: "Josh T.",
-      action: "won",
-      amount: "$467",
-      game: "Cowboys ML",
-      time: "64s",
+      user: 'Josh T.',
+      action: 'won',
+      amount: '$467',
+      game: 'Cowboys ML',
+      time: '64s',
     },
     {
-      user: "Mia L.",
-      action: "placed",
-      amount: "$178",
-      game: "Bills -6",
-      time: "67s",
+      user: 'Mia L.',
+      action: 'placed',
+      amount: '$178',
+      game: 'Bills -6',
+      time: '67s',
     },
     {
-      user: "Tyler S.",
-      action: "won",
-      amount: "$534",
-      game: "Warriors +2",
-      time: "70s",
+      user: 'Tyler S.',
+      action: 'won',
+      amount: '$534',
+      game: 'Warriors +2',
+      time: '70s',
     },
     {
-      user: "Grace M.",
-      action: "placed",
-      amount: "$223",
-      game: "Celtics ML",
-      time: "73s",
+      user: 'Grace M.',
+      action: 'placed',
+      amount: '$223',
+      game: 'Celtics ML',
+      time: '73s',
     },
     {
-      user: "Ethan K.",
-      action: "won",
-      amount: "$398",
-      game: "Arsenal ML",
-      time: "76s",
+      user: 'Ethan K.',
+      action: 'won',
+      amount: '$398',
+      game: 'Arsenal ML',
+      time: '76s',
     },
     {
-      user: "Olivia P.",
-      action: "placed",
-      amount: "$156",
-      game: "Lakers U220",
-      time: "79s",
+      user: 'Olivia P.',
+      action: 'placed',
+      amount: '$156',
+      game: 'Lakers U220',
+      time: '79s',
     },
     {
-      user: "Noah D.",
-      action: "won",
-      amount: "$445",
-      game: "Heat -3",
-      time: "82s",
+      user: 'Noah D.',
+      action: 'won',
+      amount: '$445',
+      game: 'Heat -3',
+      time: '82s',
     },
     {
-      user: "Ava W.",
-      action: "placed",
-      amount: "$267",
-      game: "Cowboys +4.5",
-      time: "85s",
+      user: 'Ava W.',
+      action: 'placed',
+      amount: '$267',
+      game: 'Cowboys +4.5',
+      time: '85s',
     },
     {
-      user: "Lucas B.",
-      action: "won",
-      amount: "$356",
-      game: "Bills ML",
-      time: "88s",
+      user: 'Lucas B.',
+      action: 'won',
+      amount: '$356',
+      game: 'Bills ML',
+      time: '88s',
     },
     {
-      user: "Chloe T.",
-      action: "placed",
-      amount: "$189",
-      game: "Warriors O225",
-      time: "91s",
+      user: 'Chloe T.',
+      action: 'placed',
+      amount: '$189',
+      game: 'Warriors O225',
+      time: '91s',
     },
-  ];
+  ]
   // Auto-rotate dashboard content and scroll activity feed
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentBetIndex((prev) => (prev + 1) % liveBets.length);
-      setLiveCount((prev) => prev + Math.floor(Math.random() * 3) - 1); // Simulate live count changes
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+      setCurrentBetIndex((prev) => (prev + 1) % liveBets.length)
+      setLiveCount((prev) => prev + Math.floor(Math.random() * 3) - 1) // Simulate live count changes
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
   // Continuous scroll for activity feed
   useEffect(() => {
     const interval = setInterval(() => {
-      setActivityScrollOffset((prev) => prev + 1);
-    }, 40); // Much smoother and faster scrolling
-    return () => clearInterval(interval);
-  }, []);
+      setActivityScrollOffset((prev) => prev + 1)
+    }, 40) // Much smoother and faster scrolling
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <section className="relative bg-gradient-to-br from-[#F5F5DC] to-white min-h-screen overflow-hidden">
@@ -454,16 +452,16 @@ export default function HeroProfessional() {
             className="absolute inset-0"
             style={{
               backgroundImage: `radial-gradient(circle at 2px 2px, #00CED1 1px, transparent 0)`,
-              backgroundSize: "32px 32px",
+              backgroundSize: '32px 32px',
             }}
           ></div>
         </div>
-      </div>{" "}
+      </div>{' '}
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row items-center min-h-screen pt-20 pb-12">
           {/* Left side - Enhanced Content */}
           <div className="flex-1 lg:pr-12 text-center lg:text-left">
-            {/* Enhanced social proof indicator */}{" "}
+            {/* Enhanced social proof indicator */}{' '}
             <div className="inline-flex items-center bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-full px-6 py-3 mb-8 shadow-xl">
               <div className="flex -space-x-2 mr-4">
                 <Image
@@ -496,16 +494,14 @@ export default function HeroProfessional() {
                 <span className="text-sm font-semibold text-gray-700">
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00CED1] to-[#00CED1] font-bold text-base drop-shadow-sm">
                     {liveCount.toLocaleString()}
-                  </span>{" "}
+                  </span>{' '}
                   <span className="drop-shadow-sm">players online</span>
                 </span>
               </div>
-            </div>{" "}
+            </div>{' '}
             {/* Enhanced main headline */}
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-8 relative">
-              <span className="relative inline-block text-gray-900 drop-shadow-lg">
-                The Future of
-              </span>
+              <span className="relative inline-block text-gray-900 drop-shadow-lg">The Future of</span>
               <br />
               <span className="relative inline-block">
                 {/* Main gradient text */}
@@ -519,36 +515,23 @@ export default function HeroProfessional() {
             {/* Enhanced subtitle */}
             <p className="text-xl text-gray-600 leading-relaxed mb-10 max-w-2xl mx-auto lg:mx-0 drop-shadow-md">
               Join the next generation of sports betting. Challenge friends with
-              <span className="font-semibold text-gray-700">
-                {" "}
-                intelligent predictions
-              </span>
-              , track your performance, and compete in a
-              <span className="font-semibold text-gray-700">
-                {" "}
-                transparent, social environment
-              </span>{" "}
-              built for true sports enthusiasts.
+              <span className="font-semibold text-gray-700"> intelligent predictions</span>, track your performance, and
+              compete in a<span className="font-semibold text-gray-700"> transparent, social environment</span> built
+              for true sports enthusiasts.
             </p>
             {/* Enhanced key benefits */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12 max-w-2xl mx-auto lg:mx-0">
               <div className="flex items-center space-x-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-gray-200/50 shadow-sm">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm font-medium text-gray-700">
-                  Instant Payouts
-                </span>
+                <span className="text-sm font-medium text-gray-700">Instant Payouts</span>
               </div>
               <div className="flex items-center space-x-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-gray-200/50 shadow-sm">
                 <div className="w-2 h-2 bg-[#00CED1] rounded-full"></div>
-                <span className="text-sm font-medium text-gray-700">
-                  Zero Fees
-                </span>
+                <span className="text-sm font-medium text-gray-700">Zero Fees</span>
               </div>
               <div className="flex items-center space-x-3 bg-white/60 backdrop-blur-sm rounded-xl px-4 py-3 border border-gray-200/50 shadow-sm">
                 <div className="w-2 h-2 bg-[#FFAB91] rounded-full"></div>
-                <span className="text-sm font-medium text-gray-700">
-                  Fair Play
-                </span>
+                <span className="text-sm font-medium text-gray-700">Fair Play</span>
               </div>
             </div>
             {/* Enhanced CTA buttons */}
@@ -565,12 +548,7 @@ export default function HeroProfessional() {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-[#FFAB91] to-[#00CED1] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -586,11 +564,7 @@ export default function HeroProfessional() {
             {/* Trust indicators */}
             <div className="flex flex-wrap justify-center lg:justify-start gap-8 text-sm">
               <div className="flex items-center space-x-2">
-                <svg
-                  className="w-5 h-5 text-green-500"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -600,11 +574,7 @@ export default function HeroProfessional() {
                 <span className="text-gray-600">Fully Licensed</span>
               </div>
               <div className="flex items-center space-x-2">
-                <svg
-                  className="w-5 h-5 text-[#00CED1]"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5 text-[#00CED1]" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -614,42 +584,32 @@ export default function HeroProfessional() {
                 <span className="text-gray-600">Bank-Level Security</span>
               </div>
               <div className="flex items-center space-x-2">
-                <svg
-                  className="w-5 h-5 text-[#FFAB91]"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
+                <svg className="w-5 h-5 text-[#FFAB91]" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span className="text-gray-600">24/7 Support</span>
               </div>
             </div>
-          </div>{" "}
+          </div>{' '}
           {/* Right side - Amazing Animated Dashboard */}
           <div className="flex-1 mt-16 lg:mt-0">
-            {" "}
+            {' '}
             <div className="relative max-w-lg mx-auto">
               {/* Main dashboard card with glassmorphic design */}
               <div
                 className="bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl drop-shadow-2xl border border-gray-700/50 overflow-hidden"
                 style={{
-                  boxShadow:
-                    "0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)",
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
                 }}
               >
-                {" "}
+                {' '}
                 {/* Enhanced modern header with live activity */}
                 <div className="bg-gradient-to-r from-slate-800/90 to-slate-700/90 p-6 border-b border-slate-600/40 backdrop-blur-sm">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="relative">
                         <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-cyan-600 rounded-xl flex items-center justify-center shadow-lg">
-                          <svg
-                            className="w-6 h-6 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -661,9 +621,7 @@ export default function HeroProfessional() {
                         <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full  border-2 border-slate-800"></div>
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-white">
-                          Live Dashboard
-                        </h3>
+                        <h3 className="text-xl font-bold text-white">Live Dashboard</h3>
                         <p className="text-sm text-slate-400 flex items-center">
                           <span className="w-1.5 h-1.5 bg-green-400 rounded-full mr-2 animate-pulse"></span>
                           Real-time activity
@@ -679,38 +637,28 @@ export default function HeroProfessional() {
                       </div>
                     </div>
                   </div>
-                </div>{" "}
+                </div>{' '}
                 {/* Scrolling recent wins ticker */}
                 <div className="bg-gradient-to-r from-green-500/10 to-green-400/5 border-b border-gray-600/30 py-2 overflow-hidden">
                   <div className="flex items-center">
-                    <span className="text-xs text-green-400 font-semibold px-4 whitespace-nowrap">
-                      RECENT WINS:
-                    </span>
+                    <span className="text-xs text-green-400 font-semibold px-4 whitespace-nowrap">RECENT WINS:</span>
                     <div className="flex-1 overflow-hidden ml-2">
                       <div className="flex animate-marquee space-x-4">
                         {[...recentWins, ...recentWins].map((win, index) => (
-                          <span
-                            key={index}
-                            className="text-xs text-green-300 font-medium whitespace-nowrap"
-                          >
+                          <span key={index} className="text-xs text-green-300 font-medium whitespace-nowrap">
                             +{win}
                           </span>
                         ))}
                       </div>
                     </div>
-                  </div>{" "}
-                </div>{" "}
+                  </div>{' '}
+                </div>{' '}
                 {/* Professional Statistics & Insights Section */}
                 <div className="bg-gradient-to-r from-slate-900/40 to-slate-800/30 border-y border-slate-600/20 p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                        <svg
-                          className="w-5 h-5 text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -720,12 +668,8 @@ export default function HeroProfessional() {
                         </svg>
                       </div>
                       <div>
-                        <h4 className="text-white font-semibold text-sm">
-                          Market Insights
-                        </h4>
-                        <p className="text-slate-400 text-xs">
-                          Live trends & analytics
-                        </p>
+                        <h4 className="text-white font-semibold text-sm">Market Insights</h4>
+                        <p className="text-slate-400 text-xs">Live trends & analytics</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 bg-blue-500/15 text-blue-400 px-3 py-1.5 rounded-full text-xs font-medium border border-blue-500/30">
@@ -736,27 +680,19 @@ export default function HeroProfessional() {
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/30 backdrop-blur-sm">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-slate-400">
-                          Hot Streak
-                        </span>
+                        <span className="text-xs text-slate-400">Hot Streak</span>
                         <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
                       </div>
-                      <div className="text-lg font-bold text-orange-400">
-                        8W
-                      </div>
+                      <div className="text-lg font-bold text-orange-400">8W</div>
                       <div className="text-xs text-slate-500">Current run</div>
                     </div>
 
                     <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/30 backdrop-blur-sm">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-slate-400">
-                          Top Sport
-                        </span>
+                        <span className="text-xs text-slate-400">Top Sport</span>
                         <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
                       </div>
-                      <div className="text-lg font-bold text-emerald-400">
-                        NBA
-                      </div>
+                      <div className="text-lg font-bold text-emerald-400">NBA</div>
                       <div className="text-xs text-slate-500">89% accuracy</div>
                     </div>
 
@@ -765,24 +701,15 @@ export default function HeroProfessional() {
                         <span className="text-xs text-slate-400">Payout</span>
                         <div className="w-2 h-2 bg-cyan-400 rounded-full"></div>
                       </div>
-                      <div className="text-lg font-bold text-cyan-400">
-                        2.4x
-                      </div>
-                      <div className="text-xs text-slate-500">
-                        Avg. multiplier
-                      </div>
+                      <div className="text-lg font-bold text-cyan-400">2.4x</div>
+                      <div className="text-xs text-slate-500">Avg. multiplier</div>
                     </div>
-                  </div>{" "}
+                  </div>{' '}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-green-500/10 rounded-lg p-3 border border-emerald-500/20">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -792,19 +719,13 @@ export default function HeroProfessional() {
                           </svg>
                         </div>
                         <div>
-                          <p className="text-white text-sm font-medium">
-                            Hot Match Alert
-                          </p>
-                          <p className="text-emerald-300 text-xs">
-                            Lakers vs Warriors - 7:30 PM
-                          </p>
+                          <p className="text-white text-sm font-medium">Hot Match Alert</p>
+                          <p className="text-emerald-300 text-xs">Lakers vs Warriors - 7:30 PM</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
                         <div className="text-right">
-                          <p className="text-emerald-400 text-xs font-medium">
-                            Live
-                          </p>
+                          <p className="text-emerald-400 text-xs font-medium">Live</p>
                           <p className="text-slate-400 text-xs">2.8k betting</p>
                         </div>
                         <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
@@ -853,14 +774,10 @@ export default function HeroProfessional() {
                     {/* Dynamic scrolling activity feed */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-semibold text-slate-300">
-                          Live Activity
-                        </h4>
+                        <h4 className="text-sm font-semibold text-slate-300">Live Activity</h4>
                         <div className="flex items-center space-x-2">
                           <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                          <span className="text-xs text-green-400 font-medium">
-                            Live
-                          </span>
+                          <span className="text-xs text-green-400 font-medium">Live</span>
                         </div>
                       </div>
                       <div className="relative h-32 overflow-hidden rounded-xl bg-slate-900/20 border border-slate-700/30">
@@ -870,43 +787,27 @@ export default function HeroProfessional() {
                             transform: `translateY(-${(activityScrollOffset * 1.2) % (activityFeed.length * 32)}px)`,
                           }}
                         >
-                          {[
-                            ...activityFeed,
-                            ...activityFeed,
-                            ...activityFeed,
-                          ].map((activity, index) => (
+                          {[...activityFeed, ...activityFeed, ...activityFeed].map((activity, index) => (
                             <div
                               key={index}
                               className="flex items-center justify-between py-1.5 px-3 bg-slate-800/40 rounded-lg border border-slate-700/20 backdrop-blur-sm"
                             >
                               <div className="flex items-center space-x-3">
                                 <div
-                                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${activity.action === "won" ? "bg-green-400" : "bg-cyan-400"}`}
+                                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${activity.action === 'won' ? 'bg-green-400' : 'bg-cyan-400'}`}
                                 ></div>
                                 <div className="min-w-0 flex-1">
                                   <p className="text-xs text-white font-medium truncate">
-                                    <span className="text-slate-300">
-                                      {activity.user}
-                                    </span>{" "}
-                                    {activity.action === "won" ? "won" : "bet"}{" "}
-                                    <span
-                                      className={
-                                        activity.action === "won"
-                                          ? "text-green-400"
-                                          : "text-cyan-400"
-                                      }
-                                    >
+                                    <span className="text-slate-300">{activity.user}</span>{' '}
+                                    {activity.action === 'won' ? 'won' : 'bet'}{' '}
+                                    <span className={activity.action === 'won' ? 'text-green-400' : 'text-cyan-400'}>
                                       {activity.amount}
                                     </span>
                                   </p>
-                                  <p className="text-xs text-slate-500 truncate">
-                                    {activity.game}
-                                  </p>
+                                  <p className="text-xs text-slate-500 truncate">{activity.game}</p>
                                 </div>
                               </div>
-                              <span className="text-xs text-slate-400 flex-shrink-0">
-                                {activity.time}
-                              </span>
+                              <span className="text-xs text-slate-400 flex-shrink-0">{activity.time}</span>
                             </div>
                           ))}
                         </div>
@@ -916,19 +817,14 @@ export default function HeroProfessional() {
                       </div>
                     </div>
                   </div>
-                </div>{" "}
+                </div>{' '}
                 {/* Clean professional performance section */}
                 <div className="px-6 pb-6">
                   <div className="bg-gradient-to-r from-slate-800/60 to-slate-700/40 backdrop-blur-sm rounded-2xl border border-slate-600/40 p-6">
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center space-x-4">
                         <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                          <svg
-                            className="w-6 h-6 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -938,12 +834,8 @@ export default function HeroProfessional() {
                           </svg>
                         </div>
                         <div>
-                          <h4 className="text-white font-bold text-lg">
-                            Performance
-                          </h4>
-                          <p className="text-slate-400 text-sm">
-                            Weekly summary
-                          </p>
+                          <h4 className="text-white font-bold text-lg">Performance</h4>
+                          <p className="text-slate-400 text-sm">Weekly summary</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2 bg-emerald-500/15 text-emerald-400 px-3 py-2 rounded-full text-sm font-semibold border border-emerald-500/30">
@@ -957,21 +849,15 @@ export default function HeroProfessional() {
                         <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
                           +$1,247
                         </p>
-                        <p className="text-xs text-slate-400 mt-1">
-                          Total Winnings
-                        </p>
+                        <p className="text-xs text-slate-400 mt-1">Total Winnings</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-2xl font-bold text-emerald-400">
-                          78%
-                        </p>
+                        <p className="text-2xl font-bold text-emerald-400">78%</p>
                         <p className="text-xs text-slate-400 mt-1">Win Rate</p>
                       </div>
                       <div className="text-center">
                         <p className="text-2xl font-bold text-cyan-400">24</p>
-                        <p className="text-xs text-slate-400 mt-1">
-                          Bets Placed
-                        </p>
+                        <p className="text-xs text-slate-400 mt-1">Bets Placed</p>
                       </div>
                     </div>
                   </div>
@@ -1008,7 +894,7 @@ export default function HeroProfessional() {
                   <div className="mt-1 w-full bg-gray-700 rounded-full h-1">
                     <div
                       className="bg-gradient-to-r from-[#00CED1] to-[#FFAB91] h-1 rounded-full animate-progress"
-                      style={{ width: "78%" }}
+                      style={{ width: '78%' }}
                     ></div>
                   </div>
                 </div>
@@ -1092,7 +978,7 @@ export default function HeroProfessional() {
         }
       `}</style>
     </section>
-  );
+  )
 }
 
 //man this shit was depressing to make if someone makes this better please do i give up on this wanna be ass dashboard ass design i saw in some randomass dogshit website from 2019 or smth

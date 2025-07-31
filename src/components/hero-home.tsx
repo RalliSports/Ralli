@@ -2,6 +2,12 @@
 
 import Image from "next/image";
 import PageIllustration from "@/components/page-illustration";
+import Avatar01 from "@/public/images/avatar-01.jpg";
+import Avatar02 from "@/public/images/avatar-02.jpg";
+import Avatar03 from "@/public/images/avatar-03.jpg";
+import Avatar04 from "@/public/images/avatar-04.jpg";
+import Avatar05 from "@/public/images/avatar-05.jpg";
+import Avatar06 from "@/public/images/avatar-06.jpg";
 
 export default function HeroHome() {
   return (
@@ -43,21 +49,21 @@ export default function HeroHome() {
               <div className="relative z-10 flex -space-x-2">
                 <Image
                   className="w-8 h-8 rounded-full border-2 border-white shadow-md transition-all duration-300"
-                  src="/images/avatar-01.jpg"
+                  src={Avatar01}
                   width={32}
                   height={32}
                   alt="Player 1"
                 />
                 <Image
                   className="w-8 h-8 rounded-full border-2 border-white shadow-md transition-all duration-300"
-                  src="/images/avatar-02.jpg"
+                  src={Avatar02}
                   width={32}
                   height={32}
                   alt="Player 2"
                 />
                 <Image
                   className="w-8 h-8 rounded-full border-2 border-white shadow-md transition-all duration-300"
-                  src="/images/avatar-03.jpg"
+                  src={Avatar03}
                   width={32}
                   height={32}
                   alt="Player 3"
@@ -440,7 +446,7 @@ export default function HeroHome() {
                           <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
                         </div>
                         <Image
-                          src="/images/avatar-01.jpg"
+                          src={Avatar01}
                           width={40}
                           height={40}
                           className="rounded-full border-2 border-yellow-400 shadow-lg"
@@ -471,7 +477,7 @@ export default function HeroHome() {
                           2.
                         </span>
                         <Image
-                          src="/images/avatar-02.jpg"
+                          src={Avatar02}
                           width={36}
                           height={36}
                           className="rounded-full border-2 border-gray-400 shadow-md"
@@ -497,7 +503,7 @@ export default function HeroHome() {
                           3.
                         </span>
                         <Image
-                          src="/images/avatar-03.jpg"
+                          src={Avatar03}
                           width={36}
                           height={36}
                           className="rounded-full border-2 border-gray-400 shadow-md"
@@ -523,7 +529,7 @@ export default function HeroHome() {
                           4.
                         </span>
                         <Image
-                          src="/images/avatar-04.jpg"
+                          src={Avatar04}
                           width={32}
                           height={32}
                           className="rounded-full border border-gray-500"
