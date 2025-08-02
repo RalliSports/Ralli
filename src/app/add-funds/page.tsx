@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useParaWalletBalance } from "@/hooks/use-para-wallet-balance";
 
 export default function AddFunds() {
   const [amount, setAmount] = useState("");
@@ -13,6 +14,17 @@ export default function AddFunds() {
     cvv: "",
     name: "",
   });
+
+  // Para wallet balance hook
+  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance();
+  
+  // Format balance for display
+  const formatBalance = (amount: number) => {
+    return amount.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
 
   const quickAmounts = [10, 25, 50, 100, 250, 500];
 
@@ -130,7 +142,11 @@ export default function AddFunds() {
           <div className="text-center">
             <p className="text-slate-400 text-sm mb-2">Current Balance</p>
             <p className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
-              $1,247.50
+              {isConnected ? 
+                (balanceLoading ? "Loading..." : 
+                 balanceError ? "$0.00" : 
+                 `$${formatBalance(balances.totalUsd)}`) : 
+                "$0.00"}
             </p>
           </div>
         </div>

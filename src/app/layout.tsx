@@ -1,6 +1,7 @@
 import './globals.css'
 
 import { Inter } from 'next/font/google'
+import { AppProviders } from '@/components/app-providers';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -61,10 +62,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${inter.variable} bg-[#F5F5DC] font-inter tracking-tight text-gray-900 antialiased`}
         suppressHydrationWarning={true}
       >
-        <div className="flex min-h-screen flex-col overflow-hidden supports-[overflow:clip]:overflow-clip">
-          {children}
-        </div>
+        <AppProviders>
+          <div className="flex min-h-screen flex-col overflow-hidden supports-[overflow:clip]:overflow-clip">
+            {children}
+          </div>
+        </AppProviders>
       </body>
     </html>
-  )
+  );
 }

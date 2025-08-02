@@ -1,10 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useParaWalletBalance } from "@/hooks/use-para-wallet-balance";
 
 export default function StakeControls() {
   const [stake, setStake] = useState(50);
   const [multiplier, setMultiplier] = useState(1.5);
+
+  // Para wallet balance hook
+  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance();
+  
+  // Format balance for display
+  const formatBalance = (amount: number) => {
+    return amount.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
 
   // Pool-based calculation variables
   const activePlayersCount = 12; // Number of players currently in the game
@@ -47,7 +60,11 @@ export default function StakeControls() {
           </div>
           <div className="bg-[#FFAB91]/20 border border-[#FFAB91]/30 rounded-full px-4 py-2">
             <span className="text-[#FFAB91] font-semibold text-sm">
-              Balance: $1,250
+              Balance: {isConnected ? 
+                (balanceLoading ? "Loading..." : 
+                 balanceError ? "$0.00" : 
+                 `$${formatBalance(balances.totalUsd)}`) : 
+                "$0.00"}
             </span>
           </div>
         </div>

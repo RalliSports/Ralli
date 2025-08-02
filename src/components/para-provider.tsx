@@ -27,11 +27,10 @@ export function Providers({
         paraModalConfig={{
           logo: "https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png",
           oAuthMethods: ["GOOGLE", "TWITTER", "DISCORD"],
-          authLayout: ["AUTH:FULL", "EXTERNAL:CONDENSED"] 
+          authLayout: ["AUTH:FULL"] 
         }}
         externalWalletConfig={{
           appUrl: "http://localhost:3000/", // Ensure this matches your app's real URL
-          wallets: [ExternalWallet.BACKPACK, ExternalWallet.PHANTOM],
           solanaConnector: {
             config: {
               endpoint: "https://api.devnet.solana.com", // Ensure this matches your desired cluster
