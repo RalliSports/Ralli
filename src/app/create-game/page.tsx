@@ -8,6 +8,7 @@ export default function CreateGame() {
     title: '',
     depositAmount: 25,
     maxParticipants: 8,
+    totalLegs: 4,
     gameCode: '',
     matchupGroup: '',
     isPrivate: false,
@@ -210,6 +211,36 @@ export default function CreateGame() {
             <div className="flex justify-between text-xs text-slate-500">
               <span>2</span>
               <span>20</span>
+            </div>
+          </div>
+
+          {/* Total Legs */}
+          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-emerald-400/50 transition-all duration-300">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500/20 to-emerald-400/10 rounded-lg flex items-center justify-center border border-emerald-400/20">
+                <span className="text-lg">🎯</span>
+              </div>
+              <div>
+                <h3 className="text-white font-bold">Total Legs</h3>
+                <p className="text-slate-400 text-xs">Number of required bets</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 mb-2">
+              <input
+                type="range"
+                value={gameSettings.totalLegs || 4}
+                onChange={(e) => handleInputChange('totalLegs', parseInt(e.target.value))}
+                min="1"
+                max="15"
+                className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer contest-legs-slider"
+              />
+              <span className="text-emerald-400 font-bold text-xl min-w-[2.5rem] text-center">
+                {gameSettings.totalLegs || 4}
+              </span>
+            </div>
+            <div className="flex justify-between text-xs text-slate-500">
+              <span>1</span>
+              <span>15</span>
             </div>
           </div>
 
