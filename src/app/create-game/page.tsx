@@ -5,12 +5,15 @@ import Link from 'next/link'
 
 export default function CreateGame() {
   const [gameSettings, setGameSettings] = useState({
-    gameTitle: '',
-    gameType: 'NBA',
-    buyInAmount: 25,
-    playerLimit: 8,
-    numberOfLegs: 4,
-    visibility: 'public',
+    title: '',
+    depositAmount: 25,
+    maxParticipants: 8,
+    gameCode: '',
+    matchupGroup: '',
+    isPrivate: false,
+    type: 'limited',
+    userControlType: 'none',
+    gameMode: 'Season Long',
   })
 
   const handleInputChange = (field: string, value: any) => {
@@ -131,31 +134,31 @@ export default function CreateGame() {
             <div className="relative">
               <input
                 type="text"
-                value={gameSettings.gameTitle}
-                onChange={(e) => handleInputChange('gameTitle', e.target.value)}
+                value={gameSettings.title}
+                onChange={(e) => handleInputChange('title', e.target.value)}
                 placeholder="Enter contest title..."
                 className="w-full bg-gradient-to-br from-slate-700/80 to-slate-800/60 border-2 border-slate-600/40 rounded-xl px-5 py-4 text-white placeholder-slate-400 focus:outline-none focus:border-[#00CED1]/70 focus:ring-4 focus:ring-[#00CED1]/10 focus:bg-slate-700/90 transition-all duration-300 text-lg font-medium shadow-inner"
                 maxLength={50}
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 text-sm">
-                {gameSettings.gameTitle.length}/50
+                {gameSettings.title.length}/50
               </div>
             </div>
-            {gameSettings.gameTitle.length > 0 && (
+            {gameSettings.title.length > 0 && (
               <div className="mt-3 p-3 bg-[#00CED1]/5 border border-[#00CED1]/20 rounded-lg">
-                <p className="text-[#00CED1] text-sm font-medium">Preview: "{gameSettings.gameTitle}"</p>
+                <p className="text-[#00CED1] text-sm font-medium">Preview: "{gameSettings.title}"</p>
               </div>
             )}
           </div>
 
-          {/* Buy-in Amount */}
+          {/* Deposit Amount */}
           <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-[#00CED1]/50 transition-all duration-300">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 bg-gradient-to-br from-[#00CED1]/20 to-blue-500/10 rounded-lg flex items-center justify-center border border-[#00CED1]/20">
                 <span className="text-lg">💰</span>
               </div>
               <div>
-                <h3 className="text-white font-bold">Buy-in Amount</h3>
+                <h3 className="text-white font-bold">Deposit Amount</h3>
                 <p className="text-slate-400 text-xs">Entry fee per player</p>
               </div>
             </div>
@@ -163,15 +166,15 @@ export default function CreateGame() {
               <span className="text-[#00CED1] font-bold text-lg">$</span>
               <input
                 type="range"
-                value={gameSettings.buyInAmount}
-                onChange={(e) => handleInputChange('buyInAmount', parseInt(e.target.value))}
+                value={gameSettings.depositAmount}
+                onChange={(e) => handleInputChange('depositAmount', parseInt(e.target.value))}
                 min="5"
                 max="500"
                 step="5"
                 className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
               />
               <span className="text-[#00CED1] font-bold text-xl min-w-[3rem] text-center">
-                ${gameSettings.buyInAmount}
+                ${gameSettings.depositAmount}
               </span>
             </div>
             <div className="flex justify-between text-xs text-slate-500">
@@ -180,28 +183,28 @@ export default function CreateGame() {
             </div>
           </div>
 
-          {/* Player Limit */}
+          {/* Max Participants */}
           <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-orange-400/50 transition-all duration-300">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 bg-gradient-to-br from-orange-500/20 to-orange-400/10 rounded-lg flex items-center justify-center border border-orange-400/20">
                 <span className="text-lg">👥</span>
               </div>
               <div>
-                <h3 className="text-white font-bold">Player Limit</h3>
+                <h3 className="text-white font-bold">Max Participants</h3>
                 <p className="text-slate-400 text-xs">Maximum participants</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 mb-2">
               <input
                 type="range"
-                value={gameSettings.playerLimit}
-                onChange={(e) => handleInputChange('playerLimit', parseInt(e.target.value))}
+                value={gameSettings.maxParticipants}
+                onChange={(e) => handleInputChange('maxParticipants', parseInt(e.target.value))}
                 min="2"
                 max="20"
                 className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
               />
               <span className="text-orange-400 font-bold text-xl min-w-[2.5rem] text-center">
-                {gameSettings.playerLimit}
+                {gameSettings.maxParticipants}
               </span>
             </div>
             <div className="flex justify-between text-xs text-slate-500">
@@ -210,148 +213,234 @@ export default function CreateGame() {
             </div>
           </div>
 
-          {/* Contest Legs */}
+          {/* Game Code */}
           <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-emerald-400/50 transition-all duration-300">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 bg-gradient-to-br from-emerald-500/20 to-emerald-400/10 rounded-lg flex items-center justify-center border border-emerald-400/20">
                 <span className="text-lg">🎯</span>
               </div>
               <div>
-                <h3 className="text-white font-bold">Contest Legs</h3>
-                <p className="text-slate-400 text-xs">Required bets</p>
+                <h3 className="text-white font-bold">Game Code</h3>
+                <p className="text-slate-400 text-xs">Unique contest identifier</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3 mb-2">
-              <input
-                type="range"
-                value={gameSettings.numberOfLegs}
-                onChange={(e) => handleInputChange('numberOfLegs', parseInt(e.target.value))}
-                min="3"
-                max="15"
-                className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer contest-legs-slider"
-              />
-              <span className="text-emerald-400 font-bold text-xl min-w-[2.5rem] text-center">
-                {gameSettings.numberOfLegs}
-              </span>
-            </div>
-            <div className="flex justify-between text-xs text-slate-500">
-              <span>3</span>
-              <span>15</span>
-            </div>
+            <input
+              type="text"
+              value={gameSettings.gameCode}
+              onChange={(e) => handleInputChange('gameCode', e.target.value.toUpperCase())}
+              placeholder="Enter game code (e.g. CHAMPS)"
+              className="w-full bg-slate-700/50 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/20 transition-all duration-200 uppercase"
+              maxLength={10}
+            />
           </div>
 
-          {/* Game Type */}
-          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-blue-400/50 transition-all duration-300">
-            <div className="flex items-center space-x-3 mb-5">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-blue-400/10 rounded-lg flex items-center justify-center border border-blue-400/20">
-                <span className="text-lg">🏀</span>
+          {/* Matchup Group */}
+          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-cyan-400/50 transition-all duration-300">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500/20 to-cyan-400/10 rounded-lg flex items-center justify-center border border-cyan-400/20">
+                <span className="text-lg">📅</span>
               </div>
               <div>
-                <h3 className="text-white font-bold">Game Type</h3>
-                <p className="text-slate-400 text-xs">Choose your sport</p>
+                <h3 className="text-white font-bold">Matchup Group</h3>
+                <p className="text-slate-400 text-xs">Contest time period</p>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <input
+              type="text"
+              value={gameSettings.matchupGroup}
+              onChange={(e) => handleInputChange('matchupGroup', e.target.value)}
+              placeholder="Enter matchup group (e.g. Week 3)"
+              className="w-full bg-slate-700/50 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20 transition-all duration-200"
+            />
+          </div>
+
+          {/* Type */}
+          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-amber-400/50 transition-all duration-300">
+            <div className="flex items-center space-x-3 mb-5">
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-500/20 to-amber-400/10 rounded-lg flex items-center justify-center border border-amber-400/20">
+                <span className="text-lg">⚡</span>
+              </div>
+              <div>
+                <h3 className="text-white font-bold">Type</h3>
+                <p className="text-slate-400 text-xs">Contest entry type</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => handleInputChange('gameType', 'NBA')}
+                onClick={() => handleInputChange('type', 'limited')}
                 className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.gameType === 'NBA'
+                  gameSettings.type === 'limited'
                     ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
                     : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
                 }`}
               >
                 <div className="text-center">
-                  <span className="text-2xl block mb-1">🏀</span>
-                  <div className="text-white font-semibold text-sm">NBA</div>
+                  <span className="text-xl block mb-1">🚪</span>
+                  <div className="text-white font-semibold text-sm">Limited</div>
                 </div>
               </button>
               <button
-                onClick={() => handleInputChange('gameType', 'NFL')}
+                onClick={() => handleInputChange('type', 'unlimited')}
                 className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.gameType === 'NFL'
+                  gameSettings.type === 'unlimited'
                     ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
                     : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
                 }`}
               >
                 <div className="text-center">
-                  <span className="text-2xl block mb-1">🏈</span>
-                  <div className="text-white font-semibold text-sm">NFL</div>
-                </div>
-              </button>
-              <button
-                onClick={() => handleInputChange('gameType', 'Soccer')}
-                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.gameType === 'Soccer'
-                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                }`}
-              >
-                <div className="text-center">
-                  <span className="text-2xl block mb-1">⚽</span>
-                  <div className="text-white font-semibold text-sm">Soccer</div>
+                  <span className="text-xl block mb-1">🌐</span>
+                  <div className="text-white font-semibold text-sm">Unlimited</div>
                 </div>
               </button>
             </div>
           </div>
 
-          {/* Visibility */}
+          {/* User Control Type */}
+          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-indigo-400/50 transition-all duration-300">
+            <div className="flex items-center space-x-3 mb-5">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500/20 to-indigo-400/10 rounded-lg flex items-center justify-center border border-indigo-400/20">
+                <span className="text-lg">🛡️</span>
+              </div>
+              <div>
+                <h3 className="text-white font-bold">User Control Type</h3>
+                <p className="text-slate-400 text-xs">Access control method</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => handleInputChange('userControlType', 'none')}
+                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                  gameSettings.userControlType === 'none'
+                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
+                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
+                }`}
+              >
+                <div className="text-center">
+                  <span className="text-xl block mb-1">🔓</span>
+                  <div className="text-white font-semibold text-sm">None</div>
+                </div>
+              </button>
+              <button
+                onClick={() => handleInputChange('userControlType', 'whitelist')}
+                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                  gameSettings.userControlType === 'whitelist'
+                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
+                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
+                }`}
+              >
+                <div className="text-center">
+                  <span className="text-xl block mb-1">📋</span>
+                  <div className="text-white font-semibold text-sm">Whitelist</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Game Mode */}
+          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-pink-400/50 transition-all duration-300">
+            <div className="flex items-center space-x-3 mb-5">
+              <div className="w-10 h-10 bg-gradient-to-br from-pink-500/20 to-pink-400/10 rounded-lg flex items-center justify-center border border-pink-400/20">
+                <span className="text-lg">🎮</span>
+              </div>
+              <div>
+                <h3 className="text-white font-bold">Game Mode</h3>
+                <p className="text-slate-400 text-xs">Choose your contest format</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => handleInputChange('gameMode', 'Quick Match')}
+                className={`p-3 rounded-xl border-2 transition-all duration-200 ${
+                  gameSettings.gameMode === 'Quick Match'
+                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
+                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
+                }`}
+              >
+                <div className="text-center">
+                  <span className="text-lg block mb-1">⚡</span>
+                  <div className="text-white font-semibold text-xs">Quick Match</div>
+                </div>
+              </button>
+              <button
+                onClick={() => handleInputChange('gameMode', 'Weekly Challenge')}
+                className={`p-3 rounded-xl border-2 transition-all duration-200 ${
+                  gameSettings.gameMode === 'Weekly Challenge'
+                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
+                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
+                }`}
+              >
+                <div className="text-center">
+                  <span className="text-lg block mb-1">📅</span>
+                  <div className="text-white font-semibold text-xs">Weekly Challenge</div>
+                </div>
+              </button>
+              <button
+                onClick={() => handleInputChange('gameMode', 'Season Long')}
+                className={`p-3 rounded-xl border-2 transition-all duration-200 ${
+                  gameSettings.gameMode === 'Season Long'
+                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
+                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
+                }`}
+              >
+                <div className="text-center">
+                  <span className="text-lg block mb-1">🏆</span>
+                  <div className="text-white font-semibold text-xs">Season Long</div>
+                </div>
+              </button>
+              <button
+                onClick={() => handleInputChange('gameMode', 'Head-to-Head')}
+                className={`p-3 rounded-xl border-2 transition-all duration-200 ${
+                  gameSettings.gameMode === 'Head-to-Head'
+                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
+                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
+                }`}
+              >
+                <div className="text-center">
+                  <span className="text-lg block mb-1">⚔️</span>
+                  <div className="text-white font-semibold text-xs">Head-to-Head</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Privacy Setting */}
           <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-purple-400/50 transition-all duration-300">
             <div className="flex items-center space-x-3 mb-5">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500/20 to-purple-400/10 rounded-lg flex items-center justify-center border border-purple-400/20">
                 <span className="text-lg">🔒</span>
               </div>
               <div>
-                <h3 className="text-white font-bold">Visibility</h3>
+                <h3 className="text-white font-bold">Privacy Setting</h3>
                 <p className="text-slate-400 text-xs">Who can join this contest</p>
               </div>
             </div>
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => handleInputChange('visibility', 'public')}
-                className={`w-full p-3 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.visibility === 'public'
+                onClick={() => handleInputChange('isPrivate', false)}
+                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                  gameSettings.isPrivate === false
                     ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
                     : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
                 }`}
               >
-                <div className="flex items-center space-x-3">
-                  <span className="text-xl">🌍</span>
-                  <div className="text-left">
-                    <div className="text-white font-semibold text-sm">Public Contest</div>
-                    <div className="text-slate-400 text-xs">Anyone can join</div>
-                  </div>
+                <div className="text-center">
+                  <span className="text-xl block mb-1">🌍</span>
+                  <div className="text-white font-semibold text-sm">Public</div>
+                  <div className="text-slate-400 text-xs">Anyone can join</div>
                 </div>
               </button>
               <button
-                onClick={() => handleInputChange('visibility', 'private')}
-                className={`w-full p-3 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.visibility === 'private'
+                onClick={() => handleInputChange('isPrivate', true)}
+                className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                  gameSettings.isPrivate === true
                     ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
                     : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
                 }`}
               >
-                <div className="flex items-center space-x-3">
-                  <span className="text-xl">🔒</span>
-                  <div className="text-left">
-                    <div className="text-white font-semibold text-sm">Private Contest</div>
-                    <div className="text-slate-400 text-xs">Invite only</div>
-                  </div>
-                </div>
-              </button>
-              <button
-                onClick={() => handleInputChange('visibility', 'friends')}
-                className={`w-full p-3 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.visibility === 'friends'
-                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <span className="text-xl">👥</span>
-                  <div className="text-left">
-                    <div className="text-white font-semibold text-sm">Friends Only</div>
-                    <div className="text-slate-400 text-xs">Friends can join</div>
-                  </div>
+                <div className="text-center">
+                  <span className="text-xl block mb-1">�</span>
+                  <div className="text-white font-semibold text-sm">Private</div>
+                  <div className="text-slate-400 text-xs">Invite only</div>
                 </div>
               </button>
             </div>
@@ -367,7 +456,7 @@ export default function CreateGame() {
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold bg-gradient-to-r from-[#00CED1] to-blue-400 bg-clip-text text-transparent">
-                ${gameSettings.buyInAmount * gameSettings.playerLimit}
+                ${gameSettings.depositAmount * gameSettings.maxParticipants}
               </div>
               <div className="text-xs text-slate-400">Total prize pool</div>
             </div>
@@ -375,12 +464,12 @@ export default function CreateGame() {
 
           <div className="grid grid-cols-2 gap-3 text-center mb-6">
             <div className="bg-slate-700/30 rounded-lg p-3">
-              <div className="text-orange-400 font-bold text-lg">{gameSettings.playerLimit}</div>
-              <div className="text-slate-400 text-xs">Max Players</div>
+              <div className="text-orange-400 font-bold text-lg">{gameSettings.maxParticipants}</div>
+              <div className="text-slate-400 text-xs">Max Participants</div>
             </div>
             <div className="bg-slate-700/30 rounded-lg p-3">
-              <div className="text-emerald-400 font-bold text-lg">{gameSettings.numberOfLegs}</div>
-              <div className="text-slate-400 text-xs">Required Bets</div>
+              <div className="text-pink-400 font-bold text-lg">{gameSettings.gameMode}</div>
+              <div className="text-slate-400 text-xs">Game Mode</div>
             </div>
           </div>
 
