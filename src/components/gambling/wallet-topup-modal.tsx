@@ -1,11 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import { useParaWalletBalance } from "@/hooks/use-para-wallet-balance";
 
 export default function WalletTopUpModal() {
   const [amount, setAmount] = useState(100);
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [processing, setProcessing] = useState(false);
+
+  // Para wallet balance hook
+  const { isConnected, balances, isLoading: balanceLoading, error: balanceError } = useParaWalletBalance();
+  
+  // Format balance for display
+  const formatBalance = (amount: number) => {
+    return amount.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
 
   const quickAmounts = [25, 50, 100, 250, 500, 1000];
 
@@ -52,7 +64,13 @@ export default function WalletTopUpModal() {
       <div className="mb-6 p-4 bg-gradient-to-r from-[#00CED1]/10 to-[#FFAB91]/10 rounded-2xl border border-[#00CED1]/20">
         <div className="text-center">
           <div className="text-slate-400 text-sm mb-1">Current Balance</div>
-          <div className="text-2xl font-bold text-white">$2,847.50</div>
+          <div className="text-2xl font-bold text-white">
+            {isConnected ? 
+              (balanceLoading ? "Loading..." : 
+               balanceError ? "$0.00" : 
+               `$${formatBalance(balances.totalUsd)}`) : 
+              "$0.00"}
+          </div>
         </div>
       </div>
 
