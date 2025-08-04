@@ -18,6 +18,7 @@ export default function MainFeedPage() {
   const [isInSelectionMode, setIsInSelectionMode] = useState(false);
   const [requiredSelections, setRequiredSelections] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const [hasCheckedConnection, setHasCheckedConnection] = useState(false);
   const [profilePopupAthleteId, setProfilePopupAthleteId] = useState<
     string | null
   >(null);
@@ -54,6 +55,40 @@ export default function MainFeedPage() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isProfileDropdownOpen]);
+
+  // Handle wallet connection redirect with better logic for Para integration
+  useEffect(() => {
+    if (!mounted) return;
+
+    let timeoutId: NodeJS.Timeout;
+
+    // If we're connected, mark as checked and clear any pending redirects
+    if (isConnected) {
+      setHasCheckedConnection(true);
+      return;
+    }
+
+    // Don't check again if we've already performed a connection check
+    if (hasCheckedConnection) return;
+
+    // Don't redirect if still loading
+    if (balanceLoading) return;
+
+    // Wait for Para connection to establish - sometimes it takes a moment after signin
+    timeoutId = setTimeout(() => {
+      setHasCheckedConnection(true);
+      
+      // Only redirect if definitely not connected and not loading
+      if (!isConnected && !balanceLoading) {
+        console.log("No wallet connection found, redirecting to signin");
+        router.push("/signin");
+      }
+    }, 5000); // Wait 5 seconds to give Para plenty of time to connect
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [mounted, isConnected, balanceLoading, hasCheckedConnection, router]);
 
   // Mock lobby data - showing high activity
   const totalActiveLobbies = 169;
@@ -270,6 +305,19 @@ export default function MainFeedPage() {
   // Don't render until mounted to prevent hydration issues
   if (!mounted) {
     return null;
+  }
+
+  // Show loading state while checking wallet connection
+  if (!hasCheckedConnection && (balanceLoading || (!isConnected && !balanceError))) {
+    return (
+      <div className="bg-gray-900 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#00CED1]/20 border-t-[#00CED1] rounded-full animate-spin mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-white mb-2">Connecting to wallet...</h2>
+          <p className="text-slate-400">Please wait while we establish your connection</p>
+        </div>
+      </div>
+    );
   }
 
   return (
