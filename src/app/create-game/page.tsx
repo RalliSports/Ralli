@@ -1,25 +1,133 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useSessionToken } from '@/hooks/use-session'
+import { toast, ToastContainer } from 'react-toastify'
+import { useParaWalletBalance } from "@/hooks/use-para-wallet-balance";
+import { useRouter } from 'next/navigation';
+
+//check if para is connected else kick back to /signin
 
 export default function CreateGame() {
+  const router = useRouter();
+
+  // Para wallet balance hook
+  const { isConnected } = useParaWalletBalance();
+  const { session } = useSessionToken();
+
+  useEffect(() => {
+    if (!isConnected) {
+      // Redirect to sign-in page with a callback to return to /create-game
+      router.push(`/signin?callbackUrl=/create-game`);
+    }
+  }, [isConnected, router]);
+
+  if (!isConnected) {
+    return null; // Prevent rendering until redirection is handled
+  }
+
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})
   const [gameSettings, setGameSettings] = useState({
     title: '',
     depositAmount: 25,
     maxParticipants: 8,
-    totalLegs: 4,
-    gameCode: '',
     matchupGroup: '',
     isPrivate: false,
     type: 'limited',
     userControlType: 'none',
-    gameMode: 'Season Long',
+    gameMode: '550e8400-e29b-41d4-a716-446655440020',
+    maxBets: 10, // Default max bets
   })
+
+  const isValidUUID = (uuid: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid)
+
+  const validateForm = () => {
+    const errors: { [key: string]: string } = {}
+
+    if (!gameSettings.title.trim()) errors.title = 'Title is required.'
+    if (!gameSettings.matchupGroup.trim()) errors.matchupGroup = 'Matchup Group is required.'
+    if (gameSettings.depositAmount < 5 || gameSettings.depositAmount > 500)
+      errors.depositAmount = 'Deposit must be between $5 and $500.'
+    if (gameSettings.maxParticipants < 2 || gameSettings.maxParticipants > 20)
+      errors.maxParticipants = 'Participants must be between 2 and 20.'
+    if (gameSettings.maxBets < 1 || gameSettings.maxBets > 50) errors.maxBets = 'Max bets must be between 1 and 50.'
+    if (!['1v1', 'limited', 'unlimited'].includes(gameSettings.type)) errors.type = 'Invalid contest type.'
+    if (!['none', 'whitelist', 'blacklist'].includes(gameSettings.userControlType))
+      errors.userControlType = 'Invalid user control type.'
+    if (!gameSettings.gameMode || !isValidUUID(gameSettings.gameMode))
+      errors.gameMode = 'Game Mode ID must be a valid UUID.'
+
+    return errors
+  }
 
   const handleInputChange = (field: string, value: any) => {
     setGameSettings((prev) => ({ ...prev, [field]: value }))
   }
+
+  const handleCreateContest = async () => {
+  const errors = validateForm()
+  setFormErrors(errors)
+
+  if (Object.keys(errors).length > 0) {
+    Object.entries(errors).forEach(([field, message]) => {
+      toast.error(message)
+    })
+    return
+  }
+
+  const apiData = {
+    title: gameSettings.title,
+    depositAmount: gameSettings.depositAmount,
+    currency: 'USD',
+    maxParticipants: gameSettings.maxParticipants,
+    maxBets: gameSettings.maxBets,
+    matchupGroup: gameSettings.matchupGroup,
+    depositToken: 'USDC',
+    isPrivate: gameSettings.isPrivate,
+    type: gameSettings.type,
+    userControlType: gameSettings.userControlType,
+    gameModeId: gameSettings.gameMode,
+  }
+
+  try {
+    const response = await fetch('/api/create-game', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-para-session': session || '',
+      },
+      body: JSON.stringify(apiData),
+    })
+
+    const result = await response.json()
+
+    if (response.ok) {
+      toast.success('Contest created successfully!')
+      setGameSettings({
+        title: '',
+        depositAmount: 25,
+        maxParticipants: 8,
+        matchupGroup: '',
+        isPrivate: false,
+        type: 'limited',
+        userControlType: 'none',
+        gameMode: '550e8400-e29b-41d4-a716-446655440020',
+        maxBets: 10,
+      })
+    } else {
+      if (Array.isArray(result.message)) {
+        result.message.forEach((msg: string) => toast.error(msg))
+      } else {
+        toast.error(result.message || 'Failed to create contest.')
+      }
+    }
+  } catch (err) {
+    console.error('Unexpected error:', err)
+    toast.error('Unexpected error. Please try again.')
+  }
+}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 p-4">
@@ -214,55 +322,33 @@ export default function CreateGame() {
             </div>
           </div>
 
-          {/* Total Legs */}
-          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-emerald-400/50 transition-all duration-300">
+          {/* Max Bets */}
+          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-teal-400/50 transition-all duration-300">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500/20 to-emerald-400/10 rounded-lg flex items-center justify-center border border-emerald-400/20">
-                <span className="text-lg">🎯</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-teal-500/20 to-teal-400/10 rounded-lg flex items-center justify-center border border-teal-400/20">
+                <span className="text-lg">🎲</span>
               </div>
               <div>
-                <h3 className="text-white font-bold">Total Legs</h3>
-                <p className="text-slate-400 text-xs">Number of required bets</p>
+                <h3 className="text-white font-bold">Max Bets</h3>
+                <p className="text-slate-400 text-xs">Maximum bets allowed per participant</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 mb-2">
               <input
                 type="range"
-                value={gameSettings.totalLegs || 4}
-                onChange={(e) => handleInputChange('totalLegs', parseInt(e.target.value))}
+                value={gameSettings.maxBets}
+                onChange={(e) => handleInputChange('maxBets', parseInt(e.target.value))}
                 min="1"
-                max="15"
-                className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer contest-legs-slider"
+                max="50"
+                step="1"
+                className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
               />
-              <span className="text-emerald-400 font-bold text-xl min-w-[2.5rem] text-center">
-                {gameSettings.totalLegs || 4}
-              </span>
+              <span className="text-teal-400 font-bold text-xl min-w-[2.5rem] text-center">{gameSettings.maxBets}</span>
             </div>
             <div className="flex justify-between text-xs text-slate-500">
               <span>1</span>
-              <span>15</span>
+              <span>50</span>
             </div>
-          </div>
-
-          {/* Game Code */}
-          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-emerald-400/50 transition-all duration-300">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500/20 to-emerald-400/10 rounded-lg flex items-center justify-center border border-emerald-400/20">
-                <span className="text-lg">🎯</span>
-              </div>
-              <div>
-                <h3 className="text-white font-bold">Game Code</h3>
-                <p className="text-slate-400 text-xs">Unique contest identifier</p>
-              </div>
-            </div>
-            <input
-              type="text"
-              value={gameSettings.gameCode}
-              onChange={(e) => handleInputChange('gameCode', e.target.value.toUpperCase())}
-              placeholder="Enter game code (e.g. CHAMPS)"
-              className="w-full bg-slate-700/50 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/20 transition-all duration-200 uppercase"
-              maxLength={10}
-            />
           </div>
 
           {/* Matchup Group */}
@@ -367,73 +453,6 @@ export default function CreateGame() {
             </div>
           </div>
 
-          {/* Game Mode */}
-          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-pink-400/50 transition-all duration-300">
-            <div className="flex items-center space-x-3 mb-5">
-              <div className="w-10 h-10 bg-gradient-to-br from-pink-500/20 to-pink-400/10 rounded-lg flex items-center justify-center border border-pink-400/20">
-                <span className="text-lg">🎮</span>
-              </div>
-              <div>
-                <h3 className="text-white font-bold">Game Mode</h3>
-                <p className="text-slate-400 text-xs">Choose your contest format</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleInputChange('gameMode', 'Quick Match')}
-                className={`p-3 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.gameMode === 'Quick Match'
-                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                }`}
-              >
-                <div className="text-center">
-                  <span className="text-lg block mb-1">⚡</span>
-                  <div className="text-white font-semibold text-xs">Quick Match</div>
-                </div>
-              </button>
-              <button
-                onClick={() => handleInputChange('gameMode', 'Weekly Challenge')}
-                className={`p-3 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.gameMode === 'Weekly Challenge'
-                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                }`}
-              >
-                <div className="text-center">
-                  <span className="text-lg block mb-1">📅</span>
-                  <div className="text-white font-semibold text-xs">Weekly Challenge</div>
-                </div>
-              </button>
-              <button
-                onClick={() => handleInputChange('gameMode', 'Season Long')}
-                className={`p-3 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.gameMode === 'Season Long'
-                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                }`}
-              >
-                <div className="text-center">
-                  <span className="text-lg block mb-1">🏆</span>
-                  <div className="text-white font-semibold text-xs">Season Long</div>
-                </div>
-              </button>
-              <button
-                onClick={() => handleInputChange('gameMode', 'Head-to-Head')}
-                className={`p-3 rounded-xl border-2 transition-all duration-200 ${
-                  gameSettings.gameMode === 'Head-to-Head'
-                    ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                    : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                }`}
-              >
-                <div className="text-center">
-                  <span className="text-lg block mb-1">⚔️</span>
-                  <div className="text-white font-semibold text-xs">Head-to-Head</div>
-                </div>
-              </button>
-            </div>
-          </div>
-
           {/* Privacy Setting */}
           <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-purple-400/50 transition-all duration-300">
             <div className="flex items-center space-x-3 mb-5">
@@ -469,7 +488,7 @@ export default function CreateGame() {
                 }`}
               >
                 <div className="text-center">
-                  <span className="text-xl block mb-1">�</span>
+                  <span className="text-xl block mb-1">🔒</span>
                   <div className="text-white font-semibold text-sm">Private</div>
                   <div className="text-slate-400 text-xs">Invite only</div>
                 </div>
@@ -504,7 +523,10 @@ export default function CreateGame() {
             </div>
           </div>
 
-          <button className="relative w-full bg-gradient-to-r from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg overflow-hidden group">
+          <button
+            onClick={handleCreateContest}
+            className="relative w-full bg-gradient-to-r from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg overflow-hidden group"
+          >
             <div className="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
             <span className="relative z-10 flex items-center justify-center space-x-2">
               <span>🚀</span>
@@ -526,6 +548,7 @@ export default function CreateGame() {
           </Link>
         </div>
       </div>
+      <ToastContainer />
     </div>
   )
 }
