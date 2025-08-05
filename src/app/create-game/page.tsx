@@ -1,12 +1,32 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSessionToken } from '@/hooks/use-session'
 import { toast, ToastContainer } from 'react-toastify'
+import { useParaWalletBalance } from "@/hooks/use-para-wallet-balance";
+import { useRouter } from 'next/navigation';
+
+//check if para is connected else kick back to /signin
 
 export default function CreateGame() {
-  const { session } = useSessionToken()
+  const router = useRouter();
+
+  // Para wallet balance hook
+  const { isConnected } = useParaWalletBalance();
+  const { session } = useSessionToken();
+
+  useEffect(() => {
+    if (!isConnected) {
+      // Redirect to sign-in page with a callback to return to /create-game
+      router.push(`/signin?callbackUrl=/create-game`);
+    }
+  }, [isConnected, router]);
+
+  if (!isConnected) {
+    return null; // Prevent rendering until redirection is handled
+  }
+
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})
   const [gameSettings, setGameSettings] = useState({
     title: '',
@@ -468,7 +488,7 @@ export default function CreateGame() {
                 }`}
               >
                 <div className="text-center">
-                  <span className="text-xl block mb-1">�</span>
+                  <span className="text-xl block mb-1">🔒</span>
                   <div className="text-white font-semibold text-sm">Private</div>
                   <div className="text-slate-400 text-xs">Invite only</div>
                 </div>
