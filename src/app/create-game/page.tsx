@@ -2,8 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useSessionToken } from '@/hooks/use-session';
+import { toast, ToastContainer } from 'react-toastify';
 
 export default function CreateGame() {
+  const { token, loading, error } = useSessionToken();
   const [gameSettings, setGameSettings] = useState({
     title: '',
     depositAmount: 25,
@@ -12,12 +15,60 @@ export default function CreateGame() {
     matchupGroup: '',
     isPrivate: false,
     type: 'limited',
-    userControlType: 'none',
-    gameMode: 'Season Long',
+    userControlType: 'None',
+    gameMode: '550e8400-e29b-41d4-a716-446655440020',
+    maxBets: 10, // Default max bets
   })
 
   const handleInputChange = (field: string, value: any) => {
     setGameSettings((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleCreateContest = async () => {
+    try {
+
+      // Map the form data to match the API schema
+      const apiData = {
+        title: gameSettings.title,
+        depositAmount: gameSettings.depositAmount,
+        currency: 'USD', // Default currency, you might want to make this configurable
+        maxParticipants: gameSettings.maxParticipants,
+        maxBets: gameSettings.maxBets,
+        matchupGroup: gameSettings.matchupGroup,
+        depositToken: 'USDC', // Default deposit token, you might want to make this configurable
+        isPrivate: gameSettings.isPrivate,
+        type: gameSettings.type,
+        userControlType: 'None', // Default user control type
+        gameModeId: "550e8400-e29b-41d4-a716-446655440020", // Map gameMode to gameModeId
+      }
+
+      console.log('API Data:', apiData);
+
+      const response = await fetch('/api/create-game', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-para-session': token || '', // ensure it’s a string
+        },
+        body: JSON.stringify(apiData),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        console.log('Contest created successfully:', result)
+        // You can add success handling here (e.g., redirect to the game page)
+        // Example: router.push(`/game/${result.gameId}`)
+      } else {
+        const errorData = await response.json()
+        console.error('Failed to create contest:', errorData)
+        toast.error('Failed to create contest. Please try again.');
+        // You can add error handling here (e.g., show error message to user)
+      }
+    } catch (error) {
+      console.error('Error creating contest:', error)
+      toast.error('An unexpected error occurred. Please try again.');
+      // You can add error handling here (e.g., show error message to user)
+    }
   }
 
   return (
@@ -210,6 +261,37 @@ export default function CreateGame() {
             <div className="flex justify-between text-xs text-slate-500">
               <span>2</span>
               <span>20</span>
+            </div>
+          </div>
+
+          {/* Max Bets */}
+          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-teal-400/50 transition-all duration-300">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-teal-500/20 to-teal-400/10 rounded-lg flex items-center justify-center border border-teal-400/20">
+                <span className="text-lg">🎲</span>
+              </div>
+              <div>
+                <h3 className="text-white font-bold">Max Bets</h3>
+                <p className="text-slate-400 text-xs">Maximum bets allowed per participant</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 mb-2">
+              <input
+                type="range"
+                value={gameSettings.maxBets}
+                onChange={(e) => handleInputChange('maxBets', parseInt(e.target.value))}
+                min="1"
+                max="50"
+                step="1"
+                className="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
+              />
+              <span className="text-teal-400 font-bold text-xl min-w-[2.5rem] text-center">
+                {gameSettings.maxBets}
+              </span>
+            </div>
+            <div className="flex justify-between text-xs text-slate-500">
+              <span>1</span>
+              <span>50</span>
             </div>
           </div>
 
@@ -473,7 +555,9 @@ export default function CreateGame() {
             </div>
           </div>
 
-          <button className="relative w-full bg-gradient-to-r from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg overflow-hidden group">
+          <button 
+            onClick={handleCreateContest}
+            className="relative w-full bg-gradient-to-r from-[#00CED1] to-blue-500 hover:from-[#00CED1]/90 hover:to-blue-500/90 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg overflow-hidden group">
             <div className="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
             <span className="relative z-10 flex items-center justify-center space-x-2">
               <span>🚀</span>
@@ -495,6 +579,7 @@ export default function CreateGame() {
           </Link>
         </div>
       </div>
+      <ToastContainer />
     </div>
   )
 }

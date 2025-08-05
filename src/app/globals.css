@@ -109,6 +109,51 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+:root {
+  /* Main background colors */
+  --toastify-color-light: #1e293b;
+  --toastify-color-dark: #0f172a;
+  --toastify-toast-background: rgba(30, 41, 59, 0.8);
+
+  /* Text colors */
+  --toastify-text-color-light: #e0f2fe;
+  --toastify-text-color-dark: #ffffff;
+
+  /* Status colors */
+  --toastify-color-info: #00CED1;
+  --toastify-color-success: #10b981;
+  --toastify-color-warning: #f59e0b;
+  --toastify-color-error: #ef4444;
+
+  /* Progress bars */
+  --toastify-color-progress-info: var(--toastify-color-info);
+  --toastify-color-progress-success: var(--toastify-color-success);
+  --toastify-color-progress-warning: var(--toastify-color-warning);
+  --toastify-color-progress-error: var(--toastify-color-error);
+  --toastify-color-progress-dark: #3b82f6;
+  --toastify-color-progress-light: linear-gradient(to right, #00CED1, #3b82f6);
+  --toastify-color-transparent: rgba(255, 255, 255, 0.1);
+  --toastify-color-progress-bgo: 0.1;
+
+  /* Icons */
+  --toastify-icon-color-info: var(--toastify-color-info);
+  --toastify-icon-color-success: var(--toastify-color-success);
+  --toastify-icon-color-warning: var(--toastify-color-warning);
+  --toastify-icon-color-error: var(--toastify-color-error);
+  --toastify-icon-color-default: #ffffff;
+
+  /* Layout */
+  --toastify-toast-width: 360px;
+  --toastify-toast-min-height: 64px;
+  --toastify-toast-padding: 16px;
+  --toastify-toast-bd-radius: 14px;
+  --toastify-toast-shadow: 0 0 12px rgba(0, 206, 209, 0.3);
+  --toastify-font-family: 'Inter', sans-serif;
+  --toastify-z-index: 9999;
+
+  --toastify-spinner-color: #00CED1;
+  --toastify-spinner-color-empty-area: #334155;
+}
 
 @layer base {
   * {
