@@ -9,9 +9,11 @@ import AthleteProfilePopup from "@/components/main-feed/athlete-profile-popup";
 import SidebarNav from "@/components/ui/sidebar-nav";
 import { ParaButton } from "@/components/para-modal";
 import { useParaWalletBalance } from "@/hooks/use-para-wallet-balance";
+import { useAccount } from "@getpara/react-sdk";
 
 export default function MainFeedPage() {
   const router = useRouter();
+  const { data: account } = useAccount();
   const [selectedSport, setSelectedSport] = useState("all");
   const [bookmarkedAthletes, setBookmarkedAthletes] = useState<string[]>([]);
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([]);
@@ -89,6 +91,13 @@ export default function MainFeedPage() {
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, [mounted, isConnected, balanceLoading, hasCheckedConnection, router]);
+
+  // Redirect to /signin if the user is not connected
+  useEffect(() => {
+    if (!account?.isConnected) {
+      router.push('/signin');
+    }
+  }, [account?.isConnected, router]);
 
   // Mock lobby data - showing high activity
   const totalActiveLobbies = 169;

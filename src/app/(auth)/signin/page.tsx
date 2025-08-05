@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useModal, useAccount } from "@getpara/react-sdk";
 import { toast } from "sonner";
 
 export default function SignIn() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { openModal } = useModal();
   const { data: account } = useAccount();
   const [hasShownInitialModal, setHasShownInitialModal] = useState(false);
   const modalOpenedRef = useRef(false);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const callbackUrl = searchParams.get("callbackUrl") || "/main";
 
   // Check if modal is open by looking for Para modal elements in DOM
   const isModalOpen = () => {
@@ -61,10 +64,10 @@ export default function SignIn() {
   };
 
   useEffect(() => {
-    // If user is already logged in, redirect to main
+    // If user is already logged in, redirect to callback URL or main
     if (account?.isConnected) {
       stopModalMonitoring();
-      router.push("/main");
+      router.push(callbackUrl);
       return;
     }
 
@@ -77,15 +80,15 @@ export default function SignIn() {
         startModalMonitoring();
       }, 500);
     }
-  }, [account?.isConnected, router, openModal, hasShownInitialModal]);
+  }, [account?.isConnected, router, openModal, hasShownInitialModal, callbackUrl]);
 
   // Monitor account changes and redirect when logged in
   useEffect(() => {
     if (account?.isConnected) {
       stopModalMonitoring();
-      router.push("/main");
+      router.push(callbackUrl);
     }
-  }, [account?.isConnected, router]);
+  }, [account?.isConnected, router, callbackUrl]);
 
   // Cleanup on unmount
   useEffect(() => {
