@@ -6,7 +6,7 @@ import { useSessionToken } from '@/hooks/use-session';
 import { toast, ToastContainer } from 'react-toastify';
 
 export default function CreateGame() {
-  const { token, loading, error } = useSessionToken();
+  const { session } = useSessionToken();
   const [gameSettings, setGameSettings] = useState({
     title: '',
     depositAmount: 25,
@@ -15,7 +15,7 @@ export default function CreateGame() {
     matchupGroup: '',
     isPrivate: false,
     type: 'limited',
-    userControlType: 'None',
+    userControlType: 'none',
     gameMode: '550e8400-e29b-41d4-a716-446655440020',
     maxBets: 10, // Default max bets
   })
@@ -38,7 +38,7 @@ export default function CreateGame() {
         depositToken: 'USDC', // Default deposit token, you might want to make this configurable
         isPrivate: gameSettings.isPrivate,
         type: gameSettings.type,
-        userControlType: 'None', // Default user control type
+        userControlType: 'none', // Default user control type
         gameModeId: "550e8400-e29b-41d4-a716-446655440020", // Map gameMode to gameModeId
       }
 
@@ -48,7 +48,7 @@ export default function CreateGame() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-para-session': token || '', // ensure it’s a string
+          'x-para-session': session || '', // ensure it’s a string
         },
         body: JSON.stringify(apiData),
       })
