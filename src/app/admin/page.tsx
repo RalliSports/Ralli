@@ -1,16 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ToastProvider, useToast } from '../../components/ui/toast'
 import { Dropdown, SportsDropdown } from '../../components/ui/dropdown'
 import { useSessionToken } from '@/hooks/use-session'
 
 // Types for the admin panel
-interface StatType {
+interface Stat {
+  id: string
   name: string
   description: string
   customId: number
+  createdAt: string
 }
 
 interface Player {
@@ -187,6 +190,23 @@ function AdminPageContent() {
     },
   ])
 
+  const [stats, setStats] = useState<Stat[]>([])
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const response = await fetch('/api/read-stats', {
+        method: 'GET',
+        headers: {
+          'x-para-session': session || '',
+        },
+      })
+      const data = await response.json()
+      console.log(data, 'data')
+      setStats(data)
+    }
+    fetchStats()
+  }, [])
+
   // Form states
   const [newStat, setNewStat] = useState({
     name: '',
@@ -222,26 +242,10 @@ function AdminPageContent() {
     resolutionReason: '',
   })
 
-  // Helper functions
-  const generateNextLineCode = (sportCode: string): string => {
-    const existingLines = statTypes.filter((st) => st.sportCode === sportCode)
-    const maxLineCode = existingLines.reduce((max, stat) => {
-      const lineNum = parseInt(stat.lineCode)
-      return lineNum > max ? lineNum : max
-    }, 0)
-    return String(maxLineCode + 1).padStart(5, '0')
-  }
-
   const handleCreateStat = async () => {
     if (!newStat.name || !newStat.description || !newStat.customId) {
       addToast('Please fill in all fields', 'error')
       return
-    }
-
-    const statType: StatType = {
-      name: newStat.name,
-      description: newStat.description,
-      customId: newStat.customId,
     }
 
     setNewStat({
@@ -455,7 +459,7 @@ function AdminPageContent() {
     const result = await response.json()
     console.log(result, 'result')
 
-    addToast(`Line resolved as ${result.toUpperCase()} successfully! (${actualValue} vs ${line.value})`, 'success')
+    addToast(`Line resolved as ${result.toUpperCase()} successfully!`, 'success')
   }
 
   const handleResolveGame = (gameId: string, action: 'end' | 'cancel') => {
@@ -654,26 +658,16 @@ function AdminPageContent() {
                       className="w-full px-4 py-3 pl-11 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
                   </div>
-
-                  <div>
-                    <SportsDropdown
-                      value={selectedSport}
-                      onChange={setSelectedSport}
-                      includeAll={true}
-                      placeholder="Filter by sport"
-                    />
-                  </div>
                 </div>
 
-                {/* <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {statTypes
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {stats
                     .filter((stat) => {
                       const matchesSearch =
                         stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         stat.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        stat.numId.toLowerCase().includes(searchTerm.toLowerCase())
-                      const matchesSport = selectedSport === 'all' || stat.sport === selectedSport
-                      return matchesSearch && matchesSport
+                        stat.customId.toString().includes(searchTerm.toLowerCase())
+                      return matchesSearch
                     })
                     .map((stat) => (
                       <div
@@ -683,31 +677,16 @@ function AdminPageContent() {
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center space-x-3 mb-2">
-                              <div
-                                className={`w-10 h-10 rounded-lg bg-gradient-to-br ${sports.find((s) => s.name === stat.sport)?.color} flex items-center justify-center`}
-                              >
-                                <span className="text-lg">{sports.find((s) => s.name === stat.sport)?.icon}</span>
-                              </div>
                               <div className="flex-1">
                                 <h4 className="text-white font-semibold text-lg">{stat.name}</h4>
                                 <div className="flex items-center space-x-2">
-                                  <span className="text-[#00CED1] text-sm font-medium">{stat.sport}</span>
+                                  {/* <span className="text-[#00CED1] text-sm font-medium">{stat.sport}</span> */}
                                   <span className="text-slate-400">•</span>
-                                  <span className="text-[#FFAB91] font-mono text-sm">{stat.numId}</span>
+                                  <span className="text-[#FFAB91] font-mono text-sm">{stat.customId}</span>
                                 </div>
                               </div>
                             </div>
                             <p className="text-slate-300 text-sm leading-relaxed mb-3 pl-13">{stat.description}</p>
-                            <div className="flex items-center space-x-4 text-xs pl-13">
-                              <div className="bg-slate-800/50 rounded-lg px-2 py-1">
-                                <span className="text-slate-400">Sport Code: </span>
-                                <span className="text-[#00CED1] font-mono">{stat.sportCode}</span>
-                              </div>
-                              <div className="bg-slate-800/50 rounded-lg px-2 py-1">
-                                <span className="text-slate-400">Line Code: </span>
-                                <span className="text-[#FFAB91] font-mono">{stat.lineCode}</span>
-                              </div>
-                            </div>
                           </div>
                           <div className="flex flex-col space-y-2">
                             <button className="p-2 bg-slate-800/50 hover:bg-slate-700/50 rounded-lg transition-colors group">
@@ -744,13 +723,12 @@ function AdminPageContent() {
                         </div>
                       </div>
                     ))}
-                  {statTypes.filter((stat) => {
+                  {stats.filter((stat) => {
                     const matchesSearch =
                       stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                       stat.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      stat.numId.toLowerCase().includes(searchTerm.toLowerCase())
-                    const matchesSport = selectedSport === 'all' || stat.sport === selectedSport
-                    return matchesSearch && matchesSport
+                      stat.customId.toString().includes(searchTerm.toLowerCase())
+                    return matchesSearch
                   }).length === 0 && (
                     <div className="text-center py-8">
                       <div className="text-slate-400 mb-2"></div>
@@ -758,7 +736,7 @@ function AdminPageContent() {
                       <p className="text-slate-500 text-sm mt-1">Try adjusting your search or filter</p>
                     </div>
                   )}
-                </div> */}
+                </div>
               </div>
             </div>
           )}
@@ -920,16 +898,11 @@ function AdminPageContent() {
                           label: 'Select stat type',
                           disabled: true,
                         },
-                        ...statTypes
-                          .filter((st) => {
-                            const selectedPlayer = players.find((p) => p.id === newLine.playerId)
-                            return !selectedPlayer || st.sport === selectedPlayer.sport
-                          })
-                          .map((stat) => ({
-                            value: stat.id,
-                            label: `${stat.name} (${stat.numId})`,
-                            icon: '📊',
-                          })),
+                        ...stats.map((stat) => ({
+                          value: stat.id,
+                          label: `${stat.name} (${stat.customId})`,
+                          icon: '📊',
+                        })),
                       ]}
                       searchable={true}
                     />
