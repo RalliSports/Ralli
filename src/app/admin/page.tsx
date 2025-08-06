@@ -247,8 +247,8 @@ function AdminPageContent() {
     name: '',
     team: '',
     position: '',
-    jerseyNumber: '',
-    age: '',
+    jerseyNumber: 0,
+    age: 0,
     picture: '',
   })
 
@@ -364,8 +364,8 @@ function AdminPageContent() {
         name: newPlayer.name,
         team: newPlayer.team,
         position: newPlayer.position,
-        jerseyNumber: parseInt(newPlayer.jerseyNumber),
-        age: parseInt(newPlayer.age),
+        jerseyNumber: newPlayer.jerseyNumber,
+        age: newPlayer.age,
         picture: newPlayer.picture || undefined, // optional field
       }
 
@@ -380,20 +380,20 @@ function AdminPageContent() {
 
       if (response.ok) {
         const newPlayerData = await response.json()
-        
+
         // Add the new player to the local state
         setPlayers([...players, newPlayerData])
-        
+
         // Reset the form
         setNewPlayer({
           name: '',
           team: '',
           position: '',
-          jerseyNumber: '',
-          age: '',
+          jerseyNumber: 0,
+          age: 0,
           picture: '',
         })
-        
+
         addToast('Player added successfully!', 'success')
       } else {
         const errorData = await response.json()
@@ -982,7 +982,7 @@ function AdminPageContent() {
                         onChange={(e) =>
                           setNewPlayer({
                             ...newPlayer,
-                            jerseyNumber: e.target.value,
+                            jerseyNumber: Number(e.target.value),
                           })
                         }
                         placeholder="e.g., 23"
@@ -1008,7 +1008,7 @@ function AdminPageContent() {
                       <input
                         type="number"
                         value={newPlayer.age}
-                        onChange={(e) => setNewPlayer({ ...newPlayer, age: e.target.value })}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, age: Number(e.target.value) })}
                         placeholder="e.g., 25"
                         className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                       />
@@ -1146,10 +1146,10 @@ function AdminPageContent() {
                           disabled: true,
                         },
                         ...statTypes.map((stat) => ({
-                            value: stat.id,
-                            label: `${stat.name} (${stat.numId})`,
-                            icon: '📊',
-                          })),
+                          value: stat.id,
+                          label: `${stat.name} (${stat.numId})`,
+                          icon: '📊',
+                        })),
                       ]}
                       searchable={true}
                     />
@@ -1396,10 +1396,7 @@ function AdminPageContent() {
                                       addToast('Please enter a valid actual value', 'error')
                                       return
                                     }
-                                    handleResolveLine(
-                                      line.id,
-                                      actualValue,
-                                    )
+                                    handleResolveLine(line.id, actualValue)
                                     setResolvingLine(null)
                                     setResolutionData({
                                       actualValue: '',
@@ -1413,10 +1410,7 @@ function AdminPageContent() {
                                 </button>
                                 <button
                                   onClick={() => {
-                                    handleResolveLine(
-                                      line.id,
-                                      0,
-                                    )
+                                    handleResolveLine(line.id, 0)
                                     setResolvingLine(null)
                                     setResolutionData({
                                       actualValue: '',
