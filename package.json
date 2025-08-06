@@ -19,12 +19,12 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "next lint",
-    "postinstall": "pnpm setup-para",
     "start": "next start"
   },
   "dependencies": {
     "@getpara/core-sdk": "alpha",
     "@getpara/react-sdk": "alpha",
+    "@getpara/server-sdk": "2.0.0-alpha.39",
     "@getpara/solana-wallet-connectors": "alpha",
     "@headlessui/react": "^2.2.0",
     "@radix-ui/react-dialog": "^1.1.14",
