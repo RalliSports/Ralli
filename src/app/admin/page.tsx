@@ -982,7 +982,7 @@ function AdminPageContent() {
                         onChange={(e) =>
                           setNewPlayer({
                             ...newPlayer,
-                            jerseyNumber: Number(e.target.value),
+                            jerseyNumber: parseInt(e.target.value),
                           })
                         }
                         placeholder="e.g., 23"
@@ -1008,7 +1008,7 @@ function AdminPageContent() {
                       <input
                         type="number"
                         value={newPlayer.age}
-                        onChange={(e) => setNewPlayer({ ...newPlayer, age: Number(e.target.value) })}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, age: parseInt(e.target.value) })}
                         placeholder="e.g., 25"
                         className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                       />
