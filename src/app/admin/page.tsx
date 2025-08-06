@@ -1,64 +1,61 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import Link from "next/link";
-import { ToastProvider, useToast } from "../../components/ui/toast";
-import {
-  Dropdown,
-  SportsDropdown,
-  DropdownOption,
-} from "../../components/ui/dropdown";
+import { useState } from 'react'
+import Link from 'next/link'
+import { ToastProvider, useToast } from '../../components/ui/toast'
+import { Dropdown, SportsDropdown, DropdownOption } from '../../components/ui/dropdown'
+import { useSessionToken } from '@/hooks/use-session'
 
 // Types for the admin panel
 interface StatType {
-  id: string;
-  name: string;
-  description: string;
-  numId: string; // Format: XXXXX-XXXXX (sport-line)
-  sport: string;
-  sportCode: string;
-  lineCode: string;
+  id: string
+  name: string
+  description: string
+  numId: string // Format: XXXXX-XXXXX (sport-line)
+  sport: string
+  sportCode: string
+  lineCode: string
 }
 
 interface Player {
-  id: string;
-  name: string;
-  sport: string;
-  team: string;
-  jerseyNumber: string;
-  position: string;
-  avatar: string;
+  id: string
+  name: string
+  sport: string
+  team: string
+  jerseyNumber: string
+  position: string
+  avatar: string
 }
 
 interface Line {
-  id: string;
-  playerId: string;
-  playerName: string;
-  statTypeId: string;
-  statName: string;
-  value: number;
-  sport: string;
-  gameTime: string;
-  gameDate?: Date; // Optional for backwards compatibility
-  status: "active" | "resolved" | "cancelled";
-  overOdds: string;
-  underOdds: string;
-  actualValue?: number; // The actual stat value when resolving
-  resolutionReason?: string; // Why it was resolved this way
+  id: string
+  playerId: string
+  playerName: string
+  statTypeId: string
+  statName: string
+  value: number
+  sport: string
+  gameTime: string
+  gameDate?: Date // Optional for backwards compatibility
+  status: 'active' | 'resolved' | 'cancelled'
+  overOdds: string
+  underOdds: string
+  actualValue?: number // The actual stat value when resolving
+  resolutionReason?: string // Why it was resolved this way
 }
 
 interface Game {
-  id: string;
-  title: string;
-  sport: string;
-  participants: number;
-  maxParticipants: number;
-  buyIn: number;
-  prizePool: number;
-  legs: number;
-  timeLeft: string;
-  status: "waiting" | "active" | "completed";
-  host: { name: string; avatar: string };
+  id: string
+  title: string
+  sport: string
+  participants: number
+  maxParticipants: number
+  buyIn: number
+  prizePool: number
+  legs: number
+  timeLeft: string
+  status: 'waiting' | 'active' | 'completed'
+  host: { name: string; avatar: string }
 }
 
 export default function AdminPage() {
@@ -66,269 +63,269 @@ export default function AdminPage() {
     <ToastProvider>
       <AdminPageContent />
     </ToastProvider>
-  );
+  )
 }
 
 function AdminPageContent() {
-  const { addToast } = useToast();
-  const [activeTab, setActiveTab] = useState<
-    "stats" | "lines" | "players" | "resolve-lines" | "resolve-games"
-  >("stats");
+  const { session } = useSessionToken()
+
+  const { addToast } = useToast()
+  const [activeTab, setActiveTab] = useState<'stats' | 'lines' | 'players' | 'resolve-lines' | 'resolve-games'>('stats')
 
   // Sport configurations
   const sports = [
     {
-      name: "NBA",
-      code: "00001",
-      icon: "🏀",
-      color: "from-[#00CED1] to-[#FFAB91]",
+      name: 'NBA',
+      code: '00001',
+      icon: '🏀',
+      color: 'from-[#00CED1] to-[#FFAB91]',
     },
     {
-      name: "NFL",
-      code: "00002",
-      icon: "🏈",
-      color: "from-[#FFAB91] to-[#00CED1]",
+      name: 'NFL',
+      code: '00002',
+      icon: '🏈',
+      color: 'from-[#FFAB91] to-[#00CED1]',
     },
     {
-      name: "Soccer",
-      code: "00003",
-      icon: "⚽",
-      color: "from-[#00CED1] to-[#FFAB91]",
+      name: 'Soccer',
+      code: '00003',
+      icon: '⚽',
+      color: 'from-[#00CED1] to-[#FFAB91]',
     },
     {
-      name: "Baseball",
-      code: "00004",
-      icon: "⚾",
-      color: "from-[#FFAB91] to-[#00CED1]",
+      name: 'Baseball',
+      code: '00004',
+      icon: '⚾',
+      color: 'from-[#FFAB91] to-[#00CED1]',
     },
-  ];
+  ]
 
   // Mock data for stat types
   const [statTypes, setStatTypes] = useState<StatType[]>([
     {
-      id: "1",
-      name: "Points",
-      description: "Total points scored in the game",
-      numId: "00001-00001",
-      sport: "NBA",
-      sportCode: "00001",
-      lineCode: "00001",
+      id: '1',
+      name: 'Points',
+      description: 'Total points scored in the game',
+      numId: '00001-00001',
+      sport: 'NBA',
+      sportCode: '00001',
+      lineCode: '00001',
     },
     {
-      id: "2",
-      name: "3-Pointers Made",
-      description: "Total three-point shots made",
-      numId: "00001-00002",
-      sport: "NBA",
-      sportCode: "00001",
-      lineCode: "00002",
+      id: '2',
+      name: '3-Pointers Made',
+      description: 'Total three-point shots made',
+      numId: '00001-00002',
+      sport: 'NBA',
+      sportCode: '00001',
+      lineCode: '00002',
     },
     {
-      id: "3",
-      name: "Passing Yards",
-      description: "Total passing yards in the game",
-      numId: "00002-00001",
-      sport: "NFL",
-      sportCode: "00002",
-      lineCode: "00001",
+      id: '3',
+      name: 'Passing Yards',
+      description: 'Total passing yards in the game',
+      numId: '00002-00001',
+      sport: 'NFL',
+      sportCode: '00002',
+      lineCode: '00001',
     },
     {
-      id: "4",
-      name: "Goals Scored",
-      description: "Total goals scored in the match",
-      numId: "00003-00001",
-      sport: "Soccer",
-      sportCode: "00003",
-      lineCode: "00001",
+      id: '4',
+      name: 'Goals Scored',
+      description: 'Total goals scored in the match',
+      numId: '00003-00001',
+      sport: 'Soccer',
+      sportCode: '00003',
+      lineCode: '00001',
     },
-  ]);
+  ])
 
   // Mock data for players
   const [players, setPlayers] = useState<Player[]>([
     {
-      id: "1",
-      name: "LeBron James",
-      sport: "NBA",
-      team: "LAL",
-      jerseyNumber: "23",
-      position: "SF",
-      avatar: "LJ",
+      id: '1',
+      name: 'LeBron James',
+      sport: 'NBA',
+      team: 'LAL',
+      jerseyNumber: '23',
+      position: 'SF',
+      avatar: 'LJ',
     },
     {
-      id: "2",
-      name: "Josh Allen",
-      sport: "NFL",
-      team: "BUF",
-      jerseyNumber: "17",
-      position: "QB",
-      avatar: "JA",
+      id: '2',
+      name: 'Josh Allen',
+      sport: 'NFL',
+      team: 'BUF',
+      jerseyNumber: '17',
+      position: 'QB',
+      avatar: 'JA',
     },
     {
-      id: "3",
-      name: "Lionel Messi",
-      sport: "Soccer",
-      team: "MIA",
-      jerseyNumber: "10",
-      position: "FW",
-      avatar: "LM",
+      id: '3',
+      name: 'Lionel Messi',
+      sport: 'Soccer',
+      team: 'MIA',
+      jerseyNumber: '10',
+      position: 'FW',
+      avatar: 'LM',
     },
-  ]);
+  ])
 
   // Mock data for lines
   const [lines, setLines] = useState<Line[]>([
     {
-      id: "1",
-      playerId: "1",
-      playerName: "LeBron James",
-      statTypeId: "1",
-      statName: "Points",
+      id: '1',
+      playerId: '1',
+      playerName: 'LeBron James',
+      statTypeId: '1',
+      statName: 'Points',
       value: 28.5,
-      sport: "NBA",
-      gameTime: "Tonight 8:00 PM",
-      status: "active",
-      overOdds: "+110",
-      underOdds: "-130",
+      sport: 'NBA',
+      gameTime: 'Tonight 8:00 PM',
+      status: 'active',
+      overOdds: '+110',
+      underOdds: '-130',
     },
     {
-      id: "2",
-      playerId: "2",
-      playerName: "Josh Allen",
-      statTypeId: "3",
-      statName: "Passing Yards",
+      id: '2',
+      playerId: '2',
+      playerName: 'Josh Allen',
+      statTypeId: '3',
+      statName: 'Passing Yards',
       value: 285.5,
-      sport: "NFL",
-      gameTime: "Sunday 1:00 PM",
-      status: "active",
-      overOdds: "-110",
-      underOdds: "-110",
+      sport: 'NFL',
+      gameTime: 'Sunday 1:00 PM',
+      status: 'active',
+      overOdds: '-110',
+      underOdds: '-110',
     },
-  ]);
+  ])
 
   // Mock data for games (using existing lobby structure)
   const [games, setGames] = useState<Game[]>([
     {
-      id: "1",
-      title: "🔥 NBA Sunday Showdown",
-      sport: "NBA",
+      id: '1',
+      title: '🔥 NBA Sunday Showdown',
+      sport: 'NBA',
       participants: 9,
       maxParticipants: 12,
       buyIn: 25,
       prizePool: 280,
       legs: 4,
-      timeLeft: "2h 15m",
-      status: "active",
-      host: { name: "Jack Sturt", avatar: "JS" },
+      timeLeft: '2h 15m',
+      status: 'active',
+      host: { name: 'Jack Sturt', avatar: 'JS' },
     },
     {
-      id: "2",
-      title: "Monday Night Football",
-      sport: "NFL",
+      id: '2',
+      title: 'Monday Night Football',
+      sport: 'NFL',
       participants: 11,
       maxParticipants: 12,
       buyIn: 50,
       prizePool: 580,
       legs: 5,
-      timeLeft: "45m",
-      status: "active",
-      host: { name: "Mike Chen", avatar: "MC" },
+      timeLeft: '45m',
+      status: 'active',
+      host: { name: 'Mike Chen', avatar: 'MC' },
     },
-  ]);
+  ])
 
   // Form states
   const [newStatType, setNewStatType] = useState({
-    name: "",
-    description: "",
-    sport: "",
-    sportCode: "",
-    lineCode: "",
-    numId: "",
-  });
+    name: '',
+    description: '',
+    sport: '',
+    sportCode: '',
+    lineCode: '',
+    numId: '',
+  })
 
   const [newPlayer, setNewPlayer] = useState({
-    name: "",
-    sport: "",
-    team: "",
-    jerseyNumber: "",
-    position: "",
-  });
+    name: '',
+    sport: '',
+    team: '',
+    jerseyNumber: '',
+    position: '',
+  })
 
   const [newLine, setNewLine] = useState({
-    playerId: "",
-    statTypeId: "",
-    value: "",
-    gameTime: "",
-    gameDate: "",
-    overOdds: "",
-    underOdds: "",
-  });
+    playerId: '',
+    statTypeId: '',
+    value: '',
+    gameTime: '',
+    gameDate: '',
+    overOdds: '',
+    underOdds: '',
+  })
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSport, setSelectedSport] = useState("all");
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedSport, setSelectedSport] = useState('all')
 
   // Resolution state for lines
-  const [resolvingLine, setResolvingLine] = useState<string | null>(null);
+  const [resolvingLine, setResolvingLine] = useState<string | null>(null)
   const [resolutionData, setResolutionData] = useState({
-    actualValue: "",
-    resolutionReason: "",
-  });
+    actualValue: '',
+    resolutionReason: '',
+  })
 
   // Wallet connection state
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState("");
+  const [walletConnected, setWalletConnected] = useState(false)
+  const [walletAddress, setWalletAddress] = useState('')
 
   // Wallet connection handler
   const handleConnectWallet = () => {
     if (walletConnected) {
       // Disconnect wallet
-      setWalletConnected(false);
-      setWalletAddress("");
-      addToast("Wallet disconnected", "success");
+      setWalletConnected(false)
+      setWalletAddress('')
+      addToast('Wallet disconnected', 'success')
     } else {
       // Simulate wallet connection (in real app, this would call actual wallet)
-      const mockAddress = "idk bro tbh i made this shit up";
-      setWalletConnected(true);
-      setWalletAddress(mockAddress);
-      addToast("Wallet connected successfully!", "success");
+      const mockAddress = 'idk bro tbh i made this shit up'
+      setWalletConnected(true)
+      setWalletAddress(mockAddress)
+      addToast('Wallet connected successfully!', 'success')
     }
-  };
+  }
 
   // Helper functions
   const generateNextLineCode = (sportCode: string): string => {
-    const existingLines = statTypes.filter((st) => st.sportCode === sportCode);
+    const existingLines = statTypes.filter((st) => st.sportCode === sportCode)
     const maxLineCode = existingLines.reduce((max, stat) => {
-      const lineNum = parseInt(stat.lineCode);
-      return lineNum > max ? lineNum : max;
-    }, 0);
-    return String(maxLineCode + 1).padStart(5, "0");
-  };
+      const lineNum = parseInt(stat.lineCode)
+      return lineNum > max ? lineNum : max
+    }, 0)
+    return String(maxLineCode + 1).padStart(5, '0')
+  }
 
   const handleCreateStatType = () => {
     if (!newStatType.name || !newStatType.description || !newStatType.sport) {
-      addToast("Please fill in all fields", "error");
-      return;
+      addToast('Please fill in all fields', 'error')
+      return
     }
 
-    const sport = sports.find((s) => s.name === newStatType.sport);
-    if (!sport) return;
+    const sport = sports.find((s) => s.name === newStatType.sport)
+    if (!sport) return
 
-    let numId = newStatType.numId;
-    let sportCode = sport.code;
-    let lineCode = "";
+    let numId = newStatType.numId
+    let sportCode = sport.code
+    let lineCode = ''
 
     // If manual numerical code is provided, validate and parse it
     if (newStatType.numId.trim()) {
-      const parts = newStatType.numId.split("-");
+      const parts = newStatType.numId.split('-')
       if (parts.length !== 2) {
-        addToast("Numerical code must be in format: 00001-00001", "error");
-        return;
+        addToast('Numerical code must be in format: 00001-00001', 'error')
+        return
       }
-      sportCode = parts[0];
-      lineCode = parts[1];
-      numId = newStatType.numId;
+      sportCode = parts[0]
+      lineCode = parts[1]
+      numId = newStatType.numId
     } else {
       // Auto-generate if not provided
-      lineCode = generateNextLineCode(sport.code);
-      numId = `${sport.code}-${lineCode}`;
+      lineCode = generateNextLineCode(sport.code)
+      numId = `${sport.code}-${lineCode}`
     }
 
     const statType: StatType = {
@@ -339,30 +336,24 @@ function AdminPageContent() {
       sport: newStatType.sport,
       sportCode: sportCode,
       lineCode: lineCode,
-    };
+    }
 
-    setStatTypes([...statTypes, statType]);
+    setStatTypes([...statTypes, statType])
     setNewStatType({
-      name: "",
-      description: "",
-      sport: "",
-      sportCode: "",
-      lineCode: "",
-      numId: "",
-    });
-    addToast("Stat type created successfully!", "success");
-  };
+      name: '',
+      description: '',
+      sport: '',
+      sportCode: '',
+      lineCode: '',
+      numId: '',
+    })
+    addToast('Stat type created successfully!', 'success')
+  }
 
   const handleCreatePlayer = () => {
-    if (
-      !newPlayer.name ||
-      !newPlayer.sport ||
-      !newPlayer.team ||
-      !newPlayer.jerseyNumber ||
-      !newPlayer.position
-    ) {
-      addToast("Please fill in all fields", "error");
-      return;
+    if (!newPlayer.name || !newPlayer.sport || !newPlayer.team || !newPlayer.jerseyNumber || !newPlayer.position) {
+      addToast('Please fill in all fields', 'error')
+      return
     }
 
     const player: Player = {
@@ -373,128 +364,147 @@ function AdminPageContent() {
       jerseyNumber: newPlayer.jerseyNumber,
       position: newPlayer.position,
       avatar: newPlayer.name
-        .split(" ")
+        .split(' ')
         .map((n) => n[0])
-        .join("")
+        .join('')
         .toUpperCase(),
-    };
+    }
 
-    setPlayers([...players, player]);
+    setPlayers([...players, player])
     setNewPlayer({
-      name: "",
-      sport: "",
-      team: "",
-      jerseyNumber: "",
-      position: "",
-    });
-    addToast("Player added successfully!", "success");
-  };
+      name: '',
+      sport: '',
+      team: '',
+      jerseyNumber: '',
+      position: '',
+    })
+    addToast('Player added successfully!', 'success')
+  }
 
-  const handleCreateLine = () => {
-    if (
-      !newLine.playerId ||
-      !newLine.statTypeId ||
-      !newLine.value ||
-      !newLine.gameTime ||
-      !newLine.gameDate ||
-      !newLine.overOdds ||
-      !newLine.underOdds
-    ) {
-      addToast("Please fill in all fields", "error");
-      return;
+  const handleCreateLine = async () => {
+    // if (
+    //   !newLine.playerId ||
+    //   !newLine.statTypeId ||
+    //   !newLine.value ||
+    //   !newLine.gameTime ||
+    //   !newLine.gameDate ||
+    //   !newLine.overOdds ||
+    //   !newLine.underOdds
+    // ) {
+    //   addToast("Please fill in all fields", "error");
+    //   return;
+    // }
+
+    // const player = players.find((p) => p.id === newLine.playerId);
+    // const statType = statTypes.find((st) => st.id === newLine.statTypeId);
+    // if (!player || !statType) return;
+
+    // // Parse the date
+    // const gameDate = new Date(newLine.gameDate);
+    // if (isNaN(gameDate.getTime())) {
+    //   addToast("Please enter a valid date and time", "error");
+    //   return;
+    // }
+
+    // const line: Line = {
+    //   id: String(lines.length + 1),
+    //   playerId: newLine.playerId,
+    //   playerName: player.name,
+    //   statTypeId: newLine.statTypeId,
+    //   statName: statType.name,
+    //   value: parseFloat(newLine.value),
+    //   sport: player.sport,
+    //   gameTime: newLine.gameTime,
+    //   gameDate: gameDate,
+    //   status: "active",
+    //   overOdds: newLine.overOdds,
+    //   underOdds: newLine.underOdds,
+    // };
+
+    // setLines([...lines, line]);
+    // setNewLine({
+    //   playerId: "",
+    //   statTypeId: "",
+    //   value: "",
+    //   gameTime: "",
+    //   gameDate: "",
+    //   overOdds: "",
+    //   underOdds: "",
+    // });
+
+    const apiData = {
+      athleteId: '17b27fd9-8ebe-4ce7-9e84-cb34714386a6',
+      statId: '550e8401-e29b-41d4-a716-446655440018',
+      matchupId: '550e8400-e29b-41d4-a716-446655440050',
+      predictedValue: 10.5,
     }
+    const response = await fetch('/api/create-line', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-para-session': session || '',
+      },
+      body: JSON.stringify(apiData),
+    })
 
-    const player = players.find((p) => p.id === newLine.playerId);
-    const statType = statTypes.find((st) => st.id === newLine.statTypeId);
-    if (!player || !statType) return;
+    const result = await response.json()
+    console.log(result, 'result')
 
-    // Parse the date
-    const gameDate = new Date(newLine.gameDate);
-    if (isNaN(gameDate.getTime())) {
-      addToast("Please enter a valid date and time", "error");
-      return;
-    }
-
-    const line: Line = {
-      id: String(lines.length + 1),
-      playerId: newLine.playerId,
-      playerName: player.name,
-      statTypeId: newLine.statTypeId,
-      statName: statType.name,
-      value: parseFloat(newLine.value),
-      sport: player.sport,
-      gameTime: newLine.gameTime,
-      gameDate: gameDate,
-      status: "active",
-      overOdds: newLine.overOdds,
-      underOdds: newLine.underOdds,
-    };
-
-    setLines([...lines, line]);
-    setNewLine({
-      playerId: "",
-      statTypeId: "",
-      value: "",
-      gameTime: "",
-      gameDate: "",
-      overOdds: "",
-      underOdds: "",
-    });
-    addToast("Line created successfully!", "success");
-  };
+    addToast('Line created successfully!', 'success')
+  }
 
   const handleResolveLine = (
     lineId: string,
     actualValue: number,
-    result: "over" | "under" | "cancel",
-    resolutionReason?: string
+    result: 'over' | 'under' | 'cancel',
+    resolutionReason?: string,
   ) => {
-    if (result === "cancel") {
+    if (result === 'cancel') {
       setLines(
         lines.map((line) =>
           line.id === lineId
             ? {
                 ...line,
-                status: "cancelled",
-                resolutionReason: resolutionReason || "Cancelled by admin",
+                status: 'cancelled',
+                resolutionReason: resolutionReason || 'Cancelled by admin',
               }
-            : line
-        )
-      );
-      addToast("Line cancelled successfully!", "success");
-      return;
+            : line,
+        ),
+      )
+      addToast('Line cancelled successfully!', 'success')
+      return
     }
 
-    const line = lines.find((l) => l.id === lineId);
-    if (!line) return;
+    const line = lines.find((l) => l.id === lineId)
+    if (!line) return
 
     // Validation logic
-    const shouldBeOver = actualValue > line.value;
-    const shouldBeUnder = actualValue < line.value;
-    const isPush = actualValue === line.value;
+    const shouldBeOver = actualValue > line.value
+    const shouldBeUnder = actualValue < line.value
+    const isPush = actualValue === line.value
 
     if (isPush) {
       addToast(
         `Actual value ${actualValue} equals line value ${line.value}. This should be a push, not resolved as ${result.toUpperCase()}`,
-        "error"
-      );
-      return;
+        'error',
+      )
+      return
     }
 
-    if (result === "over" && !shouldBeOver) {
+    if (result === 'over' && !shouldBeOver) {
       addToast(
         `Error: Actual value ${actualValue} is under the line value ${line.value}. Cannot resolve as OVER.`,
-        "error"
-      );
-      return;
+        'error',
+      )
+      return
     }
 
-    if (result === "under" && !shouldBeUnder) {
+    if (result === 'under' && !shouldBeUnder) {
       addToast(
         `Error: Actual value ${actualValue} is over the line value ${line.value}. Cannot resolve as UNDER.`,
-        "error"
-      );
-      return;
+        'error',
+      )
+      return
     }
 
     setLines(
@@ -502,58 +512,47 @@ function AdminPageContent() {
         l.id === lineId
           ? {
               ...l,
-              status: "resolved",
+              status: 'resolved',
               actualValue,
               resolutionReason:
-                resolutionReason ||
-                `Resolved as ${result.toUpperCase()}: actual ${actualValue} vs line ${line.value}`,
+                resolutionReason || `Resolved as ${result.toUpperCase()}: actual ${actualValue} vs line ${line.value}`,
             }
-          : l
-      )
-    );
+          : l,
+      ),
+    )
 
-    addToast(
-      `Line resolved as ${result.toUpperCase()} successfully! (${actualValue} vs ${line.value})`,
-      "success"
-    );
-  };
+    addToast(`Line resolved as ${result.toUpperCase()} successfully! (${actualValue} vs ${line.value})`, 'success')
+  }
 
-  const handleResolveGame = (gameId: string, action: "end" | "cancel") => {
+  const handleResolveGame = (gameId: string, action: 'end' | 'cancel') => {
     setGames(
       games.map((game) =>
         game.id === gameId
           ? {
               ...game,
-              status: action === "end" ? "completed" : ("cancelled" as any),
+              status: action === 'end' ? 'completed' : ('cancelled' as any),
             }
-          : game
-      )
-    );
-    const message =
-      action === "end"
-        ? "Game ended successfully!"
-        : "Game cancelled successfully!";
-    addToast(message, "success");
-  };
+          : game,
+      ),
+    )
+    const message = action === 'end' ? 'Game ended successfully!' : 'Game cancelled successfully!'
+    addToast(message, 'success')
+  }
 
   // Filter functions
   const filteredLines = lines.filter((line) => {
     const matchesSearch =
       line.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      line.statName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSport =
-      selectedSport === "all" || line.sport === selectedSport;
-    return matchesSearch && matchesSport;
-  });
+      line.statName.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSport = selectedSport === 'all' || line.sport === selectedSport
+    return matchesSearch && matchesSport
+  })
 
   const filteredGames = games.filter((game) => {
-    const matchesSearch = game.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesSport =
-      selectedSport === "all" || game.sport === selectedSport;
-    return matchesSearch && matchesSport;
-  });
+    const matchesSearch = game.title.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSport = selectedSport === 'all' || game.sport === selectedSport
+    return matchesSearch && matchesSport
+  })
 
   return (
     <div className="bg-gray-900 min-h-screen">
@@ -566,18 +565,8 @@ function AdminPageContent() {
               href="/main"
               className="p-2 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors"
             >
-              <svg
-                className="w-5 h-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </Link>
             <h1 className="text-xl font-bold text-white">
@@ -590,66 +579,6 @@ function AdminPageContent() {
           {/* Right: Status or Info */}
           <div className="flex items-center space-x-3">
             {/* Connect Wallet Button */}
-            <button
-              onClick={handleConnectWallet}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-xl border transition-all duration-300 backdrop-blur-sm ${
-                walletConnected
-                  ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-500/30 hover:from-green-500/30 hover:to-emerald-500/30"
-                  : "bg-gradient-to-r from-[#00CED1]/20 to-[#FFAB91]/20 border-[#00CED1]/30 hover:from-[#00CED1]/30 hover:to-[#FFAB91]/30"
-              }`}
-            >
-              <div
-                className={`w-5 h-5 rounded-lg flex items-center justify-center ${
-                  walletConnected
-                    ? "bg-gradient-to-br from-green-500 to-emerald-500"
-                    : "bg-gradient-to-br from-[#00CED1] to-[#FFAB91]"
-                }`}
-              >
-                {walletConnected ? (
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    />
-                  </svg>
-                )}
-              </div>
-              <div className="text-left">
-                <span
-                  className={`font-bold text-sm ${
-                    walletConnected
-                      ? "bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent"
-                      : "bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent"
-                  }`}
-                >
-                  {walletConnected ? "Connected" : "Connect Wallet"}
-                </span>
-                {walletConnected && (
-                  <div className="text-xs text-slate-400 font-mono">
-                    {walletAddress}
-                  </div>
-                )}
-              </div>
-            </button>
 
             {/* Admin Access Indicator */}
             {/* <div className="bg-gradient-to-r from-[#00CED1]/20 to-[#FFAB91]/20 border border-[#00CED1]/30 rounded-xl px-4 py-2 backdrop-blur-sm">
@@ -683,19 +612,19 @@ function AdminPageContent() {
           <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-3 shadow-2xl mb-6">
             <div className="flex flex-wrap gap-2">
               {[
-                { id: "stats", name: "Stat Types", icon: "📊" },
-                { id: "players", name: "Players", icon: "👤" },
-                { id: "lines", name: "Create Lines", icon: "📈" },
-                { id: "resolve-lines", name: "Resolve Lines", icon: "✅" },
-                { id: "resolve-games", name: "Resolve Games", icon: "🎮" },
+                { id: 'stats', name: 'Stat Types', icon: '📊' },
+                { id: 'players', name: 'Players', icon: '👤' },
+                { id: 'lines', name: 'Create Lines', icon: '📈' },
+                { id: 'resolve-lines', name: 'Resolve Lines', icon: '✅' },
+                { id: 'resolve-games', name: 'Resolve Games', icon: '🎮' },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center space-x-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
                     activeTab === tab.id
-                      ? "bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white shadow-lg"
-                      : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white border border-slate-700/50"
+                      ? 'bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white shadow-lg'
+                      : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white border border-slate-700/50'
                   }`}
                 >
                   <span>{tab.icon}</span>
@@ -703,9 +632,9 @@ function AdminPageContent() {
                 </button>
               ))}
             </div>
-          </div>{" "}
+          </div>{' '}
           {/* Tab Content */}
-          {activeTab === "stats" && (
+          {activeTab === 'stats' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Create New Stat Type Form */}
               <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
@@ -714,27 +643,21 @@ function AdminPageContent() {
                     <span className="text-lg">➕</span>
                   </span>
                   Create Stat Type
-                </h2>{" "}
+                </h2>{' '}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Stat Name
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Stat Name</label>
                     <input
                       type="text"
                       value={newStatType.name}
-                      onChange={(e) =>
-                        setNewStatType({ ...newStatType, name: e.target.value })
-                      }
+                      onChange={(e) => setNewStatType({ ...newStatType, name: e.target.value })}
                       placeholder="e.g., Points, Assists, Goals"
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Description
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Description</label>
                     <textarea
                       value={newStatType.description}
                       onChange={(e) =>
@@ -750,9 +673,7 @@ function AdminPageContent() {
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Numerical Code (Optional)
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Numerical Code (Optional)</label>
                     <input
                       type="text"
                       value={newStatType.numId}
@@ -766,15 +687,12 @@ function AdminPageContent() {
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all font-mono"
                     />
                     <p className="text-slate-400 text-xs mt-1">
-                      Enter the specific numerical ID (e.g., 00001-00001) or
-                      leave blank to auto-generate
+                      Enter the specific numerical ID (e.g., 00001-00001) or leave blank to auto-generate
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Sport
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Sport</label>
                     <div className="grid grid-cols-2 gap-2">
                       {sports.map((sport) => (
                         <button
@@ -787,19 +705,15 @@ function AdminPageContent() {
                           }
                           className={`p-3 rounded-xl border-2 transition-all duration-200 ${
                             newStatType.sport === sport.name
-                              ? "border-[#00CED1] bg-[#00CED1]/10 shadow-lg"
-                              : "border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50"
+                              ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
+                              : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
                           }`}
                         >
                           <div className="flex items-center space-x-2">
                             <span className="text-xl">{sport.icon}</span>
                             <div className="text-left">
-                              <div className="text-white font-semibold text-sm">
-                                {sport.name}
-                              </div>
-                              <div className="text-slate-400 text-xs">
-                                Code: {sport.code}
-                              </div>
+                              <div className="text-white font-semibold text-sm">{sport.name}</div>
+                              <div className="text-slate-400 text-xs">Code: {sport.code}</div>
                             </div>
                           </div>
                         </button>
@@ -809,34 +723,21 @@ function AdminPageContent() {
 
                   {newStatType.sport && (
                     <div className="bg-slate-700/30 rounded-xl p-4">
-                      <h4 className="text-white font-semibold mb-2">
-                        Generated ID Preview
-                      </h4>
+                      <h4 className="text-white font-semibold mb-2">Generated ID Preview</h4>
                       <div className="flex items-center space-x-2">
                         <span className="text-slate-300">Sport Code:</span>
                         <span className="text-[#00CED1] font-mono">
-                          {
-                            sports.find((s) => s.name === newStatType.sport)
-                              ?.code
-                          }
+                          {sports.find((s) => s.name === newStatType.sport)?.code}
                         </span>
                         <span className="text-slate-300">-</span>
                         <span className="text-slate-300">Line Code:</span>
                         <span className="text-[#FFAB91] font-mono">
-                          {generateNextLineCode(
-                            sports.find((s) => s.name === newStatType.sport)
-                              ?.code || ""
-                          )}
+                          {generateNextLineCode(sports.find((s) => s.name === newStatType.sport)?.code || '')}
                         </span>
                       </div>
                       <div className="text-xs text-slate-400 mt-1">
-                        Full ID:{" "}
-                        {sports.find((s) => s.name === newStatType.sport)?.code}
-                        -
-                        {generateNextLineCode(
-                          sports.find((s) => s.name === newStatType.sport)
-                            ?.code || ""
-                        )}
+                        Full ID: {sports.find((s) => s.name === newStatType.sport)?.code}-
+                        {generateNextLineCode(sports.find((s) => s.name === newStatType.sport)?.code || '')}
                       </div>
                     </div>
                   )}
@@ -887,23 +788,17 @@ function AdminPageContent() {
                 {/* Sports Summary */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                   {sports.map((sport) => {
-                    const sportCount = statTypes.filter(
-                      (st) => st.sport === sport.name
-                    ).length;
+                    const sportCount = statTypes.filter((st) => st.sport === sport.name).length
                     return (
                       <div
                         key={sport.name}
                         className="bg-slate-800/30 rounded-lg p-3 text-center border border-slate-700/30"
                       >
                         <div className="text-xl mb-1">{sport.icon}</div>
-                        <div className="text-white font-semibold text-sm">
-                          {sport.name}
-                        </div>
-                        <div className="text-[#00CED1] text-xs">
-                          {sportCount} stats
-                        </div>
+                        <div className="text-white font-semibold text-sm">{sport.name}</div>
+                        <div className="text-[#00CED1] text-xs">{sportCount} stats</div>
                       </div>
-                    );
+                    )
                   })}
                 </div>
 
@@ -911,18 +806,11 @@ function AdminPageContent() {
                   {statTypes
                     .filter((stat) => {
                       const matchesSearch =
-                        stat.name
-                          .toLowerCase()
-                          .includes(searchTerm.toLowerCase()) ||
-                        stat.description
-                          .toLowerCase()
-                          .includes(searchTerm.toLowerCase()) ||
-                        stat.numId
-                          .toLowerCase()
-                          .includes(searchTerm.toLowerCase());
-                      const matchesSport =
-                        selectedSport === "all" || stat.sport === selectedSport;
-                      return matchesSearch && matchesSport;
+                        stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        stat.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        stat.numId.toLowerCase().includes(searchTerm.toLowerCase())
+                      const matchesSport = selectedSport === 'all' || stat.sport === selectedSport
+                      return matchesSearch && matchesSport
                     })
                     .map((stat) => (
                       <div
@@ -935,47 +823,26 @@ function AdminPageContent() {
                               <div
                                 className={`w-10 h-10 rounded-lg bg-gradient-to-br ${sports.find((s) => s.name === stat.sport)?.color} flex items-center justify-center`}
                               >
-                                <span className="text-lg">
-                                  {
-                                    sports.find((s) => s.name === stat.sport)
-                                      ?.icon
-                                  }
-                                </span>
+                                <span className="text-lg">{sports.find((s) => s.name === stat.sport)?.icon}</span>
                               </div>
                               <div className="flex-1">
-                                <h4 className="text-white font-semibold text-lg">
-                                  {stat.name}
-                                </h4>
+                                <h4 className="text-white font-semibold text-lg">{stat.name}</h4>
                                 <div className="flex items-center space-x-2">
-                                  <span className="text-[#00CED1] text-sm font-medium">
-                                    {stat.sport}
-                                  </span>
+                                  <span className="text-[#00CED1] text-sm font-medium">{stat.sport}</span>
                                   <span className="text-slate-400">•</span>
-                                  <span className="text-[#FFAB91] font-mono text-sm">
-                                    {stat.numId}
-                                  </span>
+                                  <span className="text-[#FFAB91] font-mono text-sm">{stat.numId}</span>
                                 </div>
                               </div>
                             </div>
-                            <p className="text-slate-300 text-sm leading-relaxed mb-3 pl-13">
-                              {stat.description}
-                            </p>
+                            <p className="text-slate-300 text-sm leading-relaxed mb-3 pl-13">{stat.description}</p>
                             <div className="flex items-center space-x-4 text-xs pl-13">
                               <div className="bg-slate-800/50 rounded-lg px-2 py-1">
-                                <span className="text-slate-400">
-                                  Sport Code:{" "}
-                                </span>
-                                <span className="text-[#00CED1] font-mono">
-                                  {stat.sportCode}
-                                </span>
+                                <span className="text-slate-400">Sport Code: </span>
+                                <span className="text-[#00CED1] font-mono">{stat.sportCode}</span>
                               </div>
                               <div className="bg-slate-800/50 rounded-lg px-2 py-1">
-                                <span className="text-slate-400">
-                                  Line Code:{" "}
-                                </span>
-                                <span className="text-[#FFAB91] font-mono">
-                                  {stat.lineCode}
-                                </span>
+                                <span className="text-slate-400">Line Code: </span>
+                                <span className="text-[#FFAB91] font-mono">{stat.lineCode}</span>
                               </div>
                             </div>
                           </div>
@@ -1016,34 +883,23 @@ function AdminPageContent() {
                     ))}
                   {statTypes.filter((stat) => {
                     const matchesSearch =
-                      stat.name
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                      stat.description
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                      stat.numId
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase());
-                    const matchesSport =
-                      selectedSport === "all" || stat.sport === selectedSport;
-                    return matchesSearch && matchesSport;
+                      stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      stat.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      stat.numId.toLowerCase().includes(searchTerm.toLowerCase())
+                    const matchesSport = selectedSport === 'all' || stat.sport === selectedSport
+                    return matchesSearch && matchesSport
                   }).length === 0 && (
                     <div className="text-center py-8">
                       <div className="text-slate-400 mb-2"></div>
-                      <p className="text-slate-400">
-                        No stat types found matching your criteria
-                      </p>
-                      <p className="text-slate-500 text-sm mt-1">
-                        Try adjusting your search or filter
-                      </p>
+                      <p className="text-slate-400">No stat types found matching your criteria</p>
+                      <p className="text-slate-500 text-sm mt-1">Try adjusting your search or filter</p>
                     </div>
                   )}
                 </div>
               </div>
             </div>
           )}
-          {activeTab === "players" && (
+          {activeTab === 'players' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Add New Player Form */}
               <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
@@ -1056,29 +912,21 @@ function AdminPageContent() {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Player Name
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Player Name</label>
                     <input
                       type="text"
                       value={newPlayer.name}
-                      onChange={(e) =>
-                        setNewPlayer({ ...newPlayer, name: e.target.value })
-                      }
+                      onChange={(e) => setNewPlayer({ ...newPlayer, name: e.target.value })}
                       placeholder="e.g., LeBron James"
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Sport
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Sport</label>
                     <SportsDropdown
                       value={newPlayer.sport}
-                      onChange={(value) =>
-                        setNewPlayer({ ...newPlayer, sport: value })
-                      }
+                      onChange={(value) => setNewPlayer({ ...newPlayer, sport: value })}
                       includeAll={false}
                       placeholder="Select Sport"
                     />
@@ -1086,24 +934,18 @@ function AdminPageContent() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-white font-semibold mb-2">
-                        Team
-                      </label>
+                      <label className="block text-white font-semibold mb-2">Team</label>
                       <input
                         type="text"
                         value={newPlayer.team}
-                        onChange={(e) =>
-                          setNewPlayer({ ...newPlayer, team: e.target.value })
-                        }
+                        onChange={(e) => setNewPlayer({ ...newPlayer, team: e.target.value })}
                         placeholder="e.g., LAL"
                         className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-white font-semibold mb-2">
-                        Jersey #
-                      </label>
+                      <label className="block text-white font-semibold mb-2">Jersey #</label>
                       <input
                         type="text"
                         value={newPlayer.jerseyNumber}
@@ -1120,15 +962,11 @@ function AdminPageContent() {
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Position
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Position</label>
                     <input
                       type="text"
                       value={newPlayer.position}
-                      onChange={(e) =>
-                        setNewPlayer({ ...newPlayer, position: e.target.value })
-                      }
+                      onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
                       placeholder="e.g., SF, QB, FW"
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
@@ -1160,30 +998,15 @@ function AdminPageContent() {
                     >
                       <div className="flex items-center space-x-4">
                         <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold">
-                            {player.avatar}
-                          </span>
+                          <span className="text-white font-bold">{player.avatar}</span>
                         </div>
                         <div className="flex-1">
-                          <h4 className="text-white font-semibold">
-                            {player.name}
-                          </h4>
+                          <h4 className="text-white font-semibold">{player.name}</h4>
                           <div className="flex items-center space-x-2 text-sm">
-                            <span className="text-lg">
-                              {
-                                sports.find((s) => s.name === player.sport)
-                                  ?.icon
-                              }
-                            </span>
-                            <span className="text-slate-300">
-                              {player.team}
-                            </span>
-                            <span className="text-slate-400">
-                              #{player.jerseyNumber}
-                            </span>
-                            <span className="text-slate-400">
-                              {player.position}
-                            </span>
+                            <span className="text-lg">{sports.find((s) => s.name === player.sport)?.icon}</span>
+                            <span className="text-slate-300">{player.team}</span>
+                            <span className="text-slate-400">#{player.jerseyNumber}</span>
+                            <span className="text-slate-400">{player.position}</span>
                           </div>
                         </div>
                       </div>
@@ -1193,7 +1016,7 @@ function AdminPageContent() {
               </div>
             </div>
           )}
-          {activeTab === "lines" && (
+          {activeTab === 'lines' && (
             <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
                 <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-3 flex items-center justify-center">
@@ -1205,22 +1028,17 @@ function AdminPageContent() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Select Player
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Select Player</label>
                     <Dropdown
                       value={newLine.playerId}
-                      onChange={(value) =>
-                        setNewLine({ ...newLine, playerId: value })
-                      }
+                      onChange={(value) => setNewLine({ ...newLine, playerId: value })}
                       placeholder="Select a player"
                       options={[
-                        { value: "", label: "Select a player", disabled: true },
+                        { value: '', label: 'Select a player', disabled: true },
                         ...players.map((player) => ({
                           value: player.id,
                           label: `${player.name} (${player.team})`,
-                          icon: sports.find((s) => s.name === player.sport)
-                            ?.icon,
+                          icon: sports.find((s) => s.name === player.sport)?.icon,
                         })),
                       ]}
                       searchable={true}
@@ -1228,35 +1046,26 @@ function AdminPageContent() {
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Select Stat Type
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Select Stat Type</label>
                     <Dropdown
                       value={newLine.statTypeId}
-                      onChange={(value) =>
-                        setNewLine({ ...newLine, statTypeId: value })
-                      }
+                      onChange={(value) => setNewLine({ ...newLine, statTypeId: value })}
                       placeholder="Select stat type"
                       options={[
                         {
-                          value: "",
-                          label: "Select stat type",
+                          value: '',
+                          label: 'Select stat type',
                           disabled: true,
                         },
                         ...statTypes
                           .filter((st) => {
-                            const selectedPlayer = players.find(
-                              (p) => p.id === newLine.playerId
-                            );
-                            return (
-                              !selectedPlayer ||
-                              st.sport === selectedPlayer.sport
-                            );
+                            const selectedPlayer = players.find((p) => p.id === newLine.playerId)
+                            return !selectedPlayer || st.sport === selectedPlayer.sport
                           })
                           .map((stat) => ({
                             value: stat.id,
                             label: `${stat.name} (${stat.numId})`,
-                            icon: "📊",
+                            icon: '📊',
                           })),
                       ]}
                       searchable={true}
@@ -1264,16 +1073,12 @@ function AdminPageContent() {
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Line Value
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Line Value</label>
                     <input
                       type="number"
                       step="0.5"
                       value={newLine.value}
-                      onChange={(e) =>
-                        setNewLine({ ...newLine, value: e.target.value })
-                      }
+                      onChange={(e) => setNewLine({ ...newLine, value: e.target.value })}
                       placeholder="e.g., 28.5"
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
@@ -1282,29 +1087,21 @@ function AdminPageContent() {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Game Date & Time
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Game Date & Time</label>
                     <input
                       type="datetime-local"
                       value={newLine.gameDate}
-                      onChange={(e) =>
-                        setNewLine({ ...newLine, gameDate: e.target.value })
-                      }
+                      onChange={(e) => setNewLine({ ...newLine, gameDate: e.target.value })}
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Game Description
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Game Description</label>
                     <input
                       type="text"
                       value={newLine.gameTime}
-                      onChange={(e) =>
-                        setNewLine({ ...newLine, gameTime: e.target.value })
-                      }
+                      onChange={(e) => setNewLine({ ...newLine, gameTime: e.target.value })}
                       placeholder="e.g., Lakers vs Warriors - 4th Quarter"
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
@@ -1312,30 +1109,22 @@ function AdminPageContent() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-white font-semibold mb-2">
-                        Over Odds
-                      </label>
+                      <label className="block text-white font-semibold mb-2">Over Odds</label>
                       <input
                         type="text"
                         value={newLine.overOdds}
-                        onChange={(e) =>
-                          setNewLine({ ...newLine, overOdds: e.target.value })
-                        }
+                        onChange={(e) => setNewLine({ ...newLine, overOdds: e.target.value })}
                         placeholder="e.g., +110"
                         className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-white font-semibold mb-2">
-                        Under Odds
-                      </label>
+                      <label className="block text-white font-semibold mb-2">Under Odds</label>
                       <input
                         type="text"
                         value={newLine.underOdds}
-                        onChange={(e) =>
-                          setNewLine({ ...newLine, underOdds: e.target.value })
-                        }
+                        onChange={(e) => setNewLine({ ...newLine, underOdds: e.target.value })}
                         placeholder="e.g., -130"
                         className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                       />
@@ -1352,7 +1141,7 @@ function AdminPageContent() {
               </div>
             </div>
           )}
-          {activeTab === "resolve-lines" && (
+          {activeTab === 'resolve-lines' && (
             <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
                 <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-3 flex items-center justify-center">
@@ -1394,118 +1183,86 @@ function AdminPageContent() {
                       {/* Line Header */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
-                          <span className="text-lg">
-                            {sports.find((s) => s.name === line.sport)?.icon}
-                          </span>
-                          <h4 className="text-white font-semibold text-lg">
-                            {line.playerName}
-                          </h4>
+                          <span className="text-lg">{sports.find((s) => s.name === line.sport)?.icon}</span>
+                          <h4 className="text-white font-semibold text-lg">{line.playerName}</h4>
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              line.status === "active"
-                                ? "bg-[#00CED1]/20 text-[#00CED1] border border-[#00CED1]/30"
-                                : line.status === "resolved"
-                                  ? "bg-[#FFAB91]/20 text-[#FFAB91] border border-[#FFAB91]/30"
-                                  : "bg-red-500/20 text-red-400 border border-red-400/30"
+                              line.status === 'active'
+                                ? 'bg-[#00CED1]/20 text-[#00CED1] border border-[#00CED1]/30'
+                                : line.status === 'resolved'
+                                  ? 'bg-[#FFAB91]/20 text-[#FFAB91] border border-[#FFAB91]/30'
+                                  : 'bg-red-500/20 text-red-400 border border-red-400/30'
                             }`}
                           >
                             {line.status}
                           </span>
                         </div>
                         <div className="text-right">
-                          <div className="text-sm text-slate-400">
-                            Line Value
-                          </div>
-                          <div className="text-xl font-bold text-[#FFAB91]">
-                            {line.value}
-                          </div>
+                          <div className="text-sm text-slate-400">Line Value</div>
+                          <div className="text-xl font-bold text-[#FFAB91]">{line.value}</div>
                         </div>
                       </div>
 
                       {/* Line Details */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-800/30 rounded-lg">
                         <div>
-                          <div className="text-sm text-slate-400">
-                            Stat Type
-                          </div>
-                          <div className="text-white font-semibold">
-                            {line.statName}
-                          </div>
+                          <div className="text-sm text-slate-400">Stat Type</div>
+                          <div className="text-white font-semibold">{line.statName}</div>
                         </div>
                         <div>
                           <div className="text-sm text-slate-400">Odds</div>
                           <div className="text-white">
-                            Over:{" "}
-                            <span className="text-[#00CED1]">
-                              {line.overOdds}
-                            </span>{" "}
-                            | Under:{" "}
-                            <span className="text-[#FFAB91]">
-                              {line.underOdds}
-                            </span>
+                            Over: <span className="text-[#00CED1]">{line.overOdds}</span> | Under:{' '}
+                            <span className="text-[#FFAB91]">{line.underOdds}</span>
                           </div>
                         </div>
                         <div>
                           <div className="text-sm text-slate-400">Game</div>
-                          <div className="text-white font-semibold">
-                            {line.gameTime}
-                          </div>
+                          <div className="text-white font-semibold">{line.gameTime}</div>
                         </div>
                       </div>
 
                       {/* Resolution Status or Input */}
-                      {line.status === "resolved" && (
+                      {line.status === 'resolved' && (
                         <div className="p-4 bg-gradient-to-r from-[#FFAB91]/10 to-[#00CED1]/10 border border-[#FFAB91]/30 rounded-lg">
                           <div className="flex items-center justify-between">
                             <div>
-                              <div className="text-sm text-slate-300">
-                                Resolved Value
-                              </div>
+                              <div className="text-sm text-slate-300">Resolved Value</div>
                               <div className="text-lg font-bold text-[#FFAB91]">
                                 {line.actualValue} (Line was {line.value})
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="text-sm text-slate-300">
-                                Result
-                              </div>
+                              <div className="text-sm text-slate-300">Result</div>
                               <div
                                 className={`font-bold ${
-                                  line.actualValue! > line.value
-                                    ? "text-[#00CED1]"
-                                    : "text-[#FFAB91]"
+                                  line.actualValue! > line.value ? 'text-[#00CED1]' : 'text-[#FFAB91]'
                                 }`}
                               >
                                 {line.actualValue! > line.value
-                                  ? "OVER"
+                                  ? 'OVER'
                                   : line.actualValue! < line.value
-                                    ? "UNDER"
-                                    : "PUSH"}
+                                    ? 'UNDER'
+                                    : 'PUSH'}
                               </div>
                             </div>
                           </div>
                           {line.resolutionReason && (
-                            <div className="mt-2 text-sm text-slate-400">
-                              {line.resolutionReason}
-                            </div>
+                            <div className="mt-2 text-sm text-slate-400">{line.resolutionReason}</div>
                           )}
                         </div>
                       )}
 
-                      {line.status === "cancelled" && (
+                      {line.status === 'cancelled' && (
                         <div className="p-4 bg-red-500/10 border border-red-400/30 rounded-lg">
-                          <div className="text-red-400 font-semibold">
-                            Line Cancelled
-                          </div>
+                          <div className="text-red-400 font-semibold">Line Cancelled</div>
                           {line.resolutionReason && (
-                            <div className="mt-1 text-sm text-slate-400">
-                              {line.resolutionReason}
-                            </div>
+                            <div className="mt-1 text-sm text-slate-400">{line.resolutionReason}</div>
                           )}
                         </div>
                       )}
 
-                      {line.status === "active" && (
+                      {line.status === 'active' && (
                         <div className="border-t border-slate-600/30 pt-4">
                           {resolvingLine === line.id ? (
                             <div className="space-y-4">
@@ -1527,9 +1284,7 @@ function AdminPageContent() {
                                     placeholder={`e.g., ${line.value}`}
                                     className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                                   />
-                                  <div className="mt-1 text-sm text-slate-400">
-                                    Line value: {line.value}
-                                  </div>
+                                  <div className="mt-1 text-sm text-slate-400">Line value: {line.value}</div>
                                 </div>
                                 <div>
                                   <label className="block text-white font-semibold mb-2">
@@ -1553,29 +1308,22 @@ function AdminPageContent() {
                               <div className="flex flex-wrap gap-3">
                                 <button
                                   onClick={() => {
-                                    const actualValue = parseFloat(
-                                      resolutionData.actualValue
-                                    );
+                                    const actualValue = parseFloat(resolutionData.actualValue)
                                     if (isNaN(actualValue)) {
-                                      addToast(
-                                        "Please enter a valid actual value",
-                                        "error"
-                                      );
-                                      return;
+                                      addToast('Please enter a valid actual value', 'error')
+                                      return
                                     }
                                     handleResolveLine(
                                       line.id,
                                       actualValue,
-                                      actualValue > line.value
-                                        ? "over"
-                                        : "under",
-                                      resolutionData.resolutionReason
-                                    );
-                                    setResolvingLine(null);
+                                      actualValue > line.value ? 'over' : 'under',
+                                      resolutionData.resolutionReason,
+                                    )
+                                    setResolvingLine(null)
                                     setResolutionData({
-                                      actualValue: "",
-                                      resolutionReason: "",
-                                    });
+                                      actualValue: '',
+                                      resolutionReason: '',
+                                    })
                                   }}
                                   disabled={!resolutionData.actualValue}
                                   className="px-6 py-3 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-semibold rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1587,15 +1335,14 @@ function AdminPageContent() {
                                     handleResolveLine(
                                       line.id,
                                       0,
-                                      "cancel",
-                                      resolutionData.resolutionReason ||
-                                        "Cancelled by admin"
-                                    );
-                                    setResolvingLine(null);
+                                      'cancel',
+                                      resolutionData.resolutionReason || 'Cancelled by admin',
+                                    )
+                                    setResolvingLine(null)
                                     setResolutionData({
-                                      actualValue: "",
-                                      resolutionReason: "",
-                                    });
+                                      actualValue: '',
+                                      resolutionReason: '',
+                                    })
                                   }}
                                   className="px-4 py-3 bg-slate-600 hover:bg-slate-500 text-white font-semibold rounded-xl transition-colors"
                                 >
@@ -1603,11 +1350,11 @@ function AdminPageContent() {
                                 </button>
                                 <button
                                   onClick={() => {
-                                    setResolvingLine(null);
+                                    setResolvingLine(null)
                                     setResolutionData({
-                                      actualValue: "",
-                                      resolutionReason: "",
-                                    });
+                                      actualValue: '',
+                                      resolutionReason: '',
+                                    })
                                   }}
                                   className="px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-xl transition-colors"
                                 >
@@ -1625,12 +1372,7 @@ function AdminPageContent() {
                               </button>
                               <button
                                 onClick={() => {
-                                  handleResolveLine(
-                                    line.id,
-                                    0,
-                                    "cancel",
-                                    "Quick cancelled by admin"
-                                  );
+                                  handleResolveLine(line.id, 0, 'cancel', 'Quick cancelled by admin')
                                 }}
                                 className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-white font-semibold rounded-xl transition-colors"
                               >
@@ -1646,7 +1388,7 @@ function AdminPageContent() {
               </div>
             </div>
           )}
-          {activeTab === "resolve-games" && (
+          {activeTab === 'resolve-games' && (
             <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
                 <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-3 flex items-center justify-center">
@@ -1680,26 +1422,19 @@ function AdminPageContent() {
               {/* Games List */}
               <div className="space-y-4">
                 {filteredGames.map((game) => (
-                  <div
-                    key={game.id}
-                    className="bg-slate-700/30 rounded-xl p-4 hover:bg-slate-700/50 transition-colors"
-                  >
+                  <div key={game.id} className="bg-slate-700/30 rounded-xl p-4 hover:bg-slate-700/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
-                          <span className="text-lg">
-                            {sports.find((s) => s.name === game.sport)?.icon}
-                          </span>
-                          <h4 className="text-white font-semibold">
-                            {game.title}
-                          </h4>
+                          <span className="text-lg">{sports.find((s) => s.name === game.sport)?.icon}</span>
+                          <h4 className="text-white font-semibold">{game.title}</h4>
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                              game.status === "active"
-                                ? "bg-[#00CED1]/20 text-[#00CED1]"
-                                : game.status === "waiting"
-                                  ? "bg-yellow-500/20 text-[#FFAB91]"
-                                  : "bg-[#FFAB91]/20 text-[#FFAB91]"
+                              game.status === 'active'
+                                ? 'bg-[#00CED1]/20 text-[#00CED1]'
+                                : game.status === 'waiting'
+                                  ? 'bg-yellow-500/20 text-[#FFAB91]'
+                                  : 'bg-[#FFAB91]/20 text-[#FFAB91]'
                             }`}
                           >
                             {game.status}
@@ -1714,25 +1449,21 @@ function AdminPageContent() {
                         </div>
                         <div className="flex items-center space-x-2 text-sm">
                           <span className="text-slate-300">Host:</span>
-                          <span className="text-[#FFAB91]">
-                            {game.host.name}
-                          </span>
-                          <span className="text-slate-400">
-                            • {game.timeLeft} remaining
-                          </span>
+                          <span className="text-[#FFAB91]">{game.host.name}</span>
+                          <span className="text-slate-400">• {game.timeLeft} remaining</span>
                         </div>
                       </div>
 
-                      {game.status === "active" && (
+                      {game.status === 'active' && (
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => handleResolveGame(game.id, "end")}
+                            onClick={() => handleResolveGame(game.id, 'end')}
                             className="px-4 py-2 bg-[#00CED1] hover:bg-[#00CED1]/90 text-white font-semibold rounded-lg transition-colors"
                           >
                             End Game
                           </button>
                           <button
-                            onClick={() => handleResolveGame(game.id, "cancel")}
+                            onClick={() => handleResolveGame(game.id, 'cancel')}
                             className="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white font-semibold rounded-lg transition-colors"
                           >
                             Cancel
@@ -1748,5 +1479,5 @@ function AdminPageContent() {
         </div>
       </div>
     </div>
-  );
+  )
 }
