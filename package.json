@@ -25,7 +25,7 @@
   "dependencies": {
     "@getpara/core-sdk": "alpha",
     "@getpara/react-sdk": "alpha",
-    "@getpara/solana-wallet-connectors": "2.0.0-alpha.20",
+    "@getpara/solana-wallet-connectors": "alpha",
     "@headlessui/react": "^2.2.0",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.15",

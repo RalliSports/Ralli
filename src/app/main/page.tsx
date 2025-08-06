@@ -13,7 +13,7 @@ import { useAccount } from "@getpara/react-sdk";
 
 export default function MainFeedPage() {
   const router = useRouter();
-  const { data: account } = useAccount();
+  const account = useAccount();
   const [selectedSport, setSelectedSport] = useState("all");
   const [bookmarkedAthletes, setBookmarkedAthletes] = useState<string[]>([]);
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([]);

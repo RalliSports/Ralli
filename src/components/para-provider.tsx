@@ -2,7 +2,7 @@
 
 import React from "react"; // Explicitly import React for ReactNode type
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthLayout, ExternalWallet, ParaProvider, Environment } from "@getpara/react-sdk";
+import { ParaProvider } from "@getpara/react-sdk";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import "@getpara/react-sdk/styles.css";
 import { ENVIRONMENT, API_KEY } from "@/constants";

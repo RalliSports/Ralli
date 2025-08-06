@@ -12,7 +12,7 @@ function ellipsify(address?: string, start = 4, end = 4) {
 
 export function ParaButton() {
   const { openModal } = useModal()
-  const { data: account } = useAccount()
+  const account = useAccount()
   const { data: wallet } = useWallet()
   const para = useClient()
 
@@ -33,7 +33,7 @@ export function ParaButton() {
   return (
     <div className="relative group">
       <button
-        onClick={openModal}
+        onClick={() => openModal()}
         className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all duration-300 ${
           isConnected
             ? 'bg-gradient-to-r from-teal-500/20 to-teal-400/20 hover:from-teal-500/30 hover:to-teal-400/30 border border-teal-400/40 backdrop-blur-sm hover:scale-105 hover:shadow-md hover:shadow-teal-500/25'

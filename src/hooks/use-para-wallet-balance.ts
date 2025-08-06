@@ -23,7 +23,7 @@ function useSolPrice() {
 }
 
 export function useParaWalletBalance() {
-  const { data: account } = useAccount()
+  const account = useAccount()
   const { data: wallet } = useWallet()
   const para = useClient()
   const { connection } = useConnection()

@@ -9,7 +9,7 @@ export default function SignIn() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { openModal } = useModal();
-  const { data: account } = useAccount();
+  const account = useAccount();
   const [hasShownInitialModal, setHasShownInitialModal] = useState(false);
   const modalOpenedRef = useRef(false);
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
