@@ -20,11 +20,11 @@ interface Stat {
 interface Player {
   id: string
   name: string
-  sport: string
   team: string
-  jerseyNumber: string
+  jerseyNumber: number
   position: string
-  avatar: string
+  age: number
+  picture?: string
 }
 
 interface Line {
@@ -121,36 +121,38 @@ function AdminPageContent() {
     },
   ]
 
-  // Mock data for players
-  const [players, setPlayers] = useState<Player[]>([
-    {
-      id: '1',
-      name: 'LeBron James',
-      sport: 'NBA',
-      team: 'LAL',
-      jerseyNumber: '23',
-      position: 'SF',
-      avatar: 'LJ',
-    },
-    {
-      id: '2',
-      name: 'Josh Allen',
-      sport: 'NFL',
-      team: 'BUF',
-      jerseyNumber: '17',
-      position: 'QB',
-      avatar: 'JA',
-    },
-    {
-      id: '3',
-      name: 'Lionel Messi',
-      sport: 'Soccer',
-      team: 'MIA',
-      jerseyNumber: '10',
-      position: 'FW',
-      avatar: 'LM',
-    },
-  ])
+  // Players data from API
+  const [players, setPlayers] = useState<Player[]>([])
+
+  // Fetch players from API
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        const response = await fetch('/api/fetch-athletes', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-para-session': session || '',
+          },
+        })
+
+        if (response.ok) {
+          const fetchedPlayers = await response.json()
+          setPlayers(fetchedPlayers)
+        } else {
+          console.error('Failed to fetch players:', response.statusText)
+          addToast('Failed to fetch players', 'error')
+        }
+      } catch (error) {
+        console.error('Error fetching players:', error)
+        addToast('Error fetching players', 'error')
+      }
+    }
+
+    if (session) {
+      fetchPlayers()
+    }
+  }, [session, addToast])
 
   // Mock data for lines
   const [lines, setLines] = useState<Line[]>([])
@@ -228,10 +230,11 @@ function AdminPageContent() {
 
   const [newPlayer, setNewPlayer] = useState({
     name: '',
-    sport: '',
     team: '',
-    jerseyNumber: '',
     position: '',
+    jerseyNumber: 0,
+    age: 0,
+    picture: '',
   })
 
   const [newLine, setNewLine] = useState({
@@ -284,35 +287,56 @@ function AdminPageContent() {
     addToast('Stat type created successfully!', 'success')
   }
 
-  const handleCreatePlayer = () => {
-    if (!newPlayer.name || !newPlayer.sport || !newPlayer.team || !newPlayer.jerseyNumber || !newPlayer.position) {
-      addToast('Please fill in all fields', 'error')
+  const handleCreatePlayer = async () => {
+    if (!newPlayer.name || !newPlayer.team || !newPlayer.jerseyNumber || !newPlayer.position || !newPlayer.age) {
+      addToast('Please fill in all required fields', 'error')
       return
     }
 
-    const player: Player = {
-      id: String(players.length + 1),
-      name: newPlayer.name,
-      sport: newPlayer.sport,
-      team: newPlayer.team,
-      jerseyNumber: newPlayer.jerseyNumber,
-      position: newPlayer.position,
-      avatar: newPlayer.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase(),
-    }
+    try {
+      const apiData = {
+        name: newPlayer.name,
+        team: newPlayer.team,
+        position: newPlayer.position,
+        jerseyNumber: newPlayer.jerseyNumber,
+        age: newPlayer.age,
+        picture: newPlayer.picture || undefined, // optional field
+      }
 
-    setPlayers([...players, player])
-    setNewPlayer({
-      name: '',
-      sport: '',
-      team: '',
-      jerseyNumber: '',
-      position: '',
-    })
-    addToast('Player added successfully!', 'success')
+      const response = await fetch('/api/create-athlete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-para-session': session || '',
+        },
+        body: JSON.stringify(apiData),
+      })
+
+      if (response.ok) {
+        const newPlayerData = await response.json()
+
+        // Add the new player to the local state
+        setPlayers([...players, newPlayerData])
+
+        // Reset the form
+        setNewPlayer({
+          name: '',
+          team: '',
+          position: '',
+          jerseyNumber: 0,
+          age: 0,
+          picture: '',
+        })
+
+        addToast('Player added successfully!', 'success')
+      } else {
+        const errorData = await response.json()
+        addToast(errorData.error || 'Failed to create player', 'error')
+      }
+    } catch (error) {
+      console.error('Error creating player:', error)
+      addToast('Error creating player', 'error')
+    }
   }
 
   const handleCreateLine = async () => {
@@ -471,7 +495,7 @@ function AdminPageContent() {
     const result = await response.json()
     console.log(result, 'result')
 
-    addToast(`Line resolved as ${result.toUpperCase()} successfully!`, 'success')
+    addToast(`Line resolved successfully! (${actualValue})`, 'success')
   }
 
   const handleResolveGame = (gameId: string, action: 'end' | 'cancel') => {
@@ -776,16 +800,6 @@ function AdminPageContent() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-white font-semibold mb-2">Sport</label>
-                    <SportsDropdown
-                      value={newPlayer.sport}
-                      onChange={(value) => setNewPlayer({ ...newPlayer, sport: value })}
-                      includeAll={false}
-                      placeholder="Select Sport"
-                    />
-                  </div>
-
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-white font-semibold mb-2">Team</label>
@@ -801,12 +815,12 @@ function AdminPageContent() {
                     <div>
                       <label className="block text-white font-semibold mb-2">Jersey #</label>
                       <input
-                        type="text"
+                        type="number"
                         value={newPlayer.jerseyNumber}
                         onChange={(e) =>
                           setNewPlayer({
                             ...newPlayer,
-                            jerseyNumber: e.target.value,
+                            jerseyNumber: parseInt(e.target.value),
                           })
                         }
                         placeholder="e.g., 23"
@@ -815,13 +829,37 @@ function AdminPageContent() {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-white font-semibold mb-2">Position</label>
+                      <input
+                        type="text"
+                        value={newPlayer.position}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
+                        placeholder="e.g., SF, QB, FW"
+                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-white font-semibold mb-2">Age</label>
+                      <input
+                        type="number"
+                        value={newPlayer.age}
+                        onChange={(e) => setNewPlayer({ ...newPlayer, age: parseInt(e.target.value) })}
+                        placeholder="e.g., 25"
+                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="block text-white font-semibold mb-2">Position</label>
+                    <label className="block text-white font-semibold mb-2">Picture URL (Optional)</label>
                     <input
-                      type="text"
-                      value={newPlayer.position}
-                      onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
-                      placeholder="e.g., SF, QB, FW"
+                      type="url"
+                      value={newPlayer.picture}
+                      onChange={(e) => setNewPlayer({ ...newPlayer, picture: e.target.value })}
+                      placeholder="e.g., https://example.com/player-image.jpg"
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
                   </div>
@@ -845,27 +883,61 @@ function AdminPageContent() {
                 </h2>
 
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {players.map((player) => (
-                    <div
-                      key={player.id}
-                      className="bg-slate-700/30 rounded-xl p-4 hover:bg-slate-700/50 transition-colors"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold">{player.avatar}</span>
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-white font-semibold">{player.name}</h4>
-                          <div className="flex items-center space-x-2 text-sm">
-                            <span className="text-lg">{sports.find((s) => s.name === player.sport)?.icon}</span>
-                            <span className="text-slate-300">{player.team}</span>
-                            <span className="text-slate-400">#{player.jerseyNumber}</span>
-                            <span className="text-slate-400">{player.position}</span>
+                  {players.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-slate-400 mb-2">No players found</div>
+                      <div className="text-sm text-slate-500">Add players using the form on the left</div>
+                    </div>
+                  ) : (
+                    players.map((player) => (
+                      <div
+                        key={player.id}
+                        className="bg-slate-700/30 rounded-xl p-4 hover:bg-slate-700/50 transition-colors"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center overflow-hidden">
+                            {player.picture ? (
+                              <img
+                                src={player.picture}
+                                alt={player.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  // Fallback to initials if image fails to load
+                                  const target = e.target as HTMLImageElement
+                                  target.style.display = 'none'
+                                  const parent = target.parentElement
+                                  if (parent) {
+                                    parent.innerHTML = `<span class="text-white font-bold">${player.name
+                                      .split(' ')
+                                      .map((n) => n[0])
+                                      .join('')
+                                      .toUpperCase()}</span>`
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <span className="text-white font-bold">
+                                {player.name
+                                  .split(' ')
+                                  .map((n) => n[0])
+                                  .join('')
+                                  .toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-white font-semibold">{player.name}</h4>
+                            <div className="flex items-center space-x-2 text-sm">
+                              <span className="text-slate-300">{player.team}</span>
+                              <span className="text-slate-400">#{player.jerseyNumber}</span>
+                              <span className="text-slate-400">{player.position}</span>
+                              <span className="text-slate-400">Age: {player.age}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -892,7 +964,7 @@ function AdminPageContent() {
                         ...players.map((player) => ({
                           value: player.id,
                           label: `${player.name} (${player.team})`,
-                          icon: sports.find((s) => s.name === player.sport)?.icon,
+                          icon: '👤',
                         })),
                       ]}
                       searchable={true}
@@ -929,7 +1001,7 @@ function AdminPageContent() {
                       value={newLine.value}
                       onChange={(e) => setNewLine({ ...newLine, value: e.target.value })}
                       placeholder="e.g., 28.5"
-                      className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                      className="w-full px-4 py-3 bg-slate-800/50 border border-slate-70  0/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
                   </div>
                 </div>
