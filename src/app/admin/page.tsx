@@ -453,73 +453,89 @@ function AdminPageContent() {
     addToast('Line created successfully!', 'success')
   }
 
-  const handleResolveLine = (
+  const handleResolveLine = async (
     lineId: string,
     actualValue: number,
-    result: 'over' | 'under' | 'cancel',
-    resolutionReason?: string,
+    // result: 'over' | 'under' | 'cancel',
+    // resolutionReason?: string,
   ) => {
-    if (result === 'cancel') {
-      setLines(
-        lines.map((line) =>
-          line.id === lineId
-            ? {
-                ...line,
-                status: 'cancelled',
-                resolutionReason: resolutionReason || 'Cancelled by admin',
-              }
-            : line,
-        ),
-      )
-      addToast('Line cancelled successfully!', 'success')
-      return
+    // if (result === 'cancel') {
+    //   setLines(
+    //     lines.map((line) =>
+    //       line.id === lineId
+    //         ? {
+    //             ...line,
+    //             status: 'cancelled',
+    //             resolutionReason: resolutionReason || 'Cancelled by admin',
+    //           }
+    //         : line,
+    //     ),
+    //   )
+    //   addToast('Line cancelled successfully!', 'success')
+    //   return
+    // }
+
+    // const line = lines.find((l) => l.id === lineId)
+    // if (!line) return
+
+    // // Validation logic
+    // const shouldBeOver = actualValue > line.value
+    // const shouldBeUnder = actualValue < line.value
+    // const isPush = actualValue === line.value
+
+    // if (isPush) {
+    //   addToast(
+    //     `Actual value ${actualValue} equals line value ${line.value}. This should be a push, not resolved as ${result.toUpperCase()}`,
+    //     'error',
+    //   )
+    //   return
+    // }
+
+    // if (result === 'over' && !shouldBeOver) {
+    //   addToast(
+    //     `Error: Actual value ${actualValue} is under the line value ${line.value}. Cannot resolve as OVER.`,
+    //     'error',
+    //   )
+    //   return
+    // }
+
+    // if (result === 'under' && !shouldBeUnder) {
+    //   addToast(
+    //     `Error: Actual value ${actualValue} is over the line value ${line.value}. Cannot resolve as UNDER.`,
+    //     'error',
+    //   )
+    //   return
+    // }
+
+    // setLines(
+    //   lines.map((l) =>
+    //     l.id === lineId
+    //       ? {
+    //           ...l,
+    //           status: 'resolved',
+    //           actualValue,
+    //           resolutionReason:
+    //             resolutionReason || `Resolved as ${result.toUpperCase()}: actual ${actualValue} vs line ${line.value}`,
+    //         }
+    //       : l,
+    //   ),
+    // )
+
+    const apiData = {
+      lineId: 'a2fcf50b-c67c-481e-8658-e4fb2ad9cd95',
+      actualValue: 12,
     }
+    const response = await fetch('/api/resolve-line', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-para-session': session || '',
+      },
+      body: JSON.stringify(apiData),
+    })
 
-    const line = lines.find((l) => l.id === lineId)
-    if (!line) return
-
-    // Validation logic
-    const shouldBeOver = actualValue > line.value
-    const shouldBeUnder = actualValue < line.value
-    const isPush = actualValue === line.value
-
-    if (isPush) {
-      addToast(
-        `Actual value ${actualValue} equals line value ${line.value}. This should be a push, not resolved as ${result.toUpperCase()}`,
-        'error',
-      )
-      return
-    }
-
-    if (result === 'over' && !shouldBeOver) {
-      addToast(
-        `Error: Actual value ${actualValue} is under the line value ${line.value}. Cannot resolve as OVER.`,
-        'error',
-      )
-      return
-    }
-
-    if (result === 'under' && !shouldBeUnder) {
-      addToast(
-        `Error: Actual value ${actualValue} is over the line value ${line.value}. Cannot resolve as UNDER.`,
-        'error',
-      )
-      return
-    }
-
-    setLines(
-      lines.map((l) =>
-        l.id === lineId
-          ? {
-              ...l,
-              status: 'resolved',
-              actualValue,
-              resolutionReason:
-                resolutionReason || `Resolved as ${result.toUpperCase()}: actual ${actualValue} vs line ${line.value}`,
-            }
-          : l,
-      ),
-    )
+    const result = await response.json()
+    console.log(result, 'result')
 
     addToast(`Line resolved as ${result.toUpperCase()} successfully! (${actualValue} vs ${line.value})`, 'success')
   }
