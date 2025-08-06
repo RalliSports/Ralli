@@ -19,7 +19,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "next lint",
-    "postinstall": "pnpm setup-para",
     "start": "next start"
   },
   "dependencies": {
