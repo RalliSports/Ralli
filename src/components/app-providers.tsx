@@ -10,14 +10,14 @@ import React from 'react'
 
 export function AppProviders({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <ReactQueryProvider>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <Providers>
-        <ClusterProvider>
-            <SolanaProvider>{children}</SolanaProvider>
-        </ClusterProvider>
-        </Providers>
-      </ThemeProvider>
-    </ReactQueryProvider>
+    <ClusterProvider>
+      <SolanaProvider>
+        <ReactQueryProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <Providers>{children}</Providers>
+          </ThemeProvider>
+        </ReactQueryProvider>
+      </SolanaProvider>
+    </ClusterProvider>
   )
 }
