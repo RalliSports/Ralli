@@ -23,10 +23,6 @@ export default function CreateGame() {
     }
   }, [isConnected, router]);
 
-  if (!isConnected) {
-    return null; // Prevent rendering until redirection is handled
-  }
-
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})
   const [gameSettings, setGameSettings] = useState({
     title: '',
@@ -34,6 +30,8 @@ export default function CreateGame() {
     maxParticipants: 8,
     matchupGroup: '',
     isPrivate: false,
+    //TODO: Update depositToken when live
+    depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
     type: 'limited',
     userControlType: 'none',
     gameMode: '550e8400-e29b-41d4-a716-446655440020',
@@ -84,7 +82,8 @@ export default function CreateGame() {
     maxParticipants: gameSettings.maxParticipants,
     maxBets: gameSettings.maxBets,
     matchupGroup: gameSettings.matchupGroup,
-    depositToken: 'USDC',
+    //TODO: Update depositToken when live
+    depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
     isPrivate: gameSettings.isPrivate,
     type: gameSettings.type,
     userControlType: gameSettings.userControlType,
@@ -104,13 +103,27 @@ export default function CreateGame() {
     const result = await response.json()
 
     if (response.ok) {
-      toast.success('Contest created successfully!')
+      toast.success(
+        <div>
+          Contest created successfully! Transaction ID: 
+          <a 
+            href={`https://explorer.solana.com/tx/${result.txnId}?cluster=devnet`} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            style={{ color: '#00CED1', textDecoration: 'underline', marginLeft: '5px' }}
+          >
+            View Transaction
+          </a>
+        </div>
+      );
       setGameSettings({
         title: '',
         depositAmount: 25,
         maxParticipants: 8,
         matchupGroup: '',
         isPrivate: false,
+        //TODO: Update depositToken when live
+        depositToken: '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU',
         type: 'limited',
         userControlType: 'none',
         gameMode: '550e8400-e29b-41d4-a716-446655440020',
