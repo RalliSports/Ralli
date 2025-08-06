@@ -3,18 +3,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ToastProvider, useToast } from '../../components/ui/toast'
-import { Dropdown, SportsDropdown, DropdownOption } from '../../components/ui/dropdown'
+import { Dropdown, SportsDropdown } from '../../components/ui/dropdown'
 import { useSessionToken } from '@/hooks/use-session'
 
 // Types for the admin panel
 interface StatType {
-  id: string
   name: string
   description: string
-  numId: string // Format: XXXXX-XXXXX (sport-line)
-  sport: string
-  sportCode: string
-  lineCode: string
+  customId: number
 }
 
 interface Player {
@@ -76,69 +72,29 @@ function AdminPageContent() {
   const sports = [
     {
       name: 'NBA',
-      code: '00001',
+      code: '03XXX',
       icon: '🏀',
       color: 'from-[#00CED1] to-[#FFAB91]',
     },
     {
       name: 'NFL',
-      code: '00002',
+      code: '01XXX',
       icon: '🏈',
       color: 'from-[#FFAB91] to-[#00CED1]',
     },
     {
       name: 'Soccer',
-      code: '00003',
+      code: '04XXX',
       icon: '⚽',
       color: 'from-[#00CED1] to-[#FFAB91]',
     },
     {
       name: 'Baseball',
-      code: '00004',
+      code: '02XXX',
       icon: '⚾',
       color: 'from-[#FFAB91] to-[#00CED1]',
     },
   ]
-
-  // Mock data for stat types
-  const [statTypes, setStatTypes] = useState<StatType[]>([
-    {
-      id: '1',
-      name: 'Points',
-      description: 'Total points scored in the game',
-      numId: '00001-00001',
-      sport: 'NBA',
-      sportCode: '00001',
-      lineCode: '00001',
-    },
-    {
-      id: '2',
-      name: '3-Pointers Made',
-      description: 'Total three-point shots made',
-      numId: '00001-00002',
-      sport: 'NBA',
-      sportCode: '00001',
-      lineCode: '00002',
-    },
-    {
-      id: '3',
-      name: 'Passing Yards',
-      description: 'Total passing yards in the game',
-      numId: '00002-00001',
-      sport: 'NFL',
-      sportCode: '00002',
-      lineCode: '00001',
-    },
-    {
-      id: '4',
-      name: 'Goals Scored',
-      description: 'Total goals scored in the match',
-      numId: '00003-00001',
-      sport: 'Soccer',
-      sportCode: '00003',
-      lineCode: '00001',
-    },
-  ])
 
   // Mock data for players
   const [players, setPlayers] = useState<Player[]>([
@@ -232,13 +188,10 @@ function AdminPageContent() {
   ])
 
   // Form states
-  const [newStatType, setNewStatType] = useState({
+  const [newStat, setNewStat] = useState({
     name: '',
     description: '',
-    sport: '',
-    sportCode: '',
-    lineCode: '',
-    numId: '',
+    customId: 0,
   })
 
   const [newPlayer, setNewPlayer] = useState({
@@ -269,26 +222,6 @@ function AdminPageContent() {
     resolutionReason: '',
   })
 
-  // Wallet connection state
-  const [walletConnected, setWalletConnected] = useState(false)
-  const [walletAddress, setWalletAddress] = useState('')
-
-  // Wallet connection handler
-  const handleConnectWallet = () => {
-    if (walletConnected) {
-      // Disconnect wallet
-      setWalletConnected(false)
-      setWalletAddress('')
-      addToast('Wallet disconnected', 'success')
-    } else {
-      // Simulate wallet connection (in real app, this would call actual wallet)
-      const mockAddress = 'idk bro tbh i made this shit up'
-      setWalletConnected(true)
-      setWalletAddress(mockAddress)
-      addToast('Wallet connected successfully!', 'success')
-    }
-  }
-
   // Helper functions
   const generateNextLineCode = (sportCode: string): string => {
     const existingLines = statTypes.filter((st) => st.sportCode === sportCode)
@@ -299,54 +232,39 @@ function AdminPageContent() {
     return String(maxLineCode + 1).padStart(5, '0')
   }
 
-  const handleCreateStatType = () => {
-    if (!newStatType.name || !newStatType.description || !newStatType.sport) {
+  const handleCreateStat = async () => {
+    if (!newStat.name || !newStat.description || !newStat.customId) {
       addToast('Please fill in all fields', 'error')
       return
     }
 
-    const sport = sports.find((s) => s.name === newStatType.sport)
-    if (!sport) return
-
-    let numId = newStatType.numId
-    let sportCode = sport.code
-    let lineCode = ''
-
-    // If manual numerical code is provided, validate and parse it
-    if (newStatType.numId.trim()) {
-      const parts = newStatType.numId.split('-')
-      if (parts.length !== 2) {
-        addToast('Numerical code must be in format: 00001-00001', 'error')
-        return
-      }
-      sportCode = parts[0]
-      lineCode = parts[1]
-      numId = newStatType.numId
-    } else {
-      // Auto-generate if not provided
-      lineCode = generateNextLineCode(sport.code)
-      numId = `${sport.code}-${lineCode}`
-    }
-
     const statType: StatType = {
-      id: String(statTypes.length + 1),
-      name: newStatType.name,
-      description: newStatType.description,
-      numId: numId,
-      sport: newStatType.sport,
-      sportCode: sportCode,
-      lineCode: lineCode,
+      name: newStat.name,
+      description: newStat.description,
+      customId: newStat.customId,
     }
 
-    setStatTypes([...statTypes, statType])
-    setNewStatType({
+    setNewStat({
       name: '',
       description: '',
-      sport: '',
-      sportCode: '',
-      lineCode: '',
-      numId: '',
+      customId: 0,
     })
+
+    const apiData = {
+      name: newStat.name,
+      description: newStat.description,
+      customId: newStat.customId,
+    }
+    const response = await fetch('/api/create-stat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-para-session': session || '',
+      },
+      body: JSON.stringify(apiData),
+    })
+    const result = await response.json()
+    console.log(result, 'result')
     addToast('Stat type created successfully!', 'success')
   }
 
@@ -665,8 +583,8 @@ function AdminPageContent() {
                     <label className="block text-white font-semibold mb-2">Stat Name</label>
                     <input
                       type="text"
-                      value={newStatType.name}
-                      onChange={(e) => setNewStatType({ ...newStatType, name: e.target.value })}
+                      value={newStat.name}
+                      onChange={(e) => setNewStat({ ...newStat, name: e.target.value })}
                       placeholder="e.g., Points, Assists, Goals"
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
@@ -675,10 +593,10 @@ function AdminPageContent() {
                   <div>
                     <label className="block text-white font-semibold mb-2">Description</label>
                     <textarea
-                      value={newStatType.description}
+                      value={newStat.description}
                       onChange={(e) =>
-                        setNewStatType({
-                          ...newStatType,
+                        setNewStat({
+                          ...newStat,
                           description: e.target.value,
                         })
                       }
@@ -689,14 +607,14 @@ function AdminPageContent() {
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">Numerical Code (Optional)</label>
+                    <label className="block text-white font-semibold mb-2">Custom ID</label>
                     <input
                       type="text"
-                      value={newStatType.numId}
+                      value={newStat.customId}
                       onChange={(e) =>
-                        setNewStatType({
-                          ...newStatType,
-                          numId: e.target.value,
+                        setNewStat({
+                          ...newStat,
+                          customId: parseInt(e.target.value),
                         })
                       }
                       placeholder="e.g., 00001-00001"
@@ -707,59 +625,8 @@ function AdminPageContent() {
                     </p>
                   </div>
 
-                  <div>
-                    <label className="block text-white font-semibold mb-2">Sport</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {sports.map((sport) => (
-                        <button
-                          key={sport.name}
-                          onClick={() =>
-                            setNewStatType({
-                              ...newStatType,
-                              sport: sport.name,
-                            })
-                          }
-                          className={`p-3 rounded-xl border-2 transition-all duration-200 ${
-                            newStatType.sport === sport.name
-                              ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
-                              : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
-                          }`}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <span className="text-xl">{sport.icon}</span>
-                            <div className="text-left">
-                              <div className="text-white font-semibold text-sm">{sport.name}</div>
-                              <div className="text-slate-400 text-xs">Code: {sport.code}</div>
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {newStatType.sport && (
-                    <div className="bg-slate-700/30 rounded-xl p-4">
-                      <h4 className="text-white font-semibold mb-2">Generated ID Preview</h4>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-slate-300">Sport Code:</span>
-                        <span className="text-[#00CED1] font-mono">
-                          {sports.find((s) => s.name === newStatType.sport)?.code}
-                        </span>
-                        <span className="text-slate-300">-</span>
-                        <span className="text-slate-300">Line Code:</span>
-                        <span className="text-[#FFAB91] font-mono">
-                          {generateNextLineCode(sports.find((s) => s.name === newStatType.sport)?.code || '')}
-                        </span>
-                      </div>
-                      <div className="text-xs text-slate-400 mt-1">
-                        Full ID: {sports.find((s) => s.name === newStatType.sport)?.code}-
-                        {generateNextLineCode(sports.find((s) => s.name === newStatType.sport)?.code || '')}
-                      </div>
-                    </div>
-                  )}
-
                   <button
-                    onClick={handleCreateStatType}
+                    onClick={handleCreateStat}
                     className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
                   >
                     Create Stat Type
@@ -773,10 +640,7 @@ function AdminPageContent() {
                   <span className="w-8 h-8 bg-gradient-to-r from-[#FFAB91] to-[#00CED1] rounded-full mr-3 flex items-center justify-center">
                     <span className="text-lg">📋</span>
                   </span>
-                  Existing Stat Types
-                  <span className="ml-auto bg-gradient-to-r from-[#00CED1]/20 to-[#FFAB91]/20 border border-[#00CED1]/30 rounded-lg px-3 py-1 text-sm">
-                    {statTypes.length} Total
-                  </span>
+                  Existing Stats
                 </h2>
 
                 {/* Search and Filter */}
@@ -801,24 +665,7 @@ function AdminPageContent() {
                   </div>
                 </div>
 
-                {/* Sports Summary */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                  {sports.map((sport) => {
-                    const sportCount = statTypes.filter((st) => st.sport === sport.name).length
-                    return (
-                      <div
-                        key={sport.name}
-                        className="bg-slate-800/30 rounded-lg p-3 text-center border border-slate-700/30"
-                      >
-                        <div className="text-xl mb-1">{sport.icon}</div>
-                        <div className="text-white font-semibold text-sm">{sport.name}</div>
-                        <div className="text-[#00CED1] text-xs">{sportCount} stats</div>
-                      </div>
-                    )
-                  })}
-                </div>
-
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                {/* <div className="space-y-3 max-h-96 overflow-y-auto">
                   {statTypes
                     .filter((stat) => {
                       const matchesSearch =
@@ -911,7 +758,7 @@ function AdminPageContent() {
                       <p className="text-slate-500 text-sm mt-1">Try adjusting your search or filter</p>
                     </div>
                   )}
-                </div>
+                </div> */}
               </div>
             </div>
           )}
