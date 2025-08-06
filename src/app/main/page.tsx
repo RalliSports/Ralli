@@ -1,289 +1,291 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import LobbyCard from "@/components/main-feed/lobby-card";
-import AthleteCard from "@/components/main-feed/athlete-card";
-import SelectionBar from "@/components/main-feed/selection-bar";
-import AthleteProfilePopup from "@/components/main-feed/athlete-profile-popup";
-import SidebarNav from "@/components/ui/sidebar-nav";
-import { ParaButton } from "@/components/para-modal";
-import { useParaWalletBalance } from "@/hooks/use-para-wallet-balance";
-import { useAccount } from "@getpara/react-sdk";
-import { fetchGames } from "@/hooks/get-games";
-import type { Lobby } from "@/hooks/get-games";
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import LobbyCard from '@/components/main-feed/lobby-card'
+import AthleteCard from '@/components/main-feed/athlete-card'
+import SelectionBar from '@/components/main-feed/selection-bar'
+import AthleteProfilePopup from '@/components/main-feed/athlete-profile-popup'
+import SidebarNav from '@/components/ui/sidebar-nav'
+import { ParaButton } from '@/components/para-modal'
+import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
+import { useAccount } from '@getpara/react-sdk'
+import { fetchGames } from '@/hooks/get-games'
+import type { Lobby } from '@/hooks/get-games'
 
 export default function MainFeedPage() {
-  const router = useRouter();
-  const account = useAccount();
-  const [selectedSport, setSelectedSport] = useState("all");
+  const router = useRouter()
+  const account = useAccount()
+  const [selectedSport, setSelectedSport] = useState('all')
 
-  const [lobbiesData, setLobbiesData] = useState<Lobby[]>([]);
+  const [lobbiesData, setLobbiesData] = useState<Lobby[]>([])
 
   useEffect(() => {
     const loadLobbies = async () => {
-      const fetchedLobbies = await fetchGames();
-      setLobbiesData(fetchedLobbies);
-    };
+      const fetchedLobbies = await fetchGames()
+      setLobbiesData(fetchedLobbies)
+    }
 
-    loadLobbies();
-  }, []);
+    loadLobbies()
+  }, [])
 
-  const [bookmarkedAthletes, setBookmarkedAthletes] = useState<string[]>([]);
-  const [selectedAthletes, setSelectedAthletes] = useState<string[]>([]);
-  const [isInSelectionMode, setIsInSelectionMode] = useState(false);
-  const [requiredSelections, setRequiredSelections] = useState(0);
-  const [mounted, setMounted] = useState(false);
-  const [hasCheckedConnection, setHasCheckedConnection] = useState(false);
-  const [profilePopupAthleteId, setProfilePopupAthleteId] = useState<
-    string | null
-  >(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [bookmarkedAthletes, setBookmarkedAthletes] = useState<string[]>([])
+  const [selectedAthletes, setSelectedAthletes] = useState<string[]>([])
+  const [isInSelectionMode, setIsInSelectionMode] = useState(false)
+  const [requiredSelections, setRequiredSelections] = useState(0)
+  const [mounted, setMounted] = useState(false)
+  const [hasCheckedConnection, setHasCheckedConnection] = useState(false)
+  const [profilePopupAthleteId, setProfilePopupAthleteId] = useState<string | null>(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
 
   // Para wallet balance hook
-  const { isConnected, balances, isLoading: balanceLoading, error: balanceError, refetch: refetchBalance } = useParaWalletBalance();
+  const {
+    isConnected,
+    balances,
+    isLoading: balanceLoading,
+    error: balanceError,
+    refetch: refetchBalance,
+  } = useParaWalletBalance()
 
   // Format balance for display
   const formatBalance = (amount: number) => {
-    return amount.toLocaleString('en-US', { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
-    });
-  };
+    return amount.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  }
 
   // Fix hydration issues
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isProfileDropdownOpen) {
-        const target = event.target as Element;
-        if (!target.closest(".profile-dropdown")) {
-          setIsProfileDropdownOpen(false);
+        const target = event.target as Element
+        if (!target.closest('.profile-dropdown')) {
+          setIsProfileDropdownOpen(false)
         }
       }
-    };
+    }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isProfileDropdownOpen]);
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isProfileDropdownOpen])
 
   // Handle wallet connection redirect with better logic for Para integration
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted) return
 
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: NodeJS.Timeout
 
     // If we're connected, mark as checked and clear any pending redirects
     if (isConnected) {
-      setHasCheckedConnection(true);
-      return;
+      setHasCheckedConnection(true)
+      return
     }
 
     // Don't check again if we've already performed a connection check
-    if (hasCheckedConnection) return;
+    if (hasCheckedConnection) return
 
     // Don't redirect if still loading
-    if (balanceLoading) return;
+    if (balanceLoading) return
 
     // Wait for Para connection to establish - sometimes it takes a moment after signin
     timeoutId = setTimeout(() => {
-      setHasCheckedConnection(true);
-      
+      setHasCheckedConnection(true)
+
       // Only redirect if definitely not connected and not loading
       if (!isConnected && !balanceLoading) {
-        console.log("No wallet connection found, redirecting to signin");
-        router.push("/signin");
+        console.log('No wallet connection found, redirecting to signin')
+        router.push('/signin')
       }
-    }, 5000); // Wait 5 seconds to give Para plenty of time to connect
+    }, 5000) // Wait 5 seconds to give Para plenty of time to connect
 
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [mounted, isConnected, balanceLoading, hasCheckedConnection, router]);
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [mounted, isConnected, balanceLoading, hasCheckedConnection, router])
 
   // Redirect to /signin if the user is not connected
   useEffect(() => {
     if (!account?.isConnected) {
-      router.push('/signin');
+      router.push('/signin')
     }
-  }, [account?.isConnected, router]);
+  }, [account?.isConnected, router])
 
   // Mock lobby data - showing high activity
-  const totalActiveLobbies = lobbiesData.filter((lobby) => lobby.status === "active").length;
+  const totalActiveLobbies = lobbiesData.filter((lobby) => lobby.status === 'active').length
 
   // Mock athlete data
   const athletes = [
     {
-      id: "lebron-james",
-      name: "LeBron James",
-      team: "LAL",
-      position: "SF",
-      sport: "NBA",
-      matchup: "vs GSW",
-      gameTime: "Tonight 8:00 PM",
-      avatar: "LJ",
+      id: 'lebron-james',
+      name: 'LeBron James',
+      team: 'LAL',
+      position: 'SF',
+      sport: 'NBA',
+      matchup: 'vs GSW',
+      gameTime: 'Tonight 8:00 PM',
+      avatar: 'LJ',
       stats: [
-        { type: "Points", line: 28.5, over: "+110", under: "-130" },
-        { type: "Rebounds", line: 7.5, over: "-110", under: "-110" },
-        { type: "Assists", line: 6.5, over: "+105", under: "-125" },
+        { type: 'Points', line: 28.5, over: '+110', under: '-130' },
+        { type: 'Rebounds', line: 7.5, over: '-110', under: '-110' },
+        { type: 'Assists', line: 6.5, over: '+105', under: '-125' },
       ],
-      trending: "up" as const,
+      trending: 'up' as const,
       confidence: 85,
     },
     {
-      id: "steph-curry",
-      name: "Stephen Curry",
-      team: "GSW",
-      position: "PG",
-      sport: "NBA",
-      matchup: "@ LAL",
-      gameTime: "Tonight 8:00 PM",
-      avatar: "SC",
+      id: 'steph-curry',
+      name: 'Stephen Curry',
+      team: 'GSW',
+      position: 'PG',
+      sport: 'NBA',
+      matchup: '@ LAL',
+      gameTime: 'Tonight 8:00 PM',
+      avatar: 'SC',
       stats: [
-        { type: "Points", line: 31.5, over: "-115", under: "-105" },
-        { type: "3-Pointers", line: 4.5, over: "+120", under: "-140" },
-        { type: "Assists", line: 5.5, over: "-110", under: "-110" },
+        { type: 'Points', line: 31.5, over: '-115', under: '-105' },
+        { type: '3-Pointers', line: 4.5, over: '+120', under: '-140' },
+        { type: 'Assists', line: 5.5, over: '-110', under: '-110' },
       ],
-      trending: "hot" as const,
+      trending: 'hot' as const,
       confidence: 92,
     },
     {
-      id: "josh-allen",
-      name: "Josh Allen",
-      team: "BUF",
-      position: "QB",
-      sport: "NFL",
-      matchup: "vs KC",
-      gameTime: "Sunday 1:00 PM",
-      avatar: "JA",
+      id: 'josh-allen',
+      name: 'Josh Allen',
+      team: 'BUF',
+      position: 'QB',
+      sport: 'NFL',
+      matchup: 'vs KC',
+      gameTime: 'Sunday 1:00 PM',
+      avatar: 'JA',
       stats: [
-        { type: "Passing Yards", line: 285.5, over: "-110", under: "-110" },
-        { type: "Rushing Yards", line: 45.5, over: "+105", under: "-125" },
-        { type: "Total TDs", line: 2.5, over: "+115", under: "-135" },
+        { type: 'Passing Yards', line: 285.5, over: '-110', under: '-110' },
+        { type: 'Rushing Yards', line: 45.5, over: '+105', under: '-125' },
+        { type: 'Total TDs', line: 2.5, over: '+115', under: '-135' },
       ],
-      trending: "stable" as const,
+      trending: 'stable' as const,
       confidence: 78,
     },
     {
-      id: "patrick-mahomes",
-      name: "Patrick Mahomes",
-      team: "KC",
-      position: "QB",
-      sport: "NFL",
-      matchup: "@ BUF",
-      gameTime: "Sunday 1:00 PM",
-      avatar: "PM",
+      id: 'patrick-mahomes',
+      name: 'Patrick Mahomes',
+      team: 'KC',
+      position: 'QB',
+      sport: 'NFL',
+      matchup: '@ BUF',
+      gameTime: 'Sunday 1:00 PM',
+      avatar: 'PM',
       stats: [
-        { type: "Passing Yards", line: 295.5, over: "-105", under: "-115" },
-        { type: "Passing TDs", line: 2.5, over: "+110", under: "-130" },
-        { type: "Completions", line: 24.5, over: "-110", under: "-110" },
+        { type: 'Passing Yards', line: 295.5, over: '-105', under: '-115' },
+        { type: 'Passing TDs', line: 2.5, over: '+110', under: '-130' },
+        { type: 'Completions', line: 24.5, over: '-110', under: '-110' },
       ],
-      trending: "hot" as const,
+      trending: 'hot' as const,
       confidence: 89,
     },
     {
-      id: "travis-kelce",
-      name: "Travis Kelce",
-      team: "KC",
-      position: "TE",
-      sport: "NFL",
-      matchup: "@ BUF",
-      gameTime: "Sunday 1:00 PM",
-      avatar: "TK",
+      id: 'travis-kelce',
+      name: 'Travis Kelce',
+      team: 'KC',
+      position: 'TE',
+      sport: 'NFL',
+      matchup: '@ BUF',
+      gameTime: 'Sunday 1:00 PM',
+      avatar: 'TK',
       stats: [
-        { type: "Receiving Yards", line: 85.5, over: "-110", under: "-110" },
-        { type: "Receptions", line: 6.5, over: "+105", under: "-125" },
-        { type: "Receiving TDs", line: 0.5, over: "+150", under: "-180" },
+        { type: 'Receiving Yards', line: 85.5, over: '-110', under: '-110' },
+        { type: 'Receptions', line: 6.5, over: '+105', under: '-125' },
+        { type: 'Receiving TDs', line: 0.5, over: '+150', under: '-180' },
       ],
-      trending: "up" as const,
+      trending: 'up' as const,
       confidence: 74,
     },
     {
-      id: "messi",
-      name: "Lionel Messi",
-      team: "MIA",
-      position: "FW",
-      sport: "Soccer",
-      matchup: "vs NYC",
-      gameTime: "Saturday 7:30 PM",
-      avatar: "LM",
+      id: 'messi',
+      name: 'Lionel Messi',
+      team: 'MIA',
+      position: 'FW',
+      sport: 'Soccer',
+      matchup: 'vs NYC',
+      gameTime: 'Saturday 7:30 PM',
+      avatar: 'LM',
       stats: [
-        { type: "Goals", line: 0.5, over: "+120", under: "-140" },
-        { type: "Assists", line: 0.5, over: "+105", under: "-125" },
-        { type: "Shots on Target", line: 2.5, over: "-110", under: "-110" },
+        { type: 'Goals', line: 0.5, over: '+120', under: '-140' },
+        { type: 'Assists', line: 0.5, over: '+105', under: '-125' },
+        { type: 'Shots on Target', line: 2.5, over: '-110', under: '-110' },
       ],
-      trending: "hot" as const,
+      trending: 'hot' as const,
       confidence: 88,
     },
-  ];
+  ]
 
   const toggleBookmark = (athleteId: string) => {
     setBookmarkedAthletes((prev) => {
       if (prev.includes(athleteId)) {
-        return prev.filter((id) => id !== athleteId);
+        return prev.filter((id) => id !== athleteId)
       } else if (prev.length < 50) {
-        return [...prev, athleteId];
+        return [...prev, athleteId]
       }
-      return prev;
-    });
-  };
+      return prev
+    })
+  }
 
   const handleLobbyJoin = (lobbyId: string, requiredLegs: number) => {
-    setIsInSelectionMode(true);
-    setRequiredSelections(requiredLegs);
-    setSelectedAthletes([]);
-  };
+    setIsInSelectionMode(true)
+    setRequiredSelections(requiredLegs)
+    setSelectedAthletes([])
+  }
 
   // maybe i can do it some id=$(lobbyId)
 
   const toggleSelection = (athleteId: string) => {
-    if (!isInSelectionMode) return;
+    if (!isInSelectionMode) return
 
     setSelectedAthletes((prev) => {
       if (prev.includes(athleteId)) {
-        return prev.filter((id) => id !== athleteId);
+        return prev.filter((id) => id !== athleteId)
       } else if (prev.length < requiredSelections) {
-        return [...prev, athleteId];
+        return [...prev, athleteId]
       }
-      return prev;
-    });
-  };
+      return prev
+    })
+  }
 
   const filteredAthletes =
-    selectedSport === "all"
-      ? athletes
-      : athletes.filter((athlete) => athlete.sport === selectedSport);
+    selectedSport === 'all' ? athletes : athletes.filter((athlete) => athlete.sport === selectedSport)
 
   const sportTabs = [
-    { id: "all", name: "All", icon: "🏆", count: athletes.length },
+    { id: 'all', name: 'All', icon: '🏆', count: athletes.length },
     {
-      id: "NBA",
-      name: "NBA",
-      icon: "🏀",
-      count: athletes.filter((a) => a.sport === "NBA").length,
+      id: 'NBA',
+      name: 'NBA',
+      icon: '🏀',
+      count: athletes.filter((a) => a.sport === 'NBA').length,
     },
     {
-      id: "NFL",
-      name: "NFL",
-      icon: "🏈",
-      count: athletes.filter((a) => a.sport === "NFL").length,
+      id: 'NFL',
+      name: 'NFL',
+      icon: '🏈',
+      count: athletes.filter((a) => a.sport === 'NFL').length,
     },
     {
-      id: "Soccer",
-      name: "Soccer",
-      icon: "⚽",
-      count: athletes.filter((a) => a.sport === "Soccer").length,
+      id: 'Soccer',
+      name: 'Soccer',
+      icon: '⚽',
+      count: athletes.filter((a) => a.sport === 'Soccer').length,
     },
-  ];
+  ]
 
   // Don't render until mounted to prevent hydration issues
   if (!mounted) {
-    return null;
+    return null
   }
 
   // Show loading state while checking wallet connection
@@ -296,7 +298,7 @@ export default function MainFeedPage() {
           <p className="text-slate-400">Please wait while we establish your connection</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -310,11 +312,7 @@ export default function MainFeedPage() {
               onClick={() => setIsSidebarOpen(true)}
               className="p-2 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors"
             >
-              <svg
-                className="w-5 h-5 text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
@@ -323,20 +321,19 @@ export default function MainFeedPage() {
               </svg>
             </button>
             <h1 className="text-xl font-bold text-white">
-              <span className="bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent">
-                Ralli
-              </span>
+              <span className="bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent">Ralli</span>
             </h1>
           </div>
 
           {/* Right: Balance + Profile */}
           <div className="flex items-center space-x-3">
-            <div 
+            <div
               className="bg-gradient-to-r from-[#00CED1]/20 to-[#FFAB91]/20 border border-[#00CED1]/30 rounded-xl px-4 py-2 backdrop-blur-sm cursor-pointer hover:from-[#00CED1]/30 hover:to-[#FFAB91]/30 transition-all duration-200"
               onClick={() => isConnected && refetchBalance()}
-              title={isConnected ? 
-                `Click to refresh balance\nSOL: ${formatBalance(balances.sol)}\nUSDC: $${formatBalance(balances.usdc)}` : 
-                "Connect wallet to view balance"
+              title={
+                isConnected
+                  ? `Click to refresh balance\nSOL: ${formatBalance(balances.sol)}\nUSDC: $${formatBalance(balances.usdc)}`
+                  : 'Connect wallet to view balance'
               }
             >
               <div className="flex items-center space-x-2">
@@ -344,11 +341,7 @@ export default function MainFeedPage() {
                   {balanceLoading ? (
                     <div className="w-3 h-3 border-[1.5px] border-white/20 border-t-white rounded-full animate-spin"></div>
                   ) : (
-                    <svg
-                      className="w-3 h-3 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path
                         fillRule="evenodd"
                         d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"
@@ -358,24 +351,20 @@ export default function MainFeedPage() {
                   )}
                 </div>
                 <span className="font-bold text-lg bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent">
-                  {isConnected ? (
-                    balanceLoading ? (
-                      "Loading..."
-                    ) : balanceError ? (
-                      "$0.00"
-                    ) : (
-                      `$${formatBalance(balances.totalUsd)}`
-                    )
-                  ) : (
-                    "$0.00"
-                  )}
+                  {isConnected
+                    ? balanceLoading
+                      ? 'Loading...'
+                      : balanceError
+                        ? '$0.00'
+                        : `$${formatBalance(balances.totalUsd)}`
+                    : '$0.00'}
                 </span>
               </div>
             </div>
 
             {/* Profile Dropdown */}
             <div className="relative profile-dropdown">
-             <ParaButton />
+              <ParaButton />
 
               {/* Dropdown Menu */}
               {isProfileDropdownOpen && (
@@ -383,17 +372,13 @@ export default function MainFeedPage() {
                   <div className="p-2">
                     <button
                       onClick={() => {
-                        router.push("/profile");
-                        setIsProfileDropdownOpen(false);
+                        router.push('/profile')
+                        setIsProfileDropdownOpen(false)
                       }}
                       className="w-full flex items-center space-x-3 px-3 py-3 rounded-xl hover:bg-slate-700/50 transition-colors text-left"
                     >
                       <div className="w-8 h-8 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center">
-                        <svg
-                          className="w-4 h-4 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path
                             fillRule="evenodd"
                             d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
@@ -402,22 +387,14 @@ export default function MainFeedPage() {
                         </svg>
                       </div>
                       <div>
-                        <div className="text-white font-semibold text-sm">
-                          Profile
-                        </div>
-                        <div className="text-slate-400 text-xs">
-                          View your stats
-                        </div>
+                        <div className="text-white font-semibold text-sm">Profile</div>
+                        <div className="text-slate-400 text-xs">View your stats</div>
                       </div>
                     </button>
 
                     <button className="w-full flex items-center space-x-3 px-3 py-3 rounded-xl hover:bg-slate-700/50 transition-colors text-left">
                       <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center">
-                        <svg
-                          className="w-4 h-4 text-slate-300"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
+                        <svg className="w-4 h-4 text-slate-300" fill="currentColor" viewBox="0 0 20 20">
                           <path
                             fillRule="evenodd"
                             d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z"
@@ -426,12 +403,8 @@ export default function MainFeedPage() {
                         </svg>
                       </div>
                       <div>
-                        <div className="text-white font-semibold text-sm">
-                          Sign Out
-                        </div>
-                        <div className="text-slate-400 text-xs">
-                          Logout of account
-                        </div>
+                        <div className="text-white font-semibold text-sm">Sign Out</div>
+                        <div className="text-slate-400 text-xs">Logout of account</div>
                       </div>
                     </button>
                   </div>
@@ -444,10 +417,7 @@ export default function MainFeedPage() {
 
       {/* Sport Category Tabs */}
       <div className="sticky top-[60px] z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/30 px-4 py-3">
-        <div
-          className="flex space-x-2 overflow-x-auto"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
+        <div className="flex space-x-2 overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style jsx>{`
             div::-webkit-scrollbar {
               display: none;
@@ -459,15 +429,13 @@ export default function MainFeedPage() {
               onClick={() => setSelectedSport(tab.id)}
               className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-300 ${
                 selectedSport === tab.id
-                  ? "bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white shadow-lg"
-                  : "bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white border border-slate-700/50"
+                  ? 'bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white shadow-lg'
+                  : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white border border-slate-700/50'
               }`}
             >
               <span>{tab.icon}</span>
               <span>{tab.name}</span>
-              <span className="bg-white/20 rounded-full px-2 py-0.5 text-xs">
-                {tab.count}
-              </span>
+              <span className="bg-white/20 rounded-full px-2 py-0.5 text-xs">{tab.count}</span>
             </button>
           ))}
         </div>
@@ -478,12 +446,7 @@ export default function MainFeedPage() {
         <div className="flex items-center space-x-3">
           {/* Search Icon */}
           <button className="p-2 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
-            <svg
-              className="w-5 h-5 text-slate-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -496,20 +459,14 @@ export default function MainFeedPage() {
           {/* Filter Tabs */}
           <div
             className="flex space-x-2 overflow-x-auto flex-1"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             <style jsx>{`
               div::-webkit-scrollbar {
                 display: none;
               }
             `}</style>
-            {[
-              "Popular",
-              "Trending",
-              "High Value",
-              "Low Stakes",
-              "Ending Soon",
-            ].map((filter) => (
+            {['Popular', 'Trending', 'High Value', 'Low Stakes', 'Ending Soon'].map((filter) => (
               <button
                 key={filter}
                 className="flex items-center space-x-2 px-3 py-1.5 rounded-lg font-medium text-xs whitespace-nowrap transition-all duration-200 bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white border border-slate-700/50"
@@ -536,7 +493,7 @@ export default function MainFeedPage() {
               </h2>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => router.push("/create-game")}
+                  onClick={() => router.push('/create-game')}
                   className="bg-slate-800/80 hover:bg-slate-700/90 backdrop-blur-md border border-blue-400/30 hover:border-blue-400/50 text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-400/20 flex items-center space-x-2 group relative overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -546,19 +503,12 @@ export default function MainFeedPage() {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                   <span className="text-sm relative z-10">Create</span>
                 </button>
                 <div className="text-right">
-                  <div className="text-[#FFAB91] font-bold text-lg">
-                    {totalActiveLobbies}
-                  </div>
+                  <div className="text-[#FFAB91] font-bold text-lg">{totalActiveLobbies}</div>
                   <div className="text-slate-400 text-xs">Active</div>
                 </div>
               </div>
@@ -586,7 +536,10 @@ export default function MainFeedPage() {
             </div>
 
             {/* View More Button */}
-            <button className="w-full mt-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white font-semibold hover:bg-slate-700/50 transition-all duration-300 flex items-center justify-center space-x-2 group">
+            <button
+              onClick={() => router.push('/lobbies')}
+              className="w-full mt-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white font-semibold hover:bg-slate-700/50 transition-all duration-300 flex items-center justify-center space-x-2 group"
+            >
               <span>View All Lobbies</span>
               <svg
                 className="w-5 h-5 group-hover:translate-x-1 transition-transform"
@@ -594,12 +547,7 @@ export default function MainFeedPage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </button>
           </div>
@@ -624,9 +572,7 @@ export default function MainFeedPage() {
                 Trending Lines Today
               </h2>
               <div className="text-right">
-                <div className="text-[#00CED1] font-bold text-lg">
-                  {filteredAthletes.length}
-                </div>
+                <div className="text-[#00CED1] font-bold text-lg">{filteredAthletes.length}</div>
                 <div className="text-slate-400 text-xs">Available</div>
               </div>
             </div>
@@ -635,9 +581,7 @@ export default function MainFeedPage() {
               <div className="mb-4 flex items-center justify-center">
                 <div className="bg-[#FFAB91]/20 border border-[#FFAB91]/30 rounded-xl px-4 py-2 flex items-center space-x-2">
                   <span className="text-[#FFAB91]">⭐</span>
-                  <span className="text-[#FFAB91] font-semibold text-sm">
-                    {bookmarkedAthletes.length} Bookmarked
-                  </span>
+                  <span className="text-[#FFAB91] font-semibold text-sm">{bookmarkedAthletes.length} Bookmarked</span>
                 </div>
               </div>
             )}
@@ -676,12 +620,7 @@ export default function MainFeedPage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </button>
           </div>
@@ -700,9 +639,7 @@ export default function MainFeedPage() {
                 Trending Lines Today
               </h2>
               <div className="text-right">
-                <div className="text-[#00CED1] font-bold text-2xl">
-                  {filteredAthletes.length}
-                </div>
+                <div className="text-[#00CED1] font-bold text-2xl">{filteredAthletes.length}</div>
                 <div className="text-slate-400 text-sm">Available</div>
               </div>
             </div>
@@ -711,9 +648,7 @@ export default function MainFeedPage() {
               <div className="mb-6 flex items-center justify-end">
                 <div className="bg-[#FFAB91]/20 border border-[#FFAB91]/30 rounded-xl px-4 py-2 flex items-center space-x-2 hover:bg-[#FFAB91]/30 transition-colors cursor-pointer">
                   <span className="text-[#FFAB91]">⭐</span>
-                  <span className="text-[#FFAB91] font-semibold">
-                    Bookmarks ({bookmarkedAthletes.length})
-                  </span>
+                  <span className="text-[#FFAB91] font-semibold">Bookmarks ({bookmarkedAthletes.length})</span>
                 </div>
               </div>
             )}
@@ -752,12 +687,7 @@ export default function MainFeedPage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </button>
           </div>
@@ -773,7 +703,7 @@ export default function MainFeedPage() {
                 Popular Lobbies
               </h2>
               <button
-                onClick={() => router.push("/create-game")}
+                onClick={() => router.push('/create-game')}
                 className="bg-slate-800/80 hover:bg-slate-700/90 backdrop-blur-md border border-blue-400/30 hover:border-blue-400/50 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-400/20 flex items-center space-x-2 group relative overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -783,21 +713,14 @@ export default function MainFeedPage() {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
                 <span className="relative z-10">Create Lobby</span>
               </button>
             </div>
 
             <div className="mb-4 flex items-center justify-center">
-              <div className="text-[#FFAB91] font-bold text-xl">
-                {totalActiveLobbies} Active
-              </div>
+              <div className="text-[#FFAB91] font-bold text-xl">{totalActiveLobbies} Active</div>
             </div>
 
             <div className="space-y-3 mb-6">
@@ -822,7 +745,10 @@ export default function MainFeedPage() {
             </div>
 
             {/* View More Button */}
-            <button className="w-full py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white font-semibold hover:bg-slate-700/50 transition-all duration-300 flex items-center justify-center space-x-2 group">
+            <button
+              onClick={() => router.push('/lobbies')}
+              className="w-full py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white font-semibold hover:bg-slate-700/50 transition-all duration-300 flex items-center justify-center space-x-2 group"
+            >
               <span>View All Lobbies</span>
               <svg
                 className="w-5 h-5 group-hover:translate-x-1 transition-transform"
@@ -830,12 +756,7 @@ export default function MainFeedPage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </button>
           </div>
@@ -855,8 +776,8 @@ export default function MainFeedPage() {
           onCancel={() => setIsInSelectionMode(false)}
           onContinue={() => {
             // Handle continue logic here
-            console.log("Selected athletes:", selectedAthletes);
-            setIsInSelectionMode(false);
+            console.log('Selected athletes:', selectedAthletes)
+            setIsInSelectionMode(false)
           }}
         />
       )}
@@ -864,17 +785,14 @@ export default function MainFeedPage() {
       {/* Athlete Profile Popup */}
       {mounted && (
         <AthleteProfilePopup
-          athleteId={profilePopupAthleteId || ""}
+          athleteId={profilePopupAthleteId || ''}
           isOpen={!!profilePopupAthleteId}
           onClose={() => setProfilePopupAthleteId(null)}
         />
       )}
 
       {/* Sidebar Navigation */}
-      <SidebarNav
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-      />
+      <SidebarNav isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
     </div>
-  );
+  )
 }
