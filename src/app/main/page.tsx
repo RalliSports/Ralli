@@ -10,11 +10,25 @@ import SidebarNav from "@/components/ui/sidebar-nav";
 import { ParaButton } from "@/components/para-modal";
 import { useParaWalletBalance } from "@/hooks/use-para-wallet-balance";
 import { useAccount } from "@getpara/react-sdk";
+import { fetchGames } from "@/hooks/get-games";
+import type { Lobby } from "@/hooks/get-games";
 
 export default function MainFeedPage() {
   const router = useRouter();
   const account = useAccount();
   const [selectedSport, setSelectedSport] = useState("all");
+
+  const [lobbiesData, setLobbiesData] = useState<Lobby[]>([]);
+
+  useEffect(() => {
+    const loadLobbies = async () => {
+      const fetchedLobbies = await fetchGames();
+      setLobbiesData(fetchedLobbies);
+    };
+
+    loadLobbies();
+  }, []);
+
   const [bookmarkedAthletes, setBookmarkedAthletes] = useState<string[]>([]);
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([]);
   const [isInSelectionMode, setIsInSelectionMode] = useState(false);
@@ -100,51 +114,7 @@ export default function MainFeedPage() {
   }, [account?.isConnected, router]);
 
   // Mock lobby data - showing high activity
-  const totalActiveLobbies = 169;
-  const lobbies = [
-    {
-      id: "1",
-      title: "🔥 NBA Sunday Showdown",
-      sport: "NBA",
-      sportIcon: "🏀",
-      participants: 9,
-      maxParticipants: 12,
-      buyIn: 25,
-      prizePool: 280,
-      legs: 4,
-      timeLeft: "2h 15m",
-      host: { name: "Jack Sturt", avatar: "JS" },
-      isUrgent: false,
-    },
-    {
-      id: "2",
-      title: "Monday Night Football",
-      sport: "NFL",
-      sportIcon: "🏈",
-      participants: 11,
-      maxParticipants: 12,
-      buyIn: 50,
-      prizePool: 580,
-      legs: 5,
-      timeLeft: "45m",
-      host: { name: "Mike Chen", avatar: "MC" },
-      isUrgent: true,
-    },
-    {
-      id: "3",
-      title: "Champions League Special",
-      sport: "Soccer",
-      sportIcon: "⚽",
-      participants: 6,
-      maxParticipants: 10,
-      buyIn: 35,
-      prizePool: 315,
-      legs: 3,
-      timeLeft: "1h 30m",
-      host: { name: "Sarah J", avatar: "SJ" },
-      isUrgent: false,
-    },
-  ];
+  const totalActiveLobbies = lobbiesData.filter((lobby) => lobby.status === "active").length;
 
   // Mock athlete data
   const athletes = [
@@ -595,7 +565,7 @@ export default function MainFeedPage() {
             </div>
 
             <div className="space-y-3">
-              {lobbies.slice(0, 3).map((lobby) => (
+              {lobbiesData.slice(0, 3).map((lobby: Lobby) => (
                 <LobbyCard
                   key={lobby.id}
                   id={lobby.id}
@@ -831,7 +801,7 @@ export default function MainFeedPage() {
             </div>
 
             <div className="space-y-3 mb-6">
-              {lobbies.slice(0, 4).map((lobby) => (
+              {lobbiesData.slice(0, 4).map((lobby) => (
                 <LobbyCard
                   key={lobby.id}
                   id={lobby.id}

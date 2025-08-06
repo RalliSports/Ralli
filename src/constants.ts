@@ -9,3 +9,5 @@ if (!API_KEY) {
     "API key is not defined. Please set NEXT_PUBLIC_PARA_API_KEY in your environment variables."
   );
 }
+
+export const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;

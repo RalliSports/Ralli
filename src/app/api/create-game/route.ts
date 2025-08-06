@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { backendUrl } from '@/constants'
 
 // TypeScript interface for the request data
 interface CreateGameRequest {
@@ -34,8 +35,6 @@ function validateCreateGameData(data: any): data is CreateGameRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the backend URL from environment variables
-    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL
 
     if (!backendUrl) {
       return NextResponse.json(
