@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ToastProvider, useToast } from '../../components/ui/toast'
 import { Dropdown, SportsDropdown } from '../../components/ui/dropdown'
 import { useSessionToken } from '@/hooks/use-session'
@@ -28,19 +29,40 @@ interface Player {
 
 interface Line {
   id: string
-  playerId: string
-  playerName: string
-  statTypeId: string
-  statName: string
-  value: number
-  sport: string
-  gameTime: string
-  gameDate?: Date // Optional for backwards compatibility
-  status: 'active' | 'resolved' | 'cancelled'
-  overOdds: string
-  underOdds: string
-  actualValue?: number // The actual stat value when resolving
-  resolutionReason?: string // Why it was resolved this way
+  createdAt: string
+  athleteId: string
+  statId: string
+  matchupId: string
+  predictedValue: string
+  actualValue: string
+  isHigher: boolean
+  stat: {
+    id: string
+    customId: number
+    name: string
+    description: string
+    createdAt: Date
+  }
+  matchup: {
+    id: string
+    homeTeam: string
+    awayTeam: string
+    gameDate: Date
+    status: string
+    scoreHome: number
+    scoreAway: number
+    createdAt: Date
+  }
+  athlete: {
+    id: string
+    name: string
+    team: string
+    position: string
+    jerseyNumber: number
+    age: number
+    picture: string
+    createdAt: Date
+  }
 }
 
 interface Game {
@@ -131,34 +153,22 @@ function AdminPageContent() {
   ])
 
   // Mock data for lines
-  const [lines, setLines] = useState<Line[]>([
-    {
-      id: '1',
-      playerId: '1',
-      playerName: 'LeBron James',
-      statTypeId: '1',
-      statName: 'Points',
-      value: 28.5,
-      sport: 'NBA',
-      gameTime: 'Tonight 8:00 PM',
-      status: 'active',
-      overOdds: '+110',
-      underOdds: '-130',
-    },
-    {
-      id: '2',
-      playerId: '2',
-      playerName: 'Josh Allen',
-      statTypeId: '3',
-      statName: 'Passing Yards',
-      value: 285.5,
-      sport: 'NFL',
-      gameTime: 'Sunday 1:00 PM',
-      status: 'active',
-      overOdds: '-110',
-      underOdds: '-110',
-    },
-  ])
+  const [lines, setLines] = useState<Line[]>([])
+
+  useEffect(() => {
+    const fetchLines = async () => {
+      const response = await fetch('/api/read-lines', {
+        method: 'GET',
+        headers: {
+          'x-para-session': session || '',
+        },
+      })
+      const data = await response.json()
+      console.log(data, 'data')
+      setLines(data)
+    }
+    fetchLines()
+  }, [])
 
   // Mock data for games (using existing lobby structure)
   const [games, setGames] = useState<Game[]>([
@@ -189,6 +199,8 @@ function AdminPageContent() {
       host: { name: 'Mike Chen', avatar: 'MC' },
     },
   ])
+
+  const timeNow = new Date()
 
   const [stats, setStats] = useState<Stat[]>([])
 
@@ -478,11 +490,12 @@ function AdminPageContent() {
   }
 
   // Filter functions
+  console.log(lines, 'lines')
   const filteredLines = lines.filter((line) => {
     const matchesSearch =
-      line.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      line.statName.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesSport = selectedSport === 'all' || line.sport === selectedSport
+      line.athlete.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      line.stat.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSport = selectedSport === 'all' || line.matchup.homeTeam === selectedSport
     return matchesSearch && matchesSport
   })
 
@@ -1023,19 +1036,47 @@ function AdminPageContent() {
                           <h4 className="text-white font-semibold text-lg">{line.playerName}</h4>
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              line.status === 'active'
+                              line.createdAt > timeNow.toISOString()
                                 ? 'bg-[#00CED1]/20 text-[#00CED1] border border-[#00CED1]/30'
-                                : line.status === 'resolved'
+                                : !!line.actualValue
                                   ? 'bg-[#FFAB91]/20 text-[#FFAB91] border border-[#FFAB91]/30'
                                   : 'bg-red-500/20 text-red-400 border border-red-400/30'
                             }`}
                           >
-                            {line.status}
+                            {line.createdAt > timeNow.toISOString()
+                              ? 'Pending'
+                              : !!line.actualValue
+                                ? 'Resolved'
+                                : 'Cancelled'}
                           </span>
+                        </div>
+                        <div
+                          key={line.athlete.id}
+                          className="bg-slate-700/30 rounded-xl p-4 hover:bg-slate-700/50 transition-colors"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center overflow-hidden">
+                              <Image
+                                src={line.athlete.picture}
+                                alt={line.athlete.name}
+                                width={48}
+                                height={48}
+                                className="w-full h-full object-cover rounded-full"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="text-white font-semibold">{line.athlete.name}</h4>
+                              <div className="flex items-center space-x-2 text-sm">
+                                <span className="text-slate-300">{line.athlete.team}</span>
+                                <span className="text-slate-400">#{line.athlete.jerseyNumber}</span>
+                                <span className="text-slate-400">{line.athlete.position}</span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         <div className="text-right">
                           <div className="text-sm text-slate-400">Line Value</div>
-                          <div className="text-xl font-bold text-[#FFAB91]">{line.value}</div>
+                          <div className="text-xl font-bold text-[#FFAB91]">{line.predictedValue}</div>
                         </div>
                       </div>
 
@@ -1043,69 +1084,52 @@ function AdminPageContent() {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-800/30 rounded-lg">
                         <div>
                           <div className="text-sm text-slate-400">Stat Type</div>
-                          <div className="text-white font-semibold">{line.statName}</div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-slate-400">Odds</div>
-                          <div className="text-white">
-                            Over: <span className="text-[#00CED1]">{line.overOdds}</span> | Under:{' '}
-                            <span className="text-[#FFAB91]">{line.underOdds}</span>
-                          </div>
+                          <div className="text-white font-semibold">{line.stat.name}</div>
                         </div>
                         <div>
                           <div className="text-sm text-slate-400">Game</div>
-                          <div className="text-white font-semibold">{line.gameTime}</div>
+                          <div className="text-white font-semibold">
+                            {line.matchup.homeTeam} vs {line.matchup.awayTeam}
+                          </div>
                         </div>
                       </div>
 
                       {/* Resolution Status or Input */}
-                      {line.status === 'resolved' && (
+                      {!!line.actualValue && (
                         <div className="p-4 bg-gradient-to-r from-[#FFAB91]/10 to-[#00CED1]/10 border border-[#FFAB91]/30 rounded-lg">
                           <div className="flex items-center justify-between">
                             <div>
                               <div className="text-sm text-slate-300">Resolved Value</div>
                               <div className="text-lg font-bold text-[#FFAB91]">
-                                {line.actualValue} (Line was {line.value})
+                                {line.actualValue} (Line was {line.predictedValue})
                               </div>
                             </div>
                             <div className="text-right">
                               <div className="text-sm text-slate-300">Result</div>
                               <div
                                 className={`font-bold ${
-                                  line.actualValue! > line.value ? 'text-[#00CED1]' : 'text-[#FFAB91]'
+                                  line.actualValue! > line.predictedValue ? 'text-[#00CED1]' : 'text-[#FFAB91]'
                                 }`}
                               >
-                                {line.actualValue! > line.value
+                                {line.actualValue! > line.predictedValue
                                   ? 'OVER'
-                                  : line.actualValue! < line.value
+                                  : line.actualValue! < line.predictedValue
                                     ? 'UNDER'
                                     : 'PUSH'}
                               </div>
                             </div>
                           </div>
-                          {line.resolutionReason && (
-                            <div className="mt-2 text-sm text-slate-400">{line.resolutionReason}</div>
-                          )}
                         </div>
                       )}
 
-                      {line.status === 'cancelled' && (
-                        <div className="p-4 bg-red-500/10 border border-red-400/30 rounded-lg">
-                          <div className="text-red-400 font-semibold">Line Cancelled</div>
-                          {line.resolutionReason && (
-                            <div className="mt-1 text-sm text-slate-400">{line.resolutionReason}</div>
-                          )}
-                        </div>
-                      )}
-
-                      {line.status === 'active' && (
+                      {!line.actualValue && (
                         <div className="border-t border-slate-600/30 pt-4">
                           {resolvingLine === line.id ? (
                             <div className="space-y-4">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                   <label className="block text-white font-semibold mb-2">
-                                    Actual {line.statName} Value
+                                    Actual {line.stat.name} Value
                                   </label>
                                   <input
                                     type="number"
@@ -1117,7 +1141,7 @@ function AdminPageContent() {
                                         actualValue: e.target.value,
                                       })
                                     }
-                                    placeholder={`e.g., ${line.value}`}
+                                    placeholder={`e.g., ${line.predictedValue}`}
                                     className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                                   />
                                   <div className="mt-1 text-sm text-slate-400">Line value: {line.value}</div>
@@ -1149,12 +1173,7 @@ function AdminPageContent() {
                                       addToast('Please enter a valid actual value', 'error')
                                       return
                                     }
-                                    handleResolveLine(
-                                      line.id,
-                                      actualValue,
-                                      actualValue > line.value ? 'over' : 'under',
-                                      resolutionData.resolutionReason,
-                                    )
+                                    handleResolveLine(line.id, actualValue)
                                     setResolvingLine(null)
                                     setResolutionData({
                                       actualValue: '',
@@ -1168,12 +1187,7 @@ function AdminPageContent() {
                                 </button>
                                 <button
                                   onClick={() => {
-                                    handleResolveLine(
-                                      line.id,
-                                      0,
-                                      'cancel',
-                                      resolutionData.resolutionReason || 'Cancelled by admin',
-                                    )
+                                    handleResolveLine(line.id, 0)
                                     setResolvingLine(null)
                                     setResolutionData({
                                       actualValue: '',
@@ -1208,7 +1222,7 @@ function AdminPageContent() {
                               </button>
                               <button
                                 onClick={() => {
-                                  handleResolveLine(line.id, 0, 'cancel', 'Quick cancelled by admin')
+                                  handleResolveLine(line.id, 0)
                                 }}
                                 className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-white font-semibold rounded-xl transition-colors"
                               >
