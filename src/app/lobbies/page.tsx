@@ -19,6 +19,8 @@ export default function LobbiesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
   const [lobbiesData, setLobbiesData] = useState<Lobby[]>([])
+  const [lobbiesError, setLobbiesError] = useState<string | null>(null)
+  const [lobbiesLoading, setLobbiesLoading] = useState(true)
 
   // Para wallet balance hook
   const {
@@ -46,10 +48,15 @@ export default function LobbiesPage() {
   useEffect(() => {
     const loadLobbies = async () => {
       try {
+        setLobbiesLoading(true)
+        setLobbiesError(null)
         const fetchedLobbies = await fetchGames()
         setLobbiesData(fetchedLobbies)
       } catch (error) {
         console.error('Failed to fetch lobbies:', error)
+        setLobbiesError(error instanceof Error ? error.message : 'Failed to fetch lobbies')
+      } finally {
+        setLobbiesLoading(false)
       }
     }
 
@@ -131,13 +138,52 @@ export default function LobbiesPage() {
   }
 
   // Show loading state while fetching lobbies
-  if (lobbiesData.length === 0) {
+  if (lobbiesLoading) {
     return (
       <div className="bg-gray-900 min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#00CED1]/20 border-t-[#00CED1] rounded-full animate-spin mx-auto mb-4"></div>
           <h2 className="text-xl font-semibold text-white mb-2">Loading lobbies...</h2>
           <p className="text-slate-400">Please wait while we fetch the latest games</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state if there's an error
+  if (lobbiesError) {
+    return (
+      <div className="bg-gray-900 min-h-screen flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2">Failed to load lobbies</h2>
+          <p className="text-slate-400 mb-4">{lobbiesError}</p>
+          <button
+            onClick={() => {
+              setLobbiesError(null)
+              setLobbiesLoading(true)
+              // Re-trigger the fetch
+              const loadLobbies = async () => {
+                try {
+                  const fetchedLobbies = await fetchGames()
+                  setLobbiesData(fetchedLobbies)
+                } catch (error) {
+                  console.error('Failed to fetch lobbies:', error)
+                  setLobbiesError(error instanceof Error ? error.message : 'Failed to fetch lobbies')
+                } finally {
+                  setLobbiesLoading(false)
+                }
+              }
+              loadLobbies()
+            }}
+            className="bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300"
+          >
+            Try Again
+          </button>
         </div>
       </div>
     )
