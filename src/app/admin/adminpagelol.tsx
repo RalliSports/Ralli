@@ -1,68 +1,46 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { ToastProvider, useToast } from '../../components/ui/toast'
-import { Dropdown, SportsDropdown } from '../../components/ui/dropdown'
-import { useSessionToken } from '@/hooks/use-session'
+import { Dropdown, SportsDropdown, DropdownOption } from '../../components/ui/dropdown'
 
 // Types for the admin panel
-interface Stat {
+interface StatType {
   id: string
   name: string
   description: string
-  customId: number
-  createdAt: string
+  numId: string // Format: XXXXX-XXXXX (sport-line)
+  sport: string
+  sportCode: string
+  lineCode: string
 }
 
 interface Player {
   id: string
   name: string
+  sport: string
   team: string
-  jerseyNumber: number
+  jerseyNumber: string
   position: string
-  age: number
-  picture?: string
+  avatar: string
 }
 
 interface Line {
   id: string
-  createdAt: string
-  athleteId: string
-  statId: string
-  matchupId: string
-  predictedValue: string
-  actualValue: string
-  isHigher: boolean
-  stat: {
-    id: string
-    customId: number
-    name: string
-    description: string
-    createdAt: Date
-  }
-  matchup: {
-    id: string
-    homeTeam: string
-    awayTeam: string
-    gameDate: Date
-    status: string
-    scoreHome: number
-    scoreAway: number
-    createdAt: Date
-  }
-  athlete: {
-    id: string
-    name: string
-    team: string
-    position: string
-    jerseyNumber: number
-    age: number
-    picture: string
-    createdAt: Date
-  }
+  playerId: string
+  playerName: string
+  statTypeId: string
+  statName: string
+  value: number
+  sport: string
+  gameTime: string
+  gameDate?: Date // Optional for backwards compatibility
+  status: 'active' | 'resolved' | 'cancelled'
+  overOdds: string
+  underOdds: string
+  actualValue?: number // The actual stat value when resolving
+  resolutionReason?: string // Why it was resolved this way
 }
 
 interface Game {
@@ -97,8 +75,6 @@ export default function AdminPage() {
 }
 
 function AdminPageContent() {
-  const { session } = useSessionToken()
-
   const { addToast } = useToast()
   const [activeTab, setActiveTab] = useState<
     'stats' | 'lines' | 'players' | 'resolve-lines' | 'resolve-games' | 'matchups'
@@ -108,96 +84,130 @@ function AdminPageContent() {
   const sports = [
     {
       name: 'NBA',
-      code: '03XXX',
+      code: '00001',
       icon: '🏀',
       color: 'from-[#00CED1] to-[#FFAB91]',
     },
     {
       name: 'NFL',
-      code: '01XXX',
+      code: '00002',
       icon: '🏈',
       color: 'from-[#FFAB91] to-[#00CED1]',
     },
     {
       name: 'Soccer',
-      code: '04XXX',
+      code: '00003',
       icon: '⚽',
       color: 'from-[#00CED1] to-[#FFAB91]',
     },
     {
       name: 'Baseball',
-      code: '02XXX',
+      code: '00004',
       icon: '⚾',
       color: 'from-[#FFAB91] to-[#00CED1]',
     },
   ]
 
-  // Players data from API
-  const [players, setPlayers] = useState<Player[]>([])
+  // Mock data for stat types
+  const [statTypes, setStatTypes] = useState<StatType[]>([
+    {
+      id: '1',
+      name: 'Points',
+      description: 'Total points scored in the game',
+      numId: '00001-00001',
+      sport: 'NBA',
+      sportCode: '00001',
+      lineCode: '00001',
+    },
+    {
+      id: '2',
+      name: '3-Pointers Made',
+      description: 'Total three-point shots made',
+      numId: '00001-00002',
+      sport: 'NBA',
+      sportCode: '00001',
+      lineCode: '00002',
+    },
+    {
+      id: '3',
+      name: 'Passing Yards',
+      description: 'Total passing yards in the game',
+      numId: '00002-00001',
+      sport: 'NFL',
+      sportCode: '00002',
+      lineCode: '00001',
+    },
+    {
+      id: '4',
+      name: 'Goals Scored',
+      description: 'Total goals scored in the match',
+      numId: '00003-00001',
+      sport: 'Soccer',
+      sportCode: '00003',
+      lineCode: '00001',
+    },
+  ])
 
-  // Fetch players from API
-  useEffect(() => {
-    const fetchPlayers = async () => {
-      try {
-        const response = await fetch('/api/fetch-athletes', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-para-session': session || '',
-          },
-        })
-
-        if (response.ok) {
-          const fetchedPlayers = await response.json()
-          setPlayers(fetchedPlayers)
-        } else {
-          console.error('Failed to fetch players:', response.statusText)
-          addToast('Failed to fetch players', 'error')
-        }
-      } catch (error) {
-        console.error('Error fetching players:', error)
-        addToast('Error fetching players', 'error')
-      }
-    }
-
-    if (session) {
-      fetchPlayers()
-    }
-  }, [session, addToast])
+  // Mock data for players
+  const [players, setPlayers] = useState<Player[]>([
+    {
+      id: '1',
+      name: 'LeBron James',
+      sport: 'NBA',
+      team: 'LAL',
+      jerseyNumber: '23',
+      position: 'SF',
+      avatar: 'LJ',
+    },
+    {
+      id: '2',
+      name: 'Josh Allen',
+      sport: 'NFL',
+      team: 'BUF',
+      jerseyNumber: '17',
+      position: 'QB',
+      avatar: 'JA',
+    },
+    {
+      id: '3',
+      name: 'Lionel Messi',
+      sport: 'Soccer',
+      team: 'MIA',
+      jerseyNumber: '10',
+      position: 'FW',
+      avatar: 'LM',
+    },
+  ])
 
   // Mock data for lines
-  const [lines, setLines] = useState<Line[]>([])
-
-  useEffect(() => {
-    const fetchLines = async () => {
-      try {
-        const response = await fetch('/api/read-lines', {
-          method: 'GET',
-          headers: {
-            'x-para-session': session || '',
-          },
-        })
-        const data = await response.json()
-        console.log(data, 'data')
-
-        // Ensure data is always an array
-        if (Array.isArray(data)) {
-          setLines(data)
-        } else if (data && Array.isArray(data.lines)) {
-          setLines(data.lines)
-        } else if (data && Array.isArray(data.data)) {
-          setLines(data.data)
-        } else {
-          console.warn('API response is not an array:', data)
-          setLines([])
-        }
-      } catch (error) {
-        console.error('Error fetching lines:', error)
-        setLines([])
-      }
-    }
-    fetchLines()
-  }, [])
+  const [lines, setLines] = useState<Line[]>([
+    {
+      id: '1',
+      playerId: '1',
+      playerName: 'LeBron James',
+      statTypeId: '1',
+      statName: 'Points',
+      value: 28.5,
+      sport: 'NBA',
+      gameTime: 'Tonight 8:00 PM',
+      status: 'active',
+      overOdds: '+110',
+      underOdds: '-130',
+    },
+    {
+      id: '2',
+      playerId: '2',
+      playerName: 'Josh Allen',
+      statTypeId: '3',
+      statName: 'Passing Yards',
+      value: 285.5,
+      sport: 'NFL',
+      gameTime: 'Sunday 1:00 PM',
+      status: 'active',
+      overOdds: '-110',
+      underOdds: '-110',
+    },
+  ])
 
   // Mock data for games (using existing lobby structure)
   const [games, setGames] = useState<Game[]>([
@@ -229,8 +239,6 @@ function AdminPageContent() {
     },
   ])
 
-  const timeNow = new Date()
-
   // Mock data for matchups
   const [matchUps, setMatchUps] = useState<MatchUp[]>([
     {
@@ -251,53 +259,22 @@ function AdminPageContent() {
     },
   ])
 
-  const [stats, setStats] = useState<Stat[]>([])
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('/api/read-stats', {
-          method: 'GET',
-          headers: {
-            'x-para-session': session || '',
-          },
-        })
-        const data = await response.json()
-        console.log(data, 'data')
-
-        // Ensure data is always an array
-        if (Array.isArray(data)) {
-          setStats(data)
-        } else if (data && Array.isArray(data.stats)) {
-          setStats(data.stats)
-        } else if (data && Array.isArray(data.data)) {
-          setStats(data.data)
-        } else {
-          console.warn('API response is not an array:', data)
-          setStats([])
-        }
-      } catch (error) {
-        console.error('Error fetching stats:', error)
-        setStats([])
-      }
-    }
-    fetchStats()
-  }, [])
-
   // Form states
-  const [newStat, setNewStat] = useState({
+  const [newStatType, setNewStatType] = useState({
     name: '',
     description: '',
-    customId: 0,
+    sport: '',
+    sportCode: '',
+    lineCode: '',
+    numId: '',
   })
 
   const [newPlayer, setNewPlayer] = useState({
     name: '',
+    sport: '',
     team: '',
+    jerseyNumber: '',
     position: '',
-    jerseyNumber: 0,
-    age: 0,
-    picture: '',
   })
 
   const [newLine, setNewLine] = useState({
@@ -326,243 +303,231 @@ function AdminPageContent() {
     resolutionReason: '',
   })
 
-  const handleCreateStat = async () => {
-    if (!newStat.name || !newStat.description || !newStat.customId) {
+  // Wallet connection state
+  const [walletConnected, setWalletConnected] = useState(false)
+  const [walletAddress, setWalletAddress] = useState('')
+
+  // Wallet connection handler
+  const handleConnectWallet = () => {
+    if (walletConnected) {
+      // Disconnect wallet
+      setWalletConnected(false)
+      setWalletAddress('')
+      addToast('Wallet disconnected', 'success')
+    } else {
+      // Simulate wallet connection (in real app, this would call actual wallet)
+      const mockAddress = 'idk bro tbh i made this shit up'
+      setWalletConnected(true)
+      setWalletAddress(mockAddress)
+      addToast('Wallet connected successfully!', 'success')
+    }
+  }
+
+  // Helper functions
+  const generateNextLineCode = (sportCode: string): string => {
+    const existingLines = statTypes.filter((st) => st.sportCode === sportCode)
+    const maxLineCode = existingLines.reduce((max, stat) => {
+      const lineNum = parseInt(stat.lineCode)
+      return lineNum > max ? lineNum : max
+    }, 0)
+    return String(maxLineCode + 1).padStart(5, '0')
+  }
+
+  const handleCreateStatType = () => {
+    if (!newStatType.name || !newStatType.description || !newStatType.sport) {
       addToast('Please fill in all fields', 'error')
       return
     }
 
-    setNewStat({
+    const sport = sports.find((s) => s.name === newStatType.sport)
+    if (!sport) return
+
+    let numId = newStatType.numId
+    let sportCode = sport.code
+    let lineCode = ''
+
+    // If manual numerical code is provided, validate and parse it
+    if (newStatType.numId.trim()) {
+      const parts = newStatType.numId.split('-')
+      if (parts.length !== 2) {
+        addToast('Numerical code must be in format: 00001-00001', 'error')
+        return
+      }
+      sportCode = parts[0]
+      lineCode = parts[1]
+      numId = newStatType.numId
+    } else {
+      // Auto-generate if not provided
+      lineCode = generateNextLineCode(sport.code)
+      numId = `${sport.code}-${lineCode}`
+    }
+
+    const statType: StatType = {
+      id: String(statTypes.length + 1),
+      name: newStatType.name,
+      description: newStatType.description,
+      numId: numId,
+      sport: newStatType.sport,
+      sportCode: sportCode,
+      lineCode: lineCode,
+    }
+
+    setStatTypes([...statTypes, statType])
+    setNewStatType({
       name: '',
       description: '',
-      customId: 0,
+      sport: '',
+      sportCode: '',
+      lineCode: '',
+      numId: '',
     })
-
-    const apiData = {
-      name: newStat.name,
-      description: newStat.description,
-      customId: newStat.customId,
-    }
-    const response = await fetch('/api/create-stat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-para-session': session || '',
-      },
-      body: JSON.stringify(apiData),
-    })
-    const result = await response.json()
-    console.log(result, 'result')
     addToast('Stat type created successfully!', 'success')
   }
 
-  const handleCreatePlayer = async () => {
-    if (!newPlayer.name || !newPlayer.team || !newPlayer.jerseyNumber || !newPlayer.position || !newPlayer.age) {
-      addToast('Please fill in all required fields', 'error')
+  const handleCreatePlayer = () => {
+    if (!newPlayer.name || !newPlayer.sport || !newPlayer.team || !newPlayer.jerseyNumber || !newPlayer.position) {
+      addToast('Please fill in all fields', 'error')
       return
     }
 
-    try {
-      const apiData = {
-        name: newPlayer.name,
-        team: newPlayer.team,
-        position: newPlayer.position,
-        jerseyNumber: newPlayer.jerseyNumber,
-        age: newPlayer.age,
-        picture: newPlayer.picture || undefined, // optional field
-      }
-
-      const response = await fetch('/api/create-athlete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-para-session': session || '',
-        },
-        body: JSON.stringify(apiData),
-      })
-
-      if (response.ok) {
-        const newPlayerData = await response.json()
-
-        // Add the new player to the local state
-        setPlayers([...players, newPlayerData])
-
-        // Reset the form
-        setNewPlayer({
-          name: '',
-          team: '',
-          position: '',
-          jerseyNumber: 0,
-          age: 0,
-          picture: '',
-        })
-
-        addToast('Player added successfully!', 'success')
-      } else {
-        const errorData = await response.json()
-        addToast(errorData.error || 'Failed to create player', 'error')
-      }
-    } catch (error) {
-      console.error('Error creating player:', error)
-      addToast('Error creating player', 'error')
+    const player: Player = {
+      id: String(players.length + 1),
+      name: newPlayer.name,
+      sport: newPlayer.sport,
+      team: newPlayer.team,
+      jerseyNumber: newPlayer.jerseyNumber,
+      position: newPlayer.position,
+      avatar: newPlayer.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase(),
     }
+
+    setPlayers([...players, player])
+    setNewPlayer({
+      name: '',
+      sport: '',
+      team: '',
+      jerseyNumber: '',
+      position: '',
+    })
+    addToast('Player added successfully!', 'success')
   }
 
-  const handleCreateLine = async () => {
-    // if (
-    //   !newLine.playerId ||
-    //   !newLine.statTypeId ||
-    //   !newLine.value ||
-    //   !newLine.gameTime ||
-    //   !newLine.gameDate ||
-    //   !newLine.overOdds ||
-    //   !newLine.underOdds
-    // ) {
-    //   addToast("Please fill in all fields", "error");
-    //   return;
-    // }
-
-    // const player = players.find((p) => p.id === newLine.playerId);
-    // const statType = statTypes.find((st) => st.id === newLine.statTypeId);
-    // if (!player || !statType) return;
-
-    // // Parse the date
-    // const gameDate = new Date(newLine.gameDate);
-    // if (isNaN(gameDate.getTime())) {
-    //   addToast("Please enter a valid date and time", "error");
-    //   return;
-    // }
-
-    // const line: Line = {
-    //   id: String(lines.length + 1),
-    //   playerId: newLine.playerId,
-    //   playerName: player.name,
-    //   statTypeId: newLine.statTypeId,
-    //   statName: statType.name,
-    //   value: parseFloat(newLine.value),
-    //   sport: player.sport,
-    //   gameTime: newLine.gameTime,
-    //   gameDate: gameDate,
-    //   status: "active",
-    //   overOdds: newLine.overOdds,
-    //   underOdds: newLine.underOdds,
-    // };
-
-    // setLines([...lines, line]);
-    // setNewLine({
-    //   playerId: "",
-    //   statTypeId: "",
-    //   value: "",
-    //   gameId: "",
-    //   gameDate: "",
-    // });
-
-    const apiData = {
-      athleteId: '17b27fd9-8ebe-4ce7-9e84-cb34714386a6',
-      statId: '550e8401-e29b-41d4-a716-446655440018',
-      matchupId: '550e8400-e29b-41d4-a716-446655440050',
-      predictedValue: 10.5,
+  const handleCreateLine = () => {
+    if (!newLine.playerId || !newLine.statTypeId || !newLine.value || !newLine.gameId || !newLine.gameDate) {
+      addToast('Please fill in all fields', 'error')
+      return
     }
-    const response = await fetch('/api/create-line', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-para-session': session || '',
-      },
-      body: JSON.stringify(apiData),
+
+    const player = players.find((p) => p.id === newLine.playerId)
+    const statType = statTypes.find((st) => st.id === newLine.statTypeId)
+    const selectedGame = games.find((g) => g.id === newLine.gameId)
+    if (!player || !statType || !selectedGame) return
+
+    // Parse the date
+    const gameDate = new Date(newLine.gameDate)
+    if (isNaN(gameDate.getTime())) {
+      addToast('Please enter a valid date and time', 'error')
+      return
+    }
+
+    const line: Line = {
+      id: String(lines.length + 1),
+      playerId: newLine.playerId,
+      playerName: player.name,
+      statTypeId: newLine.statTypeId,
+      statName: statType.name,
+      value: parseFloat(newLine.value),
+      sport: player.sport,
+      gameTime: selectedGame.title,
+      gameDate: gameDate,
+      status: 'active',
+      overOdds: '+110', // Default odds
+      underOdds: '-110', // Default odds
+    }
+
+    setLines([...lines, line])
+    setNewLine({
+      playerId: '',
+      statTypeId: '',
+      value: '',
+      gameId: '',
+      gameDate: '',
     })
-
-    const result = await response.json()
-    console.log(result, 'result')
-
     addToast('Line created successfully!', 'success')
   }
 
-  const handleResolveLine = async (
+  const handleResolveLine = (
     lineId: string,
     actualValue: number,
-    // result: 'over' | 'under' | 'cancel',
-    // resolutionReason?: string,
+    result: 'over' | 'under' | 'cancel',
+    resolutionReason?: string,
   ) => {
-    // if (result === 'cancel') {
-    //   setLines(
-    //     lines.map((line) =>
-    //       line.id === lineId
-    //         ? {
-    //             ...line,
-    //             status: 'cancelled',
-    //             resolutionReason: resolutionReason || 'Cancelled by admin',
-    //           }
-    //         : line,
-    //     ),
-    //   )
-    //   addToast('Line cancelled successfully!', 'success')
-    //   return
-    // }
-
-    // const line = lines.find((l) => l.id === lineId)
-    // if (!line) return
-
-    // // Validation logic
-    // const shouldBeOver = actualValue > line.value
-    // const shouldBeUnder = actualValue < line.value
-    // const isPush = actualValue === line.value
-
-    // if (isPush) {
-    //   addToast(
-    //     `Actual value ${actualValue} equals line value ${line.value}. This should be a push, not resolved as ${result.toUpperCase()}`,
-    //     'error',
-    //   )
-    //   return
-    // }
-
-    // if (result === 'over' && !shouldBeOver) {
-    //   addToast(
-    //     `Error: Actual value ${actualValue} is under the line value ${line.value}. Cannot resolve as OVER.`,
-    //     'error',
-    //   )
-    //   return
-    // }
-
-    // if (result === 'under' && !shouldBeUnder) {
-    //   addToast(
-    //     `Error: Actual value ${actualValue} is over the line value ${line.value}. Cannot resolve as UNDER.`,
-    //     'error',
-    //   )
-    //   return
-    // }
-
-    // setLines(
-    //   lines.map((l) =>
-    //     l.id === lineId
-    //       ? {
-    //           ...l,
-    //           status: 'resolved',
-    //           actualValue,
-    //           resolutionReason:
-    //             resolutionReason || `Resolved as ${result.toUpperCase()}: actual ${actualValue} vs line ${line.value}`,
-    //         }
-    //       : l,
-    //   ),
-    // )
-
-    const apiData = {
-      lineId: 'a2fcf50b-c67c-481e-8658-e4fb2ad9cd95',
-      actualValue: 12,
+    if (result === 'cancel') {
+      setLines(
+        lines.map((line) =>
+          line.id === lineId
+            ? {
+                ...line,
+                status: 'cancelled',
+                resolutionReason: resolutionReason || 'Cancelled by admin',
+              }
+            : line,
+        ),
+      )
+      addToast('Line cancelled successfully!', 'success')
+      return
     }
-    const response = await fetch('/api/resolve-line', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-para-session': session || '',
-      },
-      body: JSON.stringify(apiData),
-    })
 
-    const result = await response.json()
-    console.log(result, 'result')
+    const line = lines.find((l) => l.id === lineId)
+    if (!line) return
 
-    addToast(`Line resolved successfully! (${actualValue})`, 'success')
+    // Validation logic
+    const shouldBeOver = actualValue > line.value
+    const shouldBeUnder = actualValue < line.value
+    const isPush = actualValue === line.value
+
+    if (isPush) {
+      addToast(
+        `Actual value ${actualValue} equals line value ${line.value}. This should be a push, not resolved as ${result.toUpperCase()}`,
+        'error',
+      )
+      return
+    }
+
+    if (result === 'over' && !shouldBeOver) {
+      addToast(
+        `Error: Actual value ${actualValue} is under the line value ${line.value}. Cannot resolve as OVER.`,
+        'error',
+      )
+      return
+    }
+
+    if (result === 'under' && !shouldBeUnder) {
+      addToast(
+        `Error: Actual value ${actualValue} is over the line value ${line.value}. Cannot resolve as UNDER.`,
+        'error',
+      )
+      return
+    }
+
+    setLines(
+      lines.map((l) =>
+        l.id === lineId
+          ? {
+              ...l,
+              status: 'resolved',
+              actualValue,
+              resolutionReason:
+                resolutionReason || `Resolved as ${result.toUpperCase()}: actual ${actualValue} vs line ${line.value}`,
+            }
+          : l,
+      ),
+    )
+
+    addToast(`Line resolved as ${result.toUpperCase()} successfully! (${actualValue} vs ${line.value})`, 'success')
   }
 
   const handleResolveGame = (gameId: string, action: 'end' | 'cancel') => {
@@ -617,12 +582,11 @@ function AdminPageContent() {
   }
 
   // Filter functions
-  console.log(lines, 'lines')
-  const filteredLines = (Array.isArray(lines) ? lines : []).filter((line) => {
+  const filteredLines = lines.filter((line) => {
     const matchesSearch =
-      line.athlete.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      line.stat.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesSport = selectedSport === 'all' || line.matchup.homeTeam === selectedSport
+      line.playerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      line.statName.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSport = selectedSport === 'all' || line.sport === selectedSport
     return matchesSearch && matchesSport
   })
 
@@ -657,6 +621,48 @@ function AdminPageContent() {
           {/* Right: Status or Info */}
           <div className="flex items-center space-x-3">
             {/* Connect Wallet Button */}
+            <button
+              onClick={handleConnectWallet}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl border transition-all duration-300 backdrop-blur-sm ${
+                walletConnected
+                  ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-500/30 hover:from-green-500/30 hover:to-emerald-500/30'
+                  : 'bg-gradient-to-r from-[#00CED1]/20 to-[#FFAB91]/20 border-[#00CED1]/30 hover:from-[#00CED1]/30 hover:to-[#FFAB91]/30'
+              }`}
+            >
+              <div
+                className={`w-5 h-5 rounded-lg flex items-center justify-center ${
+                  walletConnected
+                    ? 'bg-gradient-to-br from-green-500 to-emerald-500'
+                    : 'bg-gradient-to-br from-[#00CED1] to-[#FFAB91]'
+                }`}
+              >
+                {walletConnected ? (
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                ) : (
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                )}
+              </div>
+              <div className="text-left">
+                <span
+                  className={`font-bold text-sm ${
+                    walletConnected
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent'
+                      : 'bg-gradient-to-r from-[#00CED1] to-[#FFAB91] bg-clip-text text-transparent'
+                  }`}
+                >
+                  {walletConnected ? 'Connected' : 'Connect Wallet'}
+                </span>
+                {walletConnected && <div className="text-xs text-slate-400 font-mono">{walletAddress}</div>}
+              </div>
+            </button>
 
             {/* Admin Access Indicator */}
             {/* <div className="bg-gradient-to-r from-[#00CED1]/20 to-[#FFAB91]/20 border border-[#00CED1]/30 rounded-xl px-4 py-2 backdrop-blur-sm">
@@ -728,8 +734,8 @@ function AdminPageContent() {
                     <label className="block text-white font-semibold mb-2">Stat Name</label>
                     <input
                       type="text"
-                      value={newStat.name}
-                      onChange={(e) => setNewStat({ ...newStat, name: e.target.value })}
+                      value={newStatType.name}
+                      onChange={(e) => setNewStatType({ ...newStatType, name: e.target.value })}
                       placeholder="e.g., Points, Assists, Goals"
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
@@ -738,10 +744,10 @@ function AdminPageContent() {
                   <div>
                     <label className="block text-white font-semibold mb-2">Description</label>
                     <textarea
-                      value={newStat.description}
+                      value={newStatType.description}
                       onChange={(e) =>
-                        setNewStat({
-                          ...newStat,
+                        setNewStatType({
+                          ...newStatType,
                           description: e.target.value,
                         })
                       }
@@ -752,14 +758,14 @@ function AdminPageContent() {
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">Custom ID</label>
+                    <label className="block text-white font-semibold mb-2">Numerical Code (Optional)</label>
                     <input
                       type="text"
-                      value={newStat.customId}
+                      value={newStatType.numId}
                       onChange={(e) =>
-                        setNewStat({
-                          ...newStat,
-                          customId: parseInt(e.target.value),
+                        setNewStatType({
+                          ...newStatType,
+                          numId: e.target.value,
                         })
                       }
                       placeholder="e.g., 00001-00001"
@@ -770,8 +776,59 @@ function AdminPageContent() {
                     </p>
                   </div>
 
+                  <div>
+                    <label className="block text-white font-semibold mb-2">Sport</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {sports.map((sport) => (
+                        <button
+                          key={sport.name}
+                          onClick={() =>
+                            setNewStatType({
+                              ...newStatType,
+                              sport: sport.name,
+                            })
+                          }
+                          className={`p-3 rounded-xl border-2 transition-all duration-200 ${
+                            newStatType.sport === sport.name
+                              ? 'border-[#00CED1] bg-[#00CED1]/10 shadow-lg'
+                              : 'border-slate-600/30 bg-slate-700/30 hover:border-slate-500/50'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xl">{sport.icon}</span>
+                            <div className="text-left">
+                              <div className="text-white font-semibold text-sm">{sport.name}</div>
+                              <div className="text-slate-400 text-xs">Code: {sport.code}</div>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {newStatType.sport && (
+                    <div className="bg-slate-700/30 rounded-xl p-4">
+                      <h4 className="text-white font-semibold mb-2">Generated ID Preview</h4>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-slate-300">Sport Code:</span>
+                        <span className="text-[#00CED1] font-mono">
+                          {sports.find((s) => s.name === newStatType.sport)?.code}
+                        </span>
+                        <span className="text-slate-300">-</span>
+                        <span className="text-slate-300">Line Code:</span>
+                        <span className="text-[#FFAB91] font-mono">
+                          {generateNextLineCode(sports.find((s) => s.name === newStatType.sport)?.code || '')}
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-400 mt-1">
+                        Full ID: {sports.find((s) => s.name === newStatType.sport)?.code}-
+                        {generateNextLineCode(sports.find((s) => s.name === newStatType.sport)?.code || '')}
+                      </div>
+                    </div>
+                  )}
+
                   <button
-                    onClick={handleCreateStat}
+                    onClick={handleCreateStatType}
                     className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
                   >
                     Create Stat Type
@@ -785,7 +842,10 @@ function AdminPageContent() {
                   <span className="w-8 h-8 bg-gradient-to-r from-[#FFAB91] to-[#00CED1] rounded-full mr-3 flex items-center justify-center">
                     <span className="text-lg">📋</span>
                   </span>
-                  Existing Stats
+                  Existing Stat Types
+                  <span className="ml-auto bg-gradient-to-r from-[#00CED1]/20 to-[#FFAB91]/20 border border-[#00CED1]/30 rounded-lg px-3 py-1 text-sm">
+                    {statTypes.length} Total
+                  </span>
                 </h2>
 
                 {/* Search and Filter */}
@@ -799,16 +859,43 @@ function AdminPageContent() {
                       className="w-full px-4 py-3 pl-11 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
                   </div>
+
+                  <div>
+                    <SportsDropdown
+                      value={selectedSport}
+                      onChange={setSelectedSport}
+                      includeAll={true}
+                      placeholder="Filter by sport"
+                    />
+                  </div>
+                </div>
+
+                {/* Sports Summary */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                  {sports.map((sport) => {
+                    const sportCount = statTypes.filter((st) => st.sport === sport.name).length
+                    return (
+                      <div
+                        key={sport.name}
+                        className="bg-slate-800/30 rounded-lg p-3 text-center border border-slate-700/30"
+                      >
+                        <div className="text-xl mb-1">{sport.icon}</div>
+                        <div className="text-white font-semibold text-sm">{sport.name}</div>
+                        <div className="text-[#00CED1] text-xs">{sportCount} stats</div>
+                      </div>
+                    )
+                  })}
                 </div>
 
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {(Array.isArray(stats) ? stats : [])
+                  {statTypes
                     .filter((stat) => {
                       const matchesSearch =
                         stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         stat.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        stat.customId.toString().includes(searchTerm.toLowerCase())
-                      return matchesSearch
+                        stat.numId.toLowerCase().includes(searchTerm.toLowerCase())
+                      const matchesSport = selectedSport === 'all' || stat.sport === selectedSport
+                      return matchesSearch && matchesSport
                     })
                     .map((stat) => (
                       <div
@@ -818,16 +905,31 @@ function AdminPageContent() {
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center space-x-3 mb-2">
+                              <div
+                                className={`w-10 h-10 rounded-lg bg-gradient-to-br ${sports.find((s) => s.name === stat.sport)?.color} flex items-center justify-center`}
+                              >
+                                <span className="text-lg">{sports.find((s) => s.name === stat.sport)?.icon}</span>
+                              </div>
                               <div className="flex-1">
                                 <h4 className="text-white font-semibold text-lg">{stat.name}</h4>
                                 <div className="flex items-center space-x-2">
-                                  {/* <span className="text-[#00CED1] text-sm font-medium">{stat.sport}</span> */}
+                                  <span className="text-[#00CED1] text-sm font-medium">{stat.sport}</span>
                                   <span className="text-slate-400">•</span>
-                                  <span className="text-[#FFAB91] font-mono text-sm">{stat.customId}</span>
+                                  <span className="text-[#FFAB91] font-mono text-sm">{stat.numId}</span>
                                 </div>
                               </div>
                             </div>
                             <p className="text-slate-300 text-sm leading-relaxed mb-3 pl-13">{stat.description}</p>
+                            <div className="flex items-center space-x-4 text-xs pl-13">
+                              <div className="bg-slate-800/50 rounded-lg px-2 py-1">
+                                <span className="text-slate-400">Sport Code: </span>
+                                <span className="text-[#00CED1] font-mono">{stat.sportCode}</span>
+                              </div>
+                              <div className="bg-slate-800/50 rounded-lg px-2 py-1">
+                                <span className="text-slate-400">Line Code: </span>
+                                <span className="text-[#FFAB91] font-mono">{stat.lineCode}</span>
+                              </div>
+                            </div>
                           </div>
                           <div className="flex flex-col space-y-2">
                             <button className="p-2 bg-slate-800/50 hover:bg-slate-700/50 rounded-lg transition-colors group">
@@ -864,12 +966,13 @@ function AdminPageContent() {
                         </div>
                       </div>
                     ))}
-                  {(Array.isArray(stats) ? stats : []).filter((stat) => {
+                  {statTypes.filter((stat) => {
                     const matchesSearch =
                       stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                       stat.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      stat.customId.toString().includes(searchTerm.toLowerCase())
-                    return matchesSearch
+                      stat.numId.toLowerCase().includes(searchTerm.toLowerCase())
+                    const matchesSport = selectedSport === 'all' || stat.sport === selectedSport
+                    return matchesSearch && matchesSport
                   }).length === 0 && (
                     <div className="text-center py-8">
                       <div className="text-slate-400 mb-2"></div>
@@ -904,6 +1007,16 @@ function AdminPageContent() {
                     />
                   </div>
 
+                  <div>
+                    <label className="block text-white font-semibold mb-2">Sport</label>
+                    <SportsDropdown
+                      value={newPlayer.sport}
+                      onChange={(value) => setNewPlayer({ ...newPlayer, sport: value })}
+                      includeAll={false}
+                      placeholder="Select Sport"
+                    />
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-white font-semibold mb-2">Team</label>
@@ -919,12 +1032,12 @@ function AdminPageContent() {
                     <div>
                       <label className="block text-white font-semibold mb-2">Jersey #</label>
                       <input
-                        type="number"
+                        type="text"
                         value={newPlayer.jerseyNumber}
                         onChange={(e) =>
                           setNewPlayer({
                             ...newPlayer,
-                            jerseyNumber: parseInt(e.target.value),
+                            jerseyNumber: e.target.value,
                           })
                         }
                         placeholder="e.g., 23"
@@ -933,37 +1046,13 @@ function AdminPageContent() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-white font-semibold mb-2">Position</label>
-                      <input
-                        type="text"
-                        value={newPlayer.position}
-                        onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
-                        placeholder="e.g., SF, QB, FW"
-                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-white font-semibold mb-2">Age</label>
-                      <input
-                        type="number"
-                        value={newPlayer.age}
-                        onChange={(e) => setNewPlayer({ ...newPlayer, age: parseInt(e.target.value) })}
-                        placeholder="e.g., 25"
-                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
-                      />
-                    </div>
-                  </div>
-
                   <div>
-                    <label className="block text-white font-semibold mb-2">Picture URL (Optional)</label>
+                    <label className="block text-white font-semibold mb-2">Position</label>
                     <input
-                      type="url"
-                      value={newPlayer.picture}
-                      onChange={(e) => setNewPlayer({ ...newPlayer, picture: e.target.value })}
-                      placeholder="e.g., https://example.com/player-image.jpg"
+                      type="text"
+                      value={newPlayer.position}
+                      onChange={(e) => setNewPlayer({ ...newPlayer, position: e.target.value })}
+                      placeholder="e.g., SF, QB, FW"
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
                   </div>
@@ -987,61 +1076,27 @@ function AdminPageContent() {
                 </h2>
 
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {players.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="text-slate-400 mb-2">No players found</div>
-                      <div className="text-sm text-slate-500">Add players using the form on the left</div>
-                    </div>
-                  ) : (
-                    players.map((player) => (
-                      <div
-                        key={player.id}
-                        className="bg-slate-700/30 rounded-xl p-4 hover:bg-slate-700/50 transition-colors"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center overflow-hidden">
-                            {player.picture ? (
-                              <img
-                                src={player.picture}
-                                alt={player.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  // Fallback to initials if image fails to load
-                                  const target = e.target as HTMLImageElement
-                                  target.style.display = 'none'
-                                  const parent = target.parentElement
-                                  if (parent) {
-                                    parent.innerHTML = `<span class="text-white font-bold">${player.name
-                                      .split(' ')
-                                      .map((n) => n[0])
-                                      .join('')
-                                      .toUpperCase()}</span>`
-                                  }
-                                }}
-                              />
-                            ) : (
-                              <span className="text-white font-bold">
-                                {player.name
-                                  .split(' ')
-                                  .map((n) => n[0])
-                                  .join('')
-                                  .toUpperCase()}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-white font-semibold">{player.name}</h4>
-                            <div className="flex items-center space-x-2 text-sm">
-                              <span className="text-slate-300">{player.team}</span>
-                              <span className="text-slate-400">#{player.jerseyNumber}</span>
-                              <span className="text-slate-400">{player.position}</span>
-                              <span className="text-slate-400">Age: {player.age}</span>
-                            </div>
+                  {players.map((player) => (
+                    <div
+                      key={player.id}
+                      className="bg-slate-700/30 rounded-xl p-4 hover:bg-slate-700/50 transition-colors"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center">
+                          <span className="text-white font-bold">{player.avatar}</span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-white font-semibold">{player.name}</h4>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="text-lg">{sports.find((s) => s.name === player.sport)?.icon}</span>
+                            <span className="text-slate-300">{player.team}</span>
+                            <span className="text-slate-400">#{player.jerseyNumber}</span>
+                            <span className="text-slate-400">{player.position}</span>
                           </div>
                         </div>
                       </div>
-                    ))
-                  )}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -1068,7 +1123,7 @@ function AdminPageContent() {
                         ...players.map((player) => ({
                           value: player.id,
                           label: `${player.name} (${player.team})`,
-                          icon: '👤',
+                          icon: sports.find((s) => s.name === player.sport)?.icon,
                         })),
                       ]}
                       searchable={true}
@@ -1087,11 +1142,16 @@ function AdminPageContent() {
                           label: 'Select stat type',
                           disabled: true,
                         },
-                        ...(Array.isArray(stats) ? stats : []).map((stat) => ({
-                          value: stat.id,
-                          label: `${stat.name} (${stat.customId})`,
-                          icon: '📊',
-                        })),
+                        ...statTypes
+                          .filter((st) => {
+                            const selectedPlayer = players.find((p) => p.id === newLine.playerId)
+                            return !selectedPlayer || st.sport === selectedPlayer.sport
+                          })
+                          .map((stat) => ({
+                            value: stat.id,
+                            label: `${stat.name} (${stat.numId})`,
+                            icon: '📊',
+                          })),
                       ]}
                       searchable={true}
                     />
@@ -1105,7 +1165,7 @@ function AdminPageContent() {
                       value={newLine.value}
                       onChange={(e) => setNewLine({ ...newLine, value: e.target.value })}
                       placeholder="e.g., 28.5"
-                      className="w-full px-4 py-3 bg-slate-800/50 border border-slate-70  0/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                      className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
                   </div>
                 </div>
@@ -1122,33 +1182,31 @@ function AdminPageContent() {
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">Select Game</label>
+                    <label className="block text-white font-semibold mb-2">Game</label>
                     <select
                       value={newLine.gameId}
                       onChange={(e) => setNewLine({ ...newLine, gameId: e.target.value })}
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     >
                       <option value="">Select a game</option>
-                      {Array.isArray(games)
-                        ? games.map((game) => (
-                            <option key={game.id} value={game.id}>
-                              {game.title} - {game.sport}
-                            </option>
-                          ))
-                        : null}
+                      {games.map((game) => (
+                        <option key={game.id} value={game.id}>
+                          {game.title} ({game.sport})
+                        </option>
+                      ))}
                     </select>
                   </div>
-                </div>
-              </div>
 
-              {/* Create Line Button - Full Width at Bottom */}
-              <div className="mt-6">
-                <button
-                  onClick={handleCreateLine}
-                  className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
-                >
-                  Create Line
-                </button>
+                  <div className="flex flex-col justify-end">
+                    <label className="block text-white font-semibold mb-2 opacity-0">Alignment</label>
+                    <button
+                      onClick={handleCreateLine}
+                      className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+                    >
+                      Create Line
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -1198,47 +1256,19 @@ function AdminPageContent() {
                           <h4 className="text-white font-semibold text-lg">{line.playerName}</h4>
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              line.createdAt > timeNow.toISOString()
+                              line.status === 'active'
                                 ? 'bg-[#00CED1]/20 text-[#00CED1] border border-[#00CED1]/30'
-                                : !!line.actualValue
+                                : line.status === 'resolved'
                                   ? 'bg-[#FFAB91]/20 text-[#FFAB91] border border-[#FFAB91]/30'
                                   : 'bg-red-500/20 text-red-400 border border-red-400/30'
                             }`}
                           >
-                            {line.createdAt > timeNow.toISOString()
-                              ? 'Pending'
-                              : !!line.actualValue
-                                ? 'Resolved'
-                                : 'Cancelled'}
+                            {line.status}
                           </span>
-                        </div>
-                        <div
-                          key={line.athlete.id}
-                          className="bg-slate-700/30 rounded-xl p-4 hover:bg-slate-700/50 transition-colors"
-                        >
-                          <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center overflow-hidden">
-                              <Image
-                                src={line.athlete.picture}
-                                alt={line.athlete.name}
-                                width={48}
-                                height={48}
-                                className="w-full h-full object-cover rounded-full"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="text-white font-semibold">{line.athlete.name}</h4>
-                              <div className="flex items-center space-x-2 text-sm">
-                                <span className="text-slate-300">{line.athlete.team}</span>
-                                <span className="text-slate-400">#{line.athlete.jerseyNumber}</span>
-                                <span className="text-slate-400">{line.athlete.position}</span>
-                              </div>
-                            </div>
-                          </div>
                         </div>
                         <div className="text-right">
                           <div className="text-sm text-slate-400">Line Value</div>
-                          <div className="text-xl font-bold text-[#FFAB91]">{line.predictedValue}</div>
+                          <div className="text-xl font-bold text-[#FFAB91]">{line.value}</div>
                         </div>
                       </div>
 
@@ -1246,52 +1276,69 @@ function AdminPageContent() {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-800/30 rounded-lg">
                         <div>
                           <div className="text-sm text-slate-400">Stat Type</div>
-                          <div className="text-white font-semibold">{line.stat.name}</div>
+                          <div className="text-white font-semibold">{line.statName}</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-slate-400">Odds</div>
+                          <div className="text-white">
+                            Over: <span className="text-[#00CED1]">{line.overOdds}</span> | Under:{' '}
+                            <span className="text-[#FFAB91]">{line.underOdds}</span>
+                          </div>
                         </div>
                         <div>
                           <div className="text-sm text-slate-400">Game</div>
-                          <div className="text-white font-semibold">
-                            {line.matchup.homeTeam} vs {line.matchup.awayTeam}
-                          </div>
+                          <div className="text-white font-semibold">{line.gameTime}</div>
                         </div>
                       </div>
 
                       {/* Resolution Status or Input */}
-                      {!!line.actualValue && (
+                      {line.status === 'resolved' && (
                         <div className="p-4 bg-gradient-to-r from-[#FFAB91]/10 to-[#00CED1]/10 border border-[#FFAB91]/30 rounded-lg">
                           <div className="flex items-center justify-between">
                             <div>
                               <div className="text-sm text-slate-300">Resolved Value</div>
                               <div className="text-lg font-bold text-[#FFAB91]">
-                                {line.actualValue} (Line was {line.predictedValue})
+                                {line.actualValue} (Line was {line.value})
                               </div>
                             </div>
                             <div className="text-right">
                               <div className="text-sm text-slate-300">Result</div>
                               <div
                                 className={`font-bold ${
-                                  line.actualValue! > line.predictedValue ? 'text-[#00CED1]' : 'text-[#FFAB91]'
+                                  line.actualValue! > line.value ? 'text-[#00CED1]' : 'text-[#FFAB91]'
                                 }`}
                               >
-                                {line.actualValue! > line.predictedValue
+                                {line.actualValue! > line.value
                                   ? 'OVER'
-                                  : line.actualValue! < line.predictedValue
+                                  : line.actualValue! < line.value
                                     ? 'UNDER'
                                     : 'PUSH'}
                               </div>
                             </div>
                           </div>
+                          {line.resolutionReason && (
+                            <div className="mt-2 text-sm text-slate-400">{line.resolutionReason}</div>
+                          )}
                         </div>
                       )}
 
-                      {!line.actualValue && (
+                      {line.status === 'cancelled' && (
+                        <div className="p-4 bg-red-500/10 border border-red-400/30 rounded-lg">
+                          <div className="text-red-400 font-semibold">Line Cancelled</div>
+                          {line.resolutionReason && (
+                            <div className="mt-1 text-sm text-slate-400">{line.resolutionReason}</div>
+                          )}
+                        </div>
+                      )}
+
+                      {line.status === 'active' && (
                         <div className="border-t border-slate-600/30 pt-4">
                           {resolvingLine === line.id ? (
                             <div className="space-y-4">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                   <label className="block text-white font-semibold mb-2">
-                                    Actual {line.stat.name} Value
+                                    Actual {line.statName} Value
                                   </label>
                                   <input
                                     type="number"
@@ -1303,7 +1350,7 @@ function AdminPageContent() {
                                         actualValue: e.target.value,
                                       })
                                     }
-                                    placeholder={`e.g., ${line.predictedValue}`}
+                                    placeholder={`e.g., ${line.value}`}
                                     className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                                   />
                                   <div className="mt-1 text-sm text-slate-400">Line value: {line.value}</div>
@@ -1335,7 +1382,12 @@ function AdminPageContent() {
                                       addToast('Please enter a valid actual value', 'error')
                                       return
                                     }
-                                    handleResolveLine(line.id, actualValue)
+                                    handleResolveLine(
+                                      line.id,
+                                      actualValue,
+                                      actualValue > line.value ? 'over' : 'under',
+                                      resolutionData.resolutionReason,
+                                    )
                                     setResolvingLine(null)
                                     setResolutionData({
                                       actualValue: '',
@@ -1349,7 +1401,12 @@ function AdminPageContent() {
                                 </button>
                                 <button
                                   onClick={() => {
-                                    handleResolveLine(line.id, 0)
+                                    handleResolveLine(
+                                      line.id,
+                                      0,
+                                      'cancel',
+                                      resolutionData.resolutionReason || 'Cancelled by admin',
+                                    )
                                     setResolvingLine(null)
                                     setResolutionData({
                                       actualValue: '',
@@ -1384,7 +1441,7 @@ function AdminPageContent() {
                               </button>
                               <button
                                 onClick={() => {
-                                  handleResolveLine(line.id, 0)
+                                  handleResolveLine(line.id, 0, 'cancel', 'Quick cancelled by admin')
                                 }}
                                 className="px-6 py-3 bg-slate-600 hover:bg-slate-500 text-white font-semibold rounded-xl transition-colors"
                               >
@@ -1492,16 +1549,14 @@ function AdminPageContent() {
           {activeTab === 'matchups' && (
             <div className="space-y-6">
               {/* Match-ups Section */}
-              <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
-                <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
-                  <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-3 flex items-center justify-center">
-                    <span className="text-lg">⚔️</span>
-                  </span>
+              <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6">
+                <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+                  <span className="mr-2">⚔️</span>
                   Match-ups
-                </h2>
+                </h3>
 
                 {/* Create Match-up Form */}
-                <div className="bg-slate-800/50 rounded-xl p-6 mb-6">
+                <div className="bg-slate-800/50 rounded-xl p-4 mb-6">
                   <h4 className="text-lg font-semibold text-white mb-4">Create New Match-up</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
@@ -1514,13 +1569,14 @@ function AdminPageContent() {
                             sport: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-[#00CED1]"
                       >
                         <option value="">Select Sport</option>
                         <option value="NBA">NBA</option>
                         <option value="NFL">NFL</option>
                         <option value="Soccer">Soccer</option>
-                        <option value="Baseball">Baseball</option>
+                        <option value="MLB">MLB</option>
+                        <option value="NHL">NHL</option>
                       </select>
                     </div>
                     <div>
@@ -1535,7 +1591,7 @@ function AdminPageContent() {
                           })
                         }
                         placeholder="e.g., Los Angeles Lakers"
-                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-[#00CED1]"
                       />
                     </div>
                     <div>
@@ -1550,7 +1606,7 @@ function AdminPageContent() {
                           })
                         }
                         placeholder="e.g., Golden State Warriors"
-                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-[#00CED1]"
                       />
                     </div>
                     <div>
@@ -1559,13 +1615,13 @@ function AdminPageContent() {
                         type="date"
                         value={newMatchUp.date}
                         onChange={(e) => setNewMatchUp({ ...newMatchUp, date: e.target.value })}
-                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-[#00CED1]"
                       />
                     </div>
                   </div>
                   <button
                     onClick={handleCreateMatchUp}
-                    className="mt-6 w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+                    className="mt-4 px-6 py-2 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity"
                   >
                     Create Match-up
                   </button>
@@ -1574,46 +1630,40 @@ function AdminPageContent() {
                 {/* Match-ups List */}
                 <div className="space-y-4">
                   {matchUps.map((matchUp) => (
-                    <div
-                      key={matchUp.id}
-                      className="bg-slate-700/30 rounded-xl p-6 hover:bg-slate-700/50 transition-colors border border-slate-600/20"
-                    >
+                    <div key={matchUp.id} className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-6">
+                        <div className="flex items-center space-x-4">
                           <div className="text-center">
-                            <div className="w-16 h-16 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center mb-2">
-                              <span className="font-bold text-white text-sm">HOME</span>
+                            <div className="w-12 h-12 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center mb-1">
+                              <span className="font-bold text-white text-xs">HOME</span>
                             </div>
                             <p className="text-xs text-slate-400">Home</p>
                           </div>
                           <div className="text-center">
-                            <p className="text-2xl font-bold text-white">VS</p>
+                            <p className="text-lg font-bold text-white">VS</p>
                           </div>
                           <div className="text-center">
-                            <div className="w-16 h-16 bg-slate-600/50 rounded-full flex items-center justify-center mb-2">
-                              <span className="font-bold text-white text-sm">AWAY</span>
+                            <div className="w-12 h-12 bg-slate-600 rounded-full flex items-center justify-center mb-1">
+                              <span className="font-bold text-white text-xs">AWAY</span>
                             </div>
                             <p className="text-xs text-slate-400">Away</p>
                           </div>
-                          <div className="ml-6">
-                            <h4 className="text-xl font-bold text-white mb-1">
+                          <div className="ml-4">
+                            <h4 className="font-semibold text-white">
                               {matchUp.homeTeam} vs {matchUp.awayTeam}
                             </h4>
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className="text-lg">{sports.find((s) => s.name === matchUp.sport)?.icon}</span>
-                              <p className="text-sm text-slate-300 font-medium">{matchUp.sport}</p>
-                            </div>
-                            <p className="text-xs text-slate-400">{new Date(matchUp.date).toLocaleDateString()}</p>
+                            <p className="text-sm text-slate-400">{matchUp.sport}</p>
+                            <p className="text-xs text-slate-500">{new Date(matchUp.date).toLocaleDateString()}</p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
                           <span
-                            className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
                               matchUp.status === 'scheduled'
-                                ? 'bg-blue-500/20 text-blue-400 border border-blue-400/30'
+                                ? 'bg-blue-500/20 text-blue-400'
                                 : matchUp.status === 'live'
-                                  ? 'bg-green-500/20 text-green-400 border border-green-400/30'
-                                  : 'bg-gray-500/20 text-gray-400 border border-gray-400/30'
+                                  ? 'bg-green-500/20 text-green-400'
+                                  : 'bg-gray-500/20 text-gray-400'
                             }`}
                           >
                             {matchUp.status.charAt(0).toUpperCase() + matchUp.status.slice(1)}
