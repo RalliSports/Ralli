@@ -5,16 +5,13 @@ import { useConnection } from '@solana/wallet-adapter-react'
 import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
-
-const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+import { USDC_MINT } from '@/constants'
 
 function useSolPrice() {
   return useQuery({
     queryKey: ['sol-price'],
     queryFn: async () => {
-      const response = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd'
-      )
+      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd')
       const data = await response.json()
       return data?.solana?.usd ?? 0
     },
@@ -59,15 +56,13 @@ export function useParaWalletBalance() {
     queryFn: async () => {
       if (!walletAddress) return 0
       try {
-        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
-          walletAddress,
-          { mint: new PublicKey(USDC_MINT) }
-        )
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(walletAddress, {
+          mint: new PublicKey(USDC_MINT),
+        })
 
         if (tokenAccounts.value.length === 0) return 0
 
-        const balance =
-          tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount
+        const balance = tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount
         return balance || 0
       } catch (error) {
         console.error('Error fetching USDC balance:', error)
@@ -81,7 +76,7 @@ export function useParaWalletBalance() {
   const totalUsdBalance = useMemo(() => {
     const solBalance = solBalanceQuery.data || 0
     const usdcBalance = usdcBalanceQuery.data || 0
-    return (solBalance * solPriceUsd) + usdcBalance
+    return solBalance * solPriceUsd + usdcBalance
   }, [solBalanceQuery.data, usdcBalanceQuery.data, solPriceUsd])
 
   return {
@@ -92,14 +87,8 @@ export function useParaWalletBalance() {
       usdc: usdcBalanceQuery.data || 0,
       totalUsd: totalUsdBalance,
     },
-    isLoading:
-      solBalanceQuery.isLoading ||
-      usdcBalanceQuery.isLoading ||
-      isPriceLoading,
-    error:
-      solBalanceQuery.error ||
-      usdcBalanceQuery.error ||
-      priceError,
+    isLoading: solBalanceQuery.isLoading || usdcBalanceQuery.isLoading || isPriceLoading,
+    error: solBalanceQuery.error || usdcBalanceQuery.error || priceError,
     refetch: () => {
       solBalanceQuery.refetch()
       usdcBalanceQuery.refetch()

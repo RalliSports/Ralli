@@ -1,6 +1,11 @@
 // Client-side constants (for browser use)
 export const API_KEY = process.env.NEXT_PUBLIC_PARA_API_KEY ?? ''
 
+const MAINNET_USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+const DEVNET_USDC_MINT = '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'
+
+export const USDC_MINT = process.env.NEXT_IS_MAINNET ? MAINNET_USDC_MINT : DEVNET_USDC_MINT
+
 // Server-side constants (for API routes)
 export const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL
 

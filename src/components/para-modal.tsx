@@ -2,7 +2,7 @@
 
 import { useModal, useAccount, useWallet, useClient } from '@getpara/react-sdk'
 import { useMemo } from 'react'
-import { Wallet, Copy, Zap } from 'lucide-react'
+import { Copy, Zap } from 'lucide-react'
 
 function ellipsify(address?: string, start = 4, end = 4) {
   if (!address) return ''
