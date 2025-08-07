@@ -34,8 +34,11 @@ interface Line {
   statId: string
   matchupId: string
   predictedValue: number
-  actualValue: string
+  actualValue: number
   isHigher: boolean
+  sport?: string
+  playerName?: string
+  value?: number
   stat: {
     id: string
     customId: number
@@ -1531,15 +1534,15 @@ function AdminPageContent() {
                             <h4 className="text-xl font-bold text-white mb-1">
                               {matchUp.homeTeam} vs {matchUp.awayTeam}
                             </h4>
-                            <div className="flex items-center space-x-2 mb-1">
+                            {/* <div className="flex items-center space-x-2 mb-1">
                               <span className="text-lg">{sports.find((s) => s.name === matchUp.sport)?.icon}</span>
                               <p className="text-sm text-slate-300 font-medium">{matchUp.sport}</p>
-                            </div>
+                            </div> */}
                             <p className="text-xs text-slate-400">{new Date(matchUp.date).toLocaleDateString()}</p>
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span
+                          {/* <span
                             className={`px-4 py-2 rounded-full text-sm font-semibold ${
                               matchUp.status === 'scheduled'
                                 ? 'bg-blue-500/20 text-blue-400 border border-blue-400/30'
@@ -1549,7 +1552,7 @@ function AdminPageContent() {
                             }`}
                           >
                             {matchUp.status.charAt(0).toUpperCase() + matchUp.status.slice(1)}
-                          </span>
+                          </span> */}
                         </div>
                       </div>
                     </div>

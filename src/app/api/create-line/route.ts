@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(body.startTime, 'startTime')
+    console.log(body.startsAtTimestamp, 'startsAtTimestamp')
 
     // Make the request to the backend
     const response = await fetch(`${backendUrl}/api/v1/create-line`, {
