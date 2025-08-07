@@ -131,7 +131,7 @@ interface SelectedPick {
 function PicksContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  // const { addToast } = useToast()
+  const { addToast } = useToast()
 
   const { session } = useSessionToken()
   const [selectedPicks, setSelectedPicks] = useState<SelectedPick[]>([])
@@ -255,7 +255,7 @@ function PicksContent() {
     })
     const result = await response.json()
     console.log(result, 'result')
-    // addToast('Stat type created successfully!', 'success')
+    addToast('Bets submitted successfully!', 'success')
   }
 
   const handlePaymentCancel = () => {

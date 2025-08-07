@@ -90,11 +90,7 @@ interface MatchUp {
 }
 
 export default function AdminPage() {
-  return (
-    <ToastProvider>
-      <AdminPageContent />
-    </ToastProvider>
-  )
+  return <AdminPageContent />
 }
 
 function AdminPageContent() {
