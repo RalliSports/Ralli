@@ -1,44 +1,44 @@
-"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client'
 
-import { useState } from "react";
+import { useState } from 'react'
 
 interface AthleteCardProps {
-  id: string;
-  name: string;
-  team: string;
-  position: string;
-  sport: string;
-  matchup: string;
-  gameTime: string;
-  avatar: string;
+  id: string
+  name: string
+  team: string
+  avatar: string
+  matchup: {
+    id: string
+    homeTeam: string
+    awayTeam: string
+    gameDate: Date
+    status: string
+    scoreHome: number
+    scoreAway: number
+    createdAt: Date
+  }
   stats: Array<{
-    type: string;
-    line: number;
-    over: string;
-    under: string;
-  }>;
-  trending: "up" | "down" | "hot" | "stable";
-  confidence: number;
-  isBookmarked: boolean;
-  isSelected: boolean;
-  isInSelectionMode: boolean;
-  onBookmarkToggle: (athleteId: string) => void;
-  onSelectionToggle: (athleteId: string) => void;
-  onProfileClick: (athleteId: string) => void;
+    type: string
+    line: number
+    over: string
+    under: string
+  }>
+  isBookmarked: boolean
+  isSelected: boolean
+  isInSelectionMode: boolean
+  onBookmarkToggle: (athleteId: string) => void
+  onSelectionToggle: (athleteId: string) => void
+  onProfileClick: (athleteId: string) => void
 }
 
 export default function AthleteCard({
   id,
   name,
   team,
-  position,
-  sport,
-  matchup,
-  gameTime,
   avatar,
   stats,
-  trending,
-  confidence,
+  matchup,
   isBookmarked,
   isSelected,
   isInSelectionMode,
@@ -46,58 +46,37 @@ export default function AthleteCard({
   onSelectionToggle,
   onProfileClick,
 }: AthleteCardProps) {
-  const [currentStatIndex, setCurrentStatIndex] = useState(0);
-
-  const getPositionColor = (position: string) => {
-    switch (position) {
-      case "QB":
-        return "from-blue-500/20 to-cyan-500/20 border-blue-500/30 text-blue-400";
-      case "RB":
-        return "from-green-500/20 to-emerald-500/20 border-green-500/30 text-green-400";
-      case "WR":
-        return "from-purple-500/20 to-pink-500/20 border-purple-500/30 text-purple-400";
-      case "TE":
-        return "from-orange-500/20 to-amber-500/20 border-orange-500/30 text-orange-400";
-      case "SF":
-        return "from-red-500/20 to-pink-500/20 border-red-500/30 text-red-400";
-      case "PG":
-        return "from-purple-500/20 to-indigo-500/20 border-purple-500/30 text-purple-400";
-      case "FW":
-        return "from-yellow-500/20 to-orange-500/20 border-yellow-500/30 text-yellow-400";
-      default:
-        return "from-slate-500/20 to-slate-600/20 border-slate-500/30 text-slate-400";
-    }
-  };
+  const [currentStatIndex, setCurrentStatIndex] = useState(0)
 
   const nextStat = () => {
-    setCurrentStatIndex((prev) => (prev + 1) % stats.length);
-  };
+    setCurrentStatIndex((prev) => (prev + 1) % stats.length)
+  }
 
   const prevStat = () => {
-    setCurrentStatIndex((prev) => (prev === 0 ? stats.length - 1 : prev - 1));
-  };
+    setCurrentStatIndex((prev) => (prev === 0 ? stats.length - 1 : prev - 1))
+  }
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    (e.target as any).startX = touch.clientX;
-  };
+    const touch = e.touches[0]
+    ;(e.target as any).startX = touch.clientX
+  }
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    const touch = e.changedTouches[0];
-    const startX = (e.target as any).startX;
-    const endX = touch.clientX;
-    const diff = startX - endX;
+    const touch = e.changedTouches[0]
+    const startX = (e.target as any).startX
+    const endX = touch.clientX
+    const diff = startX - endX
 
     if (Math.abs(diff) > 50) {
       if (diff > 0) {
-        nextStat();
+        nextStat()
       } else {
-        prevStat();
+        prevStat()
       }
     }
-  };
+  }
 
-  const currentStat = stats[currentStatIndex];
+  const currentStat = stats[currentStatIndex]
 
   return (
     <div className="group relative bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-md rounded-xl border border-slate-700/50 shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-slate-600/60 overflow-hidden">
@@ -109,9 +88,7 @@ export default function AthleteCard({
         <button
           onClick={() => onSelectionToggle(id)}
           className={`absolute inset-0 z-10 rounded-xl border-2 transition-all duration-300 ${
-            isSelected
-              ? "border-[#00CED1] bg-[#00CED1]/10"
-              : "border-transparent hover:border-[#00CED1]/50"
+            isSelected ? 'border-[#00CED1] bg-[#00CED1]/10' : 'border-transparent hover:border-[#00CED1]/50'
           }`}
         >
           {isSelected && (
@@ -134,18 +111,16 @@ export default function AthleteCard({
               >
                 {name ? (
                   <img
-                    src={`/players/${name.toLowerCase().replace(/\s+/g, "-")}.png`}
+                    src={`/players/${name.toLowerCase().replace(/\s+/g, '-')}.png`}
                     alt={name}
                     className="w-12 h-12 object-cover rounded-lg"
                     onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff&size=128`;
+                      e.currentTarget.onerror = null
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff&size=128`
                     }}
                   />
                 ) : (
-                  <span className="text-white font-bold text-lg tracking-tight">
-                    {avatar}
-                  </span>
+                  <span className="text-white font-bold text-lg tracking-tight">{avatar}</span>
                 )}
               </div>
               <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full border-2 border-slate-800 bg-emerald-500"></div>
@@ -153,15 +128,11 @@ export default function AthleteCard({
 
             {/* Player Details */}
             <div className="min-w-0 flex-1">
-              <h3 className="text-white font-bold text-lg mb-1 truncate">
-                {name}
-              </h3>
+              <h3 className="text-white font-bold text-lg mb-1 truncate">{name}</h3>
               <div className="flex items-center space-x-2">
-                <span className="text-slate-300 font-semibold text-sm">
-                  {team}
-                </span>
+                <span className="text-slate-300 font-semibold text-sm">{team}</span>
                 <div className="text-slate-400 font-medium text-sm">
-                  {matchup}
+                  {matchup.homeTeam} vs {matchup.awayTeam}
                 </div>
               </div>
             </div>
@@ -172,13 +143,13 @@ export default function AthleteCard({
             onClick={() => onBookmarkToggle(id)}
             className={`p-2 rounded-lg transition-all duration-300 ${
               isBookmarked
-                ? "text-[#FFAB91] bg-[#FFAB91]/20 border border-[#FFAB91]/40"
-                : "text-slate-400 bg-slate-700/50 border border-slate-600/50 hover:text-[#FFAB91] hover:bg-[#FFAB91]/10 hover:border-[#FFAB91]/30"
+                ? 'text-[#FFAB91] bg-[#FFAB91]/20 border border-[#FFAB91]/40'
+                : 'text-slate-400 bg-slate-700/50 border border-slate-600/50 hover:text-[#FFAB91] hover:bg-[#FFAB91]/10 hover:border-[#FFAB91]/30'
             }`}
           >
             <svg
               className="w-5 h-5"
-              fill={isBookmarked ? "currentColor" : "none"}
+              fill={isBookmarked ? 'currentColor' : 'none'}
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
@@ -217,12 +188,7 @@ export default function AthleteCard({
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2.5}
-                      d="M15 19l-7-7 7-7"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
 
@@ -240,12 +206,7 @@ export default function AthleteCard({
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2.5}
-                      d="M9 5l7 7-7 7"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
               </div>
@@ -259,8 +220,8 @@ export default function AthleteCard({
                   onClick={() => setCurrentStatIndex(index)}
                   className={`transition-all duration-500 rounded-full ${
                     index === currentStatIndex
-                      ? "w-6 h-1.5 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] shadow-lg shadow-[#00CED1]/30"
-                      : "w-1.5 h-1.5 bg-slate-600/60 hover:bg-slate-500/80 hover:scale-150 shadow-md"
+                      ? 'w-6 h-1.5 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] shadow-lg shadow-[#00CED1]/30'
+                      : 'w-1.5 h-1.5 bg-slate-600/60 hover:bg-slate-500/80 hover:scale-150 shadow-md'
                   }`}
                 ></button>
               ))}
@@ -277,12 +238,7 @@ export default function AthleteCard({
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={3}
-                    d="M5 15l7-7 7 7"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 15l7-7 7 7" />
                 </svg>
               </div>
               <div className="text-emerald-300 font-bold text-sm group-hover:text-emerald-200 transition-colors">
@@ -298,21 +254,14 @@ export default function AthleteCard({
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={3}
-                    d="M19 9l-7 7-7-7"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
-              <div className="text-red-300 font-bold text-sm group-hover:text-red-200 transition-colors">
-                UNDER
-              </div>
+              <div className="text-red-300 font-bold text-sm group-hover:text-red-200 transition-colors">UNDER</div>
             </button>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }

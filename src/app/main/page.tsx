@@ -12,11 +12,67 @@ import { useParaWalletBalance } from '@/hooks/use-para-wallet-balance'
 import { useAccount } from '@getpara/react-sdk'
 import { fetchGames } from '@/hooks/get-games'
 import type { Lobby } from '@/hooks/get-games'
+import { useSessionToken } from '@/hooks/use-session'
+
+interface Line {
+  id: string
+  createdAt: string
+  athleteId: string
+  statId: string
+  matchupId: string
+  predictedValue: number
+  actualValue: number
+  isHigher: boolean
+  sport?: string
+  playerName?: string
+  value?: number
+  stat: {
+    id: string
+    customId: number
+    name: string
+    description: string
+    createdAt: Date
+  }
+  matchup: {
+    id: string
+    homeTeam: string
+    awayTeam: string
+    gameDate: Date
+    status: string
+    scoreHome: number
+    scoreAway: number
+    createdAt: Date
+  }
+  athlete: {
+    id: string
+    name: string
+    team: string
+    position: string
+    jerseyNumber: number
+    age: number
+    picture: string
+    createdAt: Date
+  }
+}
+
+interface Athlete {
+  id: string
+  name: string
+  team: string
+  position: string
+  jerseyNumber: number
+  age: number
+  picture: string
+  customId: number
+  createdAt: Date
+
+  lines: Line[]
+}
 
 export default function MainFeedPage() {
   const router = useRouter()
   const account = useAccount()
-  const [selectedSport, setSelectedSport] = useState('all')
+  const { session } = useSessionToken()
 
   const [lobbiesData, setLobbiesData] = useState<Lobby[]>([])
 
@@ -31,6 +87,7 @@ export default function MainFeedPage() {
 
   const [bookmarkedAthletes, setBookmarkedAthletes] = useState<string[]>([])
   const [selectedAthletes, setSelectedAthletes] = useState<string[]>([])
+  const [athletes, setAthletes] = useState<Athlete[]>([])
   const [isInSelectionMode, setIsInSelectionMode] = useState(false)
   const [requiredSelections, setRequiredSelections] = useState(0)
   const [mounted, setMounted] = useState(false)
@@ -56,6 +113,27 @@ export default function MainFeedPage() {
     })
   }
 
+  useEffect(() => {
+    const fetchAthletes = async () => {
+      try {
+        const response = await fetch('/api/read-lines-group-athletes', {
+          method: 'GET',
+          headers: {
+            'x-para-session': session || '',
+          },
+        })
+        console.log('athletes response', response)
+        const data = await response.json()
+        console.log('athletes data', data)
+        setAthletes(data)
+      } catch (error) {
+        console.error('Error fetching lines:', error)
+        setAthletes([])
+      }
+    }
+    fetchAthletes()
+  }, [])
+
   // Fix hydration issues
   useEffect(() => {
     setMounted(true)
@@ -80,8 +158,6 @@ export default function MainFeedPage() {
   useEffect(() => {
     if (!mounted) return
 
-    let timeoutId: NodeJS.Timeout
-
     // If we're connected, mark as checked and clear any pending redirects
     if (isConnected) {
       setHasCheckedConnection(true)
@@ -95,7 +171,7 @@ export default function MainFeedPage() {
     if (balanceLoading) return
 
     // Wait for Para connection to establish - sometimes it takes a moment after signin
-    timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setHasCheckedConnection(true)
 
       // Only redirect if definitely not connected and not loading
@@ -119,112 +195,6 @@ export default function MainFeedPage() {
 
   // Mock lobby data - showing high activity
   const totalActiveLobbies = lobbiesData.filter((lobby) => lobby.status === 'active').length
-
-  // Mock athlete data
-  const athletes = [
-    {
-      id: 'lebron-james',
-      name: 'LeBron James',
-      team: 'LAL',
-      position: 'SF',
-      sport: 'NBA',
-      matchup: 'vs GSW',
-      gameTime: 'Tonight 8:00 PM',
-      avatar: 'LJ',
-      stats: [
-        { type: 'Points', line: 28.5, over: '+110', under: '-130' },
-        { type: 'Rebounds', line: 7.5, over: '-110', under: '-110' },
-        { type: 'Assists', line: 6.5, over: '+105', under: '-125' },
-      ],
-      trending: 'up' as const,
-      confidence: 85,
-    },
-    {
-      id: 'steph-curry',
-      name: 'Stephen Curry',
-      team: 'GSW',
-      position: 'PG',
-      sport: 'NBA',
-      matchup: '@ LAL',
-      gameTime: 'Tonight 8:00 PM',
-      avatar: 'SC',
-      stats: [
-        { type: 'Points', line: 31.5, over: '-115', under: '-105' },
-        { type: '3-Pointers', line: 4.5, over: '+120', under: '-140' },
-        { type: 'Assists', line: 5.5, over: '-110', under: '-110' },
-      ],
-      trending: 'hot' as const,
-      confidence: 92,
-    },
-    {
-      id: 'josh-allen',
-      name: 'Josh Allen',
-      team: 'BUF',
-      position: 'QB',
-      sport: 'NFL',
-      matchup: 'vs KC',
-      gameTime: 'Sunday 1:00 PM',
-      avatar: 'JA',
-      stats: [
-        { type: 'Passing Yards', line: 285.5, over: '-110', under: '-110' },
-        { type: 'Rushing Yards', line: 45.5, over: '+105', under: '-125' },
-        { type: 'Total TDs', line: 2.5, over: '+115', under: '-135' },
-      ],
-      trending: 'stable' as const,
-      confidence: 78,
-    },
-    {
-      id: 'patrick-mahomes',
-      name: 'Patrick Mahomes',
-      team: 'KC',
-      position: 'QB',
-      sport: 'NFL',
-      matchup: '@ BUF',
-      gameTime: 'Sunday 1:00 PM',
-      avatar: 'PM',
-      stats: [
-        { type: 'Passing Yards', line: 295.5, over: '-105', under: '-115' },
-        { type: 'Passing TDs', line: 2.5, over: '+110', under: '-130' },
-        { type: 'Completions', line: 24.5, over: '-110', under: '-110' },
-      ],
-      trending: 'hot' as const,
-      confidence: 89,
-    },
-    {
-      id: 'travis-kelce',
-      name: 'Travis Kelce',
-      team: 'KC',
-      position: 'TE',
-      sport: 'NFL',
-      matchup: '@ BUF',
-      gameTime: 'Sunday 1:00 PM',
-      avatar: 'TK',
-      stats: [
-        { type: 'Receiving Yards', line: 85.5, over: '-110', under: '-110' },
-        { type: 'Receptions', line: 6.5, over: '+105', under: '-125' },
-        { type: 'Receiving TDs', line: 0.5, over: '+150', under: '-180' },
-      ],
-      trending: 'up' as const,
-      confidence: 74,
-    },
-    {
-      id: 'messi',
-      name: 'Lionel Messi',
-      team: 'MIA',
-      position: 'FW',
-      sport: 'Soccer',
-      matchup: 'vs NYC',
-      gameTime: 'Saturday 7:30 PM',
-      avatar: 'LM',
-      stats: [
-        { type: 'Goals', line: 0.5, over: '+120', under: '-140' },
-        { type: 'Assists', line: 0.5, over: '+105', under: '-125' },
-        { type: 'Shots on Target', line: 2.5, over: '-110', under: '-110' },
-      ],
-      trending: 'hot' as const,
-      confidence: 88,
-    },
-  ]
 
   const toggleBookmark = (athleteId: string) => {
     setBookmarkedAthletes((prev) => {
@@ -258,30 +228,7 @@ export default function MainFeedPage() {
     })
   }
 
-  const filteredAthletes =
-    selectedSport === 'all' ? athletes : athletes.filter((athlete) => athlete.sport === selectedSport)
-
-  const sportTabs = [
-    { id: 'all', name: 'All', icon: '🏆', count: athletes.length },
-    {
-      id: 'NBA',
-      name: 'NBA',
-      icon: '🏀',
-      count: athletes.filter((a) => a.sport === 'NBA').length,
-    },
-    {
-      id: 'NFL',
-      name: 'NFL',
-      icon: '🏈',
-      count: athletes.filter((a) => a.sport === 'NFL').length,
-    },
-    {
-      id: 'Soccer',
-      name: 'Soccer',
-      icon: '⚽',
-      count: athletes.filter((a) => a.sport === 'Soccer').length,
-    },
-  ]
+  const filteredAthletes = athletes
 
   // Don't render until mounted to prevent hydration issues
   if (!mounted) {
@@ -415,34 +362,8 @@ export default function MainFeedPage() {
         </div>
       </div>
 
-      {/* Sport Category Tabs */}
-      <div className="sticky top-[60px] z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/30 px-4 py-3">
-        <div className="flex space-x-2 overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          <style jsx>{`
-            div::-webkit-scrollbar {
-              display: none;
-            }
-          `}</style>
-          {sportTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setSelectedSport(tab.id)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-semibold text-sm whitespace-nowrap transition-all duration-300 ${
-                selectedSport === tab.id
-                  ? 'bg-gradient-to-r from-[#00CED1] to-[#FFAB91] text-white shadow-lg'
-                  : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white border border-slate-700/50'
-              }`}
-            >
-              <span>{tab.icon}</span>
-              <span>{tab.name}</span>
-              <span className="bg-white/20 rounded-full px-2 py-0.5 text-xs">{tab.count}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Filters and Search */}
-      <div className="sticky top-[116px] z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/30 px-4 py-3">
+      <div className="sticky top-[16px] z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/30 px-4 py-3">
         <div className="flex items-center space-x-3">
           {/* Search Icon */}
           <button className="p-2 rounded-xl bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 transition-colors">
@@ -593,14 +514,14 @@ export default function MainFeedPage() {
                   id={athlete.id}
                   name={athlete.name}
                   team={athlete.team}
-                  position={athlete.position}
-                  sport={athlete.sport}
-                  matchup={athlete.matchup}
-                  gameTime={athlete.gameTime}
-                  avatar={athlete.avatar}
-                  stats={athlete.stats}
-                  trending={athlete.trending}
-                  confidence={athlete.confidence}
+                  avatar={athlete.picture}
+                  stats={athlete.lines.map((line) => ({
+                    type: line.stat.name,
+                    line: line.predictedValue,
+                    over: '110',
+                    under: '110',
+                  }))}
+                  matchup={athlete.lines[0].matchup}
                   isBookmarked={bookmarkedAthletes.includes(athlete.id)}
                   onBookmarkToggle={toggleBookmark}
                   isSelected={selectedAthletes.includes(athlete.id)}
@@ -660,14 +581,14 @@ export default function MainFeedPage() {
                   id={athlete.id}
                   name={athlete.name}
                   team={athlete.team}
-                  position={athlete.position}
-                  sport={athlete.sport}
-                  matchup={athlete.matchup}
-                  gameTime={athlete.gameTime}
-                  avatar={athlete.avatar}
-                  stats={athlete.stats}
-                  trending={athlete.trending}
-                  confidence={athlete.confidence}
+                  avatar={athlete.picture}
+                  stats={athlete.lines.map((line) => ({
+                    type: line.stat.name,
+                    line: line.predictedValue,
+                    over: '110',
+                    under: '110',
+                  }))}
+                  matchup={athlete.lines[0].matchup}
                   isBookmarked={bookmarkedAthletes.includes(athlete.id)}
                   onBookmarkToggle={toggleBookmark}
                   isSelected={selectedAthletes.includes(athlete.id)}
