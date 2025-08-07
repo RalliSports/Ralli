@@ -79,6 +79,15 @@ interface Game {
   host: { name: string; avatar: string }
 }
 
+interface MatchUp {
+  id: string
+  homeTeam: string
+  awayTeam: string
+  sport: string
+  date: Date
+  status: 'scheduled' | 'live' | 'completed'
+}
+
 export default function AdminPage() {
   return (
     <ToastProvider>
@@ -91,7 +100,9 @@ function AdminPageContent() {
   const { session } = useSessionToken()
 
   const { addToast } = useToast()
-  const [activeTab, setActiveTab] = useState<'stats' | 'lines' | 'players' | 'resolve-lines' | 'resolve-games'>('stats')
+  const [activeTab, setActiveTab] = useState<
+    'stats' | 'lines' | 'players' | 'resolve-lines' | 'resolve-games' | 'matchups'
+  >('stats')
 
   // Sport configurations
   const sports = [
@@ -159,15 +170,31 @@ function AdminPageContent() {
 
   useEffect(() => {
     const fetchLines = async () => {
-      const response = await fetch('/api/read-lines', {
-        method: 'GET',
-        headers: {
-          'x-para-session': session || '',
-        },
-      })
-      const data = await response.json()
-      console.log(data, 'data')
-      setLines(data)
+      try {
+        const response = await fetch('/api/read-lines', {
+          method: 'GET',
+          headers: {
+            'x-para-session': session || '',
+          },
+        })
+        const data = await response.json()
+        console.log(data, 'data')
+
+        // Ensure data is always an array
+        if (Array.isArray(data)) {
+          setLines(data)
+        } else if (data && Array.isArray(data.lines)) {
+          setLines(data.lines)
+        } else if (data && Array.isArray(data.data)) {
+          setLines(data.data)
+        } else {
+          console.warn('API response is not an array:', data)
+          setLines([])
+        }
+      } catch (error) {
+        console.error('Error fetching lines:', error)
+        setLines([])
+      }
     }
     fetchLines()
   }, [])
@@ -204,19 +231,55 @@ function AdminPageContent() {
 
   const timeNow = new Date()
 
+  // Mock data for matchups
+  const [matchUps, setMatchUps] = useState<MatchUp[]>([
+    {
+      id: '1',
+      homeTeam: 'Los Angeles Lakers',
+      awayTeam: 'Golden State Warriors',
+      sport: 'NBA',
+      date: new Date('2025-08-10'),
+      status: 'scheduled',
+    },
+    {
+      id: '2',
+      homeTeam: 'Buffalo Bills',
+      awayTeam: 'Kansas City Chiefs',
+      sport: 'NFL',
+      date: new Date('2025-08-11'),
+      status: 'scheduled',
+    },
+  ])
+
   const [stats, setStats] = useState<Stat[]>([])
 
   useEffect(() => {
     const fetchStats = async () => {
-      const response = await fetch('/api/read-stats', {
-        method: 'GET',
-        headers: {
-          'x-para-session': session || '',
-        },
-      })
-      const data = await response.json()
-      console.log(data, 'data')
-      setStats(data)
+      try {
+        const response = await fetch('/api/read-stats', {
+          method: 'GET',
+          headers: {
+            'x-para-session': session || '',
+          },
+        })
+        const data = await response.json()
+        console.log(data, 'data')
+
+        // Ensure data is always an array
+        if (Array.isArray(data)) {
+          setStats(data)
+        } else if (data && Array.isArray(data.stats)) {
+          setStats(data.stats)
+        } else if (data && Array.isArray(data.data)) {
+          setStats(data.data)
+        } else {
+          console.warn('API response is not an array:', data)
+          setStats([])
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error)
+        setStats([])
+      }
     }
     fetchStats()
   }, [])
@@ -241,14 +304,20 @@ function AdminPageContent() {
     playerId: '',
     statTypeId: '',
     value: '',
-    gameTime: '',
+    gameId: '',
     gameDate: '',
-    overOdds: '',
-    underOdds: '',
   })
 
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedSport, setSelectedSport] = useState('all')
+
+  // New matchup form state
+  const [newMatchUp, setNewMatchUp] = useState({
+    homeTeam: '',
+    awayTeam: '',
+    sport: '',
+    date: '',
+  })
 
   // Resolution state for lines
   const [resolvingLine, setResolvingLine] = useState<string | null>(null)
@@ -384,10 +453,8 @@ function AdminPageContent() {
     //   playerId: "",
     //   statTypeId: "",
     //   value: "",
-    //   gameTime: "",
+    //   gameId: "",
     //   gameDate: "",
-    //   overOdds: "",
-    //   underOdds: "",
     // });
 
     const apiData = {
@@ -513,9 +580,45 @@ function AdminPageContent() {
     addToast(message, 'success')
   }
 
+  const handleCreateMatchUp = () => {
+    if (!newMatchUp.homeTeam || !newMatchUp.awayTeam || !newMatchUp.sport || !newMatchUp.date) {
+      addToast('Please fill in all fields', 'error')
+      return
+    }
+
+    if (newMatchUp.homeTeam === newMatchUp.awayTeam) {
+      addToast('Home and away teams must be different', 'error')
+      return
+    }
+
+    const matchDate = new Date(newMatchUp.date)
+    if (isNaN(matchDate.getTime())) {
+      addToast('Please enter a valid date', 'error')
+      return
+    }
+
+    const matchUp: MatchUp = {
+      id: String(matchUps.length + 1),
+      homeTeam: newMatchUp.homeTeam,
+      awayTeam: newMatchUp.awayTeam,
+      sport: newMatchUp.sport,
+      date: matchDate,
+      status: 'scheduled',
+    }
+
+    setMatchUps([...matchUps, matchUp])
+    setNewMatchUp({
+      homeTeam: '',
+      awayTeam: '',
+      sport: '',
+      date: '',
+    })
+    addToast('Match-up created successfully!', 'success')
+  }
+
   // Filter functions
   console.log(lines, 'lines')
-  const filteredLines = lines.filter((line) => {
+  const filteredLines = (Array.isArray(lines) ? lines : []).filter((line) => {
     const matchesSearch =
       line.athlete.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       line.stat.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -592,6 +695,7 @@ function AdminPageContent() {
                 { id: 'lines', name: 'Create Lines', icon: '📈' },
                 { id: 'resolve-lines', name: 'Resolve Lines', icon: '✅' },
                 { id: 'resolve-games', name: 'Resolve Games', icon: '🎮' },
+                { id: 'matchups', name: 'Match Up', icon: '⚔️' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -698,7 +802,7 @@ function AdminPageContent() {
                 </div>
 
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {stats
+                  {(Array.isArray(stats) ? stats : [])
                     .filter((stat) => {
                       const matchesSearch =
                         stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -760,7 +864,7 @@ function AdminPageContent() {
                         </div>
                       </div>
                     ))}
-                  {stats.filter((stat) => {
+                  {(Array.isArray(stats) ? stats : []).filter((stat) => {
                     const matchesSearch =
                       stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                       stat.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -983,7 +1087,7 @@ function AdminPageContent() {
                           label: 'Select stat type',
                           disabled: true,
                         },
-                        ...stats.map((stat) => ({
+                        ...(Array.isArray(stats) ? stats : []).map((stat) => ({
                           value: stat.id,
                           label: `${stat.name} (${stat.customId})`,
                           icon: '📊',
@@ -1018,47 +1122,33 @@ function AdminPageContent() {
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">Game Description</label>
-                    <input
-                      type="text"
-                      value={newLine.gameTime}
-                      onChange={(e) => setNewLine({ ...newLine, gameTime: e.target.value })}
-                      placeholder="e.g., Lakers vs Warriors - 4th Quarter"
-                      className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
-                    />
+                    <label className="block text-white font-semibold mb-2">Select Game</label>
+                    <select
+                      value={newLine.gameId}
+                      onChange={(e) => setNewLine({ ...newLine, gameId: e.target.value })}
+                      className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                    >
+                      <option value="">Select a game</option>
+                      {Array.isArray(games)
+                        ? games.map((game) => (
+                            <option key={game.id} value={game.id}>
+                              {game.title} - {game.sport}
+                            </option>
+                          ))
+                        : null}
+                    </select>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-white font-semibold mb-2">Over Odds</label>
-                      <input
-                        type="text"
-                        value={newLine.overOdds}
-                        onChange={(e) => setNewLine({ ...newLine, overOdds: e.target.value })}
-                        placeholder="e.g., +110"
-                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-white font-semibold mb-2">Under Odds</label>
-                      <input
-                        type="text"
-                        value={newLine.underOdds}
-                        onChange={(e) => setNewLine({ ...newLine, underOdds: e.target.value })}
-                        placeholder="e.g., -130"
-                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleCreateLine}
-                    className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
-                  >
-                    Create Line
-                  </button>
                 </div>
+              </div>
+
+              {/* Create Line Button - Full Width at Bottom */}
+              <div className="mt-6">
+                <button
+                  onClick={handleCreateLine}
+                  className="w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+                >
+                  Create Line
+                </button>
               </div>
             </div>
           )}
@@ -1395,6 +1485,144 @@ function AdminPageContent() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+          {/* Match Up Tab */}
+          {activeTab === 'matchups' && (
+            <div className="space-y-6">
+              {/* Match-ups Section */}
+              <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
+                <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+                  <span className="w-8 h-8 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full mr-3 flex items-center justify-center">
+                    <span className="text-lg">⚔️</span>
+                  </span>
+                  Match-ups
+                </h2>
+
+                {/* Create Match-up Form */}
+                <div className="bg-slate-800/50 rounded-xl p-6 mb-6">
+                  <h4 className="text-lg font-semibold text-white mb-4">Create New Match-up</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Sport</label>
+                      <select
+                        value={newMatchUp.sport}
+                        onChange={(e) =>
+                          setNewMatchUp({
+                            ...newMatchUp,
+                            sport: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                      >
+                        <option value="">Select Sport</option>
+                        <option value="NBA">NBA</option>
+                        <option value="NFL">NFL</option>
+                        <option value="Soccer">Soccer</option>
+                        <option value="Baseball">Baseball</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Home Team</label>
+                      <input
+                        type="text"
+                        value={newMatchUp.homeTeam}
+                        onChange={(e) =>
+                          setNewMatchUp({
+                            ...newMatchUp,
+                            homeTeam: e.target.value,
+                          })
+                        }
+                        placeholder="e.g., Los Angeles Lakers"
+                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Away Team</label>
+                      <input
+                        type="text"
+                        value={newMatchUp.awayTeam}
+                        onChange={(e) =>
+                          setNewMatchUp({
+                            ...newMatchUp,
+                            awayTeam: e.target.value,
+                          })
+                        }
+                        placeholder="e.g., Golden State Warriors"
+                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-2">Date</label>
+                      <input
+                        type="date"
+                        value={newMatchUp.date}
+                        onChange={(e) => setNewMatchUp({ ...newMatchUp, date: e.target.value })}
+                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleCreateMatchUp}
+                    className="mt-6 w-full bg-gradient-to-r from-[#00CED1] to-[#FFAB91] hover:from-[#00CED1]/90 hover:to-[#FFAB91]/90 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg"
+                  >
+                    Create Match-up
+                  </button>
+                </div>
+
+                {/* Match-ups List */}
+                <div className="space-y-4">
+                  {matchUps.map((matchUp) => (
+                    <div
+                      key={matchUp.id}
+                      className="bg-slate-700/30 rounded-xl p-6 hover:bg-slate-700/50 transition-colors border border-slate-600/20"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-6">
+                          <div className="text-center">
+                            <div className="w-16 h-16 bg-gradient-to-r from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center mb-2">
+                              <span className="font-bold text-white text-sm">HOME</span>
+                            </div>
+                            <p className="text-xs text-slate-400">Home</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-white">VS</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="w-16 h-16 bg-slate-600/50 rounded-full flex items-center justify-center mb-2">
+                              <span className="font-bold text-white text-sm">AWAY</span>
+                            </div>
+                            <p className="text-xs text-slate-400">Away</p>
+                          </div>
+                          <div className="ml-6">
+                            <h4 className="text-xl font-bold text-white mb-1">
+                              {matchUp.homeTeam} vs {matchUp.awayTeam}
+                            </h4>
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="text-lg">{sports.find((s) => s.name === matchUp.sport)?.icon}</span>
+                              <p className="text-sm text-slate-300 font-medium">{matchUp.sport}</p>
+                            </div>
+                            <p className="text-xs text-slate-400">{new Date(matchUp.date).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span
+                            className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                              matchUp.status === 'scheduled'
+                                ? 'bg-blue-500/20 text-blue-400 border border-blue-400/30'
+                                : matchUp.status === 'live'
+                                  ? 'bg-green-500/20 text-green-400 border border-green-400/30'
+                                  : 'bg-gray-500/20 text-gray-400 border border-gray-400/30'
+                            }`}
+                          >
+                            {matchUp.status.charAt(0).toUpperCase() + matchUp.status.slice(1)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
