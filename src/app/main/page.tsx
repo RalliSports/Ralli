@@ -186,12 +186,15 @@ export default function MainFeedPage() {
     }
   }, [mounted, isConnected, balanceLoading, hasCheckedConnection, router])
 
-  // Redirect to /signin if the user is not connected
+  // Redirect to /signin if the user is not connected (only after we've checked connection)
   useEffect(() => {
-    if (!account?.isConnected) {
+    if (!mounted) return
+
+    // Only redirect if we've completed our connection check and user is still not connected
+    if (hasCheckedConnection && !account?.isConnected) {
       router.push('/signin')
     }
-  }, [account?.isConnected, router])
+  }, [mounted, hasCheckedConnection, account?.isConnected, router])
 
   // Mock lobby data - showing high activity
   const totalActiveLobbies = lobbiesData.filter((lobby) => lobby.status === 'active').length
