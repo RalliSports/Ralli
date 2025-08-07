@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Make the request to the backend
-    const response = await fetch(`${backendUrl}api/v1/create-line`, {
+    const response = await fetch(`${backendUrl}/api/v1/create-line`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

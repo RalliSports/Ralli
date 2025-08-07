@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Make the request to the backend
-    const response = await fetch(`${backendUrl}api/v1/stats`, {
+    const response = await fetch(`${backendUrl}/api/v1/stats`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

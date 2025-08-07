@@ -152,7 +152,7 @@ function AdminPageContent() {
     if (session) {
       fetchPlayers()
     }
-  }, [session, addToast])
+  }, [session])
 
   // Mock data for lines
   const [lines, setLines] = useState<Line[]>([])

@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Make the request to the backend
-    const response = await fetch(`${backendUrl}api/v1/line/resolve/${body.lineId}`, {
+    const response = await fetch(`${backendUrl}/api/v1/line/resolve/${body.lineId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
