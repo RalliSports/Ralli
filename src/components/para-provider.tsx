@@ -25,7 +25,7 @@ export function Providers({
           appName: 'Ralli',
         }}
         paraModalConfig={{
-          logo: 'https://upload.wikimedia.org/wikipedia/en/b/b9/Solana_logo.png',
+          logo: '/images/RALLI.png',
           oAuthMethods: ['GOOGLE', 'TWITTER', 'DISCORD'],
           authLayout: ['AUTH:FULL'],
         }}
