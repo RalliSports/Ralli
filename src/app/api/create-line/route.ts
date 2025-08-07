@@ -6,6 +6,7 @@ interface CreateLineRequest {
   statId: string
   matchupId: string
   predictedValue: number
+  startsAtTimestamp: number
 }
 
 // Validation function
@@ -14,7 +15,8 @@ function validateCreateLineData(data: any): data is CreateLineRequest {
     typeof data.athleteId === 'string' &&
     typeof data.statId === 'string' &&
     typeof data.matchupId === 'string' &&
-    typeof data.predictedValue === 'number'
+    typeof data.predictedValue === 'number' &&
+    typeof data.startsAtTimestamp === 'number'
   )
 }
 
@@ -40,6 +42,7 @@ export async function POST(request: NextRequest) {
             statId: 'string',
             matchupId: 'string',
             predictedValue: 'number',
+            startsAtTimestamp: 'number',
           },
         },
         { status: 400 },
@@ -60,8 +63,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log(body.startTime, 'startTime')
+
     // Make the request to the backend
-    const response = await fetch(`${backendUrl}api/v1/create-line`, {
+    const response = await fetch(`${backendUrl}/api/v1/create-line`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -69,6 +74,8 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify(body),
     })
+
+    console.log(response, 'response')
 
     // Check if the backend request was successful
     if (!response.ok) {

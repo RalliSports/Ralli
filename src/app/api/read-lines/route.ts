@@ -24,13 +24,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Make the request to the backend
-    const response = await fetch(`${backendUrl}api/v1/lines`, {
+    const response = await fetch(`${backendUrl}/api/v1/lines`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         ...(tokenString && { 'x-para-session': tokenString }),
       },
     })
+
+    console.log(response, 'response')
 
     // Check if the backend request was successful
     if (!response.ok) {
