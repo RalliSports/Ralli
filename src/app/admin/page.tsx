@@ -33,7 +33,7 @@ interface Line {
   athleteId: string
   statId: string
   matchupId: string
-  predictedValue: string
+  predictedValue: number
   actualValue: string
   isHigher: boolean
   stat: {
@@ -83,7 +83,6 @@ interface MatchUp {
   id: string
   homeTeam: string
   awayTeam: string
-  sport: string
   date: Date
   status: 'scheduled' | 'live' | 'completed'
 }
@@ -178,19 +177,7 @@ function AdminPageContent() {
           },
         })
         const data = await response.json()
-        console.log(data, 'data')
-
-        // Ensure data is always an array
-        if (Array.isArray(data)) {
-          setLines(data)
-        } else if (data && Array.isArray(data.lines)) {
-          setLines(data.lines)
-        } else if (data && Array.isArray(data.data)) {
-          setLines(data.data)
-        } else {
-          console.warn('API response is not an array:', data)
-          setLines([])
-        }
+        setLines(data)
       } catch (error) {
         console.error('Error fetching lines:', error)
         setLines([])
@@ -232,24 +219,28 @@ function AdminPageContent() {
   const timeNow = new Date()
 
   // Mock data for matchups
-  const [matchUps, setMatchUps] = useState<MatchUp[]>([
-    {
-      id: '1',
-      homeTeam: 'Los Angeles Lakers',
-      awayTeam: 'Golden State Warriors',
-      sport: 'NBA',
-      date: new Date('2025-08-10'),
-      status: 'scheduled',
-    },
-    {
-      id: '2',
-      homeTeam: 'Buffalo Bills',
-      awayTeam: 'Kansas City Chiefs',
-      sport: 'NFL',
-      date: new Date('2025-08-11'),
-      status: 'scheduled',
-    },
-  ])
+  const [matchUps, setMatchUps] = useState<MatchUp[]>([])
+
+  useEffect(() => {
+    const fetchMatchups = async () => {
+      try {
+        const response = await fetch('/api/read-matchups', {
+          method: 'GET',
+          headers: {
+            'x-para-session': session || '',
+          },
+        })
+        const data = await response.json()
+        console.log(data, 'matchups')
+
+        setMatchUps(data)
+      } catch (error) {
+        console.error('Error fetching matchups:', error)
+        setMatchUps([])
+      }
+    }
+    fetchMatchups()
+  }, [])
 
   const [stats, setStats] = useState<Stat[]>([])
 
@@ -265,17 +256,7 @@ function AdminPageContent() {
         const data = await response.json()
         console.log(data, 'data')
 
-        // Ensure data is always an array
-        if (Array.isArray(data)) {
-          setStats(data)
-        } else if (data && Array.isArray(data.stats)) {
-          setStats(data.stats)
-        } else if (data && Array.isArray(data.data)) {
-          setStats(data.data)
-        } else {
-          console.warn('API response is not an array:', data)
-          setStats([])
-        }
+        setStats(data)
       } catch (error) {
         console.error('Error fetching stats:', error)
         setStats([])
@@ -303,7 +284,7 @@ function AdminPageContent() {
   const [newLine, setNewLine] = useState({
     playerId: '',
     statTypeId: '',
-    value: '',
+    value: 0,
     gameId: '',
     gameDate: '',
   })
@@ -409,60 +390,20 @@ function AdminPageContent() {
   }
 
   const handleCreateLine = async () => {
-    // if (
-    //   !newLine.playerId ||
-    //   !newLine.statTypeId ||
-    //   !newLine.value ||
-    //   !newLine.gameTime ||
-    //   !newLine.gameDate ||
-    //   !newLine.overOdds ||
-    //   !newLine.underOdds
-    // ) {
-    //   addToast("Please fill in all fields", "error");
-    //   return;
-    // }
-
-    // const player = players.find((p) => p.id === newLine.playerId);
-    // const statType = statTypes.find((st) => st.id === newLine.statTypeId);
-    // if (!player || !statType) return;
-
-    // // Parse the date
-    // const gameDate = new Date(newLine.gameDate);
-    // if (isNaN(gameDate.getTime())) {
-    //   addToast("Please enter a valid date and time", "error");
-    //   return;
-    // }
-
-    // const line: Line = {
-    //   id: String(lines.length + 1),
-    //   playerId: newLine.playerId,
-    //   playerName: player.name,
-    //   statTypeId: newLine.statTypeId,
-    //   statName: statType.name,
-    //   value: parseFloat(newLine.value),
-    //   sport: player.sport,
-    //   gameTime: newLine.gameTime,
-    //   gameDate: gameDate,
-    //   status: "active",
-    //   overOdds: newLine.overOdds,
-    //   underOdds: newLine.underOdds,
-    // };
-
-    // setLines([...lines, line]);
-    // setNewLine({
-    //   playerId: "",
-    //   statTypeId: "",
-    //   value: "",
-    //   gameId: "",
-    //   gameDate: "",
-    // });
+    if (!newLine.playerId || !newLine.statTypeId || !newLine.value || !newLine.gameId || !newLine.gameDate) {
+      addToast('Please fill in all fields', 'error')
+      return
+    }
 
     const apiData = {
-      athleteId: '17b27fd9-8ebe-4ce7-9e84-cb34714386a6',
-      statId: '550e8401-e29b-41d4-a716-446655440018',
-      matchupId: '550e8400-e29b-41d4-a716-446655440050',
-      predictedValue: 10.5,
+      athleteId: newLine.playerId,
+      statId: newLine.statTypeId,
+      matchupId: newLine.gameId,
+      predictedValue: newLine.value,
+      startsAtTimestamp: new Date(newLine.gameDate).getTime(),
     }
+
+    console.log(apiData, 'apiData')
     const response = await fetch('/api/create-line', {
       method: 'POST',
       headers: {
@@ -474,6 +415,11 @@ function AdminPageContent() {
 
     const result = await response.json()
     console.log(result, 'result')
+
+    if (result.error) {
+      addToast(result.error, 'error')
+      return
+    }
 
     addToast('Line created successfully!', 'success')
   }
@@ -547,8 +493,8 @@ function AdminPageContent() {
     // )
 
     const apiData = {
-      lineId: 'a2fcf50b-c67c-481e-8658-e4fb2ad9cd95',
-      actualValue: 12,
+      lineId: lineId,
+      actualValue: actualValue,
     }
     const response = await fetch('/api/resolve-line', {
       method: 'POST',
@@ -581,7 +527,7 @@ function AdminPageContent() {
   }
 
   const handleCreateMatchUp = () => {
-    if (!newMatchUp.homeTeam || !newMatchUp.awayTeam || !newMatchUp.sport || !newMatchUp.date) {
+    if (!newMatchUp.homeTeam || !newMatchUp.awayTeam || !newMatchUp.date) {
       addToast('Please fill in all fields', 'error')
       return
     }
@@ -601,7 +547,6 @@ function AdminPageContent() {
       id: String(matchUps.length + 1),
       homeTeam: newMatchUp.homeTeam,
       awayTeam: newMatchUp.awayTeam,
-      sport: newMatchUp.sport,
       date: matchDate,
       status: 'scheduled',
     }
@@ -618,7 +563,7 @@ function AdminPageContent() {
 
   // Filter functions
   console.log(lines, 'lines')
-  const filteredLines = (Array.isArray(lines) ? lines : []).filter((line) => {
+  const filteredLines = lines.filter((line) => {
     const matchesSearch =
       line.athlete.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       line.stat.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -802,7 +747,7 @@ function AdminPageContent() {
                 </div>
 
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {(Array.isArray(stats) ? stats : [])
+                  {stats
                     .filter((stat) => {
                       const matchesSearch =
                         stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -864,7 +809,7 @@ function AdminPageContent() {
                         </div>
                       </div>
                     ))}
-                  {(Array.isArray(stats) ? stats : []).filter((stat) => {
+                  {stats.filter((stat) => {
                     const matchesSearch =
                       stat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                       stat.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -1087,7 +1032,7 @@ function AdminPageContent() {
                           label: 'Select stat type',
                           disabled: true,
                         },
-                        ...(Array.isArray(stats) ? stats : []).map((stat) => ({
+                        ...stats.map((stat) => ({
                           value: stat.id,
                           label: `${stat.name} (${stat.customId})`,
                           icon: '📊',
@@ -1103,7 +1048,7 @@ function AdminPageContent() {
                       type="number"
                       step="0.5"
                       value={newLine.value}
-                      onChange={(e) => setNewLine({ ...newLine, value: e.target.value })}
+                      onChange={(e) => setNewLine({ ...newLine, value: parseFloat(e.target.value) })}
                       placeholder="e.g., 28.5"
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-70  0/50 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     />
@@ -1129,13 +1074,11 @@ function AdminPageContent() {
                       className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
                     >
                       <option value="">Select a game</option>
-                      {Array.isArray(games)
-                        ? games.map((game) => (
-                            <option key={game.id} value={game.id}>
-                              {game.title} - {game.sport}
-                            </option>
-                          ))
-                        : null}
+                      {matchUps.map((matchUp) => (
+                        <option key={matchUp.id} value={matchUp.id}>
+                          {matchUp.homeTeam} vs {matchUp.awayTeam}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -1504,25 +1447,6 @@ function AdminPageContent() {
                 <div className="bg-slate-800/50 rounded-xl p-6 mb-6">
                   <h4 className="text-lg font-semibold text-white mb-4">Create New Match-up</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Sport</label>
-                      <select
-                        value={newMatchUp.sport}
-                        onChange={(e) =>
-                          setNewMatchUp({
-                            ...newMatchUp,
-                            sport: e.target.value,
-                          })
-                        }
-                        className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700/50 rounded-xl text-white focus:ring-2 focus:ring-[#00CED1] focus:border-[#00CED1] transition-all"
-                      >
-                        <option value="">Select Sport</option>
-                        <option value="NBA">NBA</option>
-                        <option value="NFL">NFL</option>
-                        <option value="Soccer">Soccer</option>
-                        <option value="Baseball">Baseball</option>
-                      </select>
-                    </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-300 mb-2">Home Team</label>
                       <input

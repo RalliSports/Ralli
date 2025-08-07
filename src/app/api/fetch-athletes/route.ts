@@ -40,8 +40,6 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    console.log(response, 'response')
-
     if (!response.ok) {
       return NextResponse.json({ error: 'Failed to fetch athletes' }, { status: response.status })
     }
