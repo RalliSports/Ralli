@@ -84,7 +84,6 @@ interface MatchUp {
   homeTeam: string
   awayTeam: string
   date: Date
-  status: 'scheduled' | 'live' | 'completed'
 }
 
 export default function AdminPage() {
@@ -526,7 +525,7 @@ function AdminPageContent() {
     addToast(message, 'success')
   }
 
-  const handleCreateMatchUp = () => {
+  const handleCreateMatchUp = async () => {
     if (!newMatchUp.homeTeam || !newMatchUp.awayTeam || !newMatchUp.date) {
       addToast('Please fill in all fields', 'error')
       return
@@ -543,15 +542,24 @@ function AdminPageContent() {
       return
     }
 
-    const matchUp: MatchUp = {
-      id: String(matchUps.length + 1),
-      homeTeam: newMatchUp.homeTeam,
-      awayTeam: newMatchUp.awayTeam,
-      date: matchDate,
-      status: 'scheduled',
+    const apiData = {
+      homeTeamId: newMatchUp.homeTeam,
+      awayTeamId: newMatchUp.awayTeam,
+      gameDate: matchDate.toISOString(), // Convert to ISO string for API
     }
 
-    setMatchUps([...matchUps, matchUp])
+    const response = await fetch('/api/create-matchup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-para-session': session || '',
+      },
+      body: JSON.stringify(apiData),
+    })
+
+    const result = await response.json()
+    console.log(result, 'result')
+
     setNewMatchUp({
       homeTeam: '',
       awayTeam: '',

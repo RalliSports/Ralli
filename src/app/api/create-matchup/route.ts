@@ -4,14 +4,14 @@ import { NextRequest, NextResponse } from 'next/server'
 interface CreateMatchupRequest {
   homeTeamId: string
   awayTeamId: string
-  gameDate: Date
+  gameDate: string
 }
 
 // Validation function
 function validateCreateMatchupData(data: unknown): data is CreateMatchupRequest {
   if (!data || typeof data !== 'object') return false
   const d = data as Record<string, unknown>
-  return typeof d.homeTeamId === 'string' && typeof d.awayTeamId === 'string' && d.gameDate instanceof Date
+  return typeof d.homeTeamId === 'string' && typeof d.awayTeamId === 'string' && typeof d.gameDate === 'string'
 }
 
 export async function POST(request: NextRequest) {
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
           required: {
             homeTeamId: 'string',
             awayTeamId: 'string',
-            gameDate: 'Date',
+            gameDate: 'string',
           },
         },
         { status: 400 },
