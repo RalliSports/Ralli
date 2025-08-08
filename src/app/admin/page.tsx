@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ToastProvider, useToast } from '../../components/ui/toast'
+import { useToast } from '../../components/ui/toast'
 import { Dropdown, SportsDropdown } from '../../components/ui/dropdown'
 import { useSessionToken } from '@/hooks/use-session'
 
@@ -68,18 +68,65 @@ interface Line {
   }
 }
 
+interface GameMode {
+  id: string
+  label: string
+
+  description: string
+
+  createdAt: string
+}
+
+interface User {
+  id: string
+
+  emailAddress: string
+
+  walletAddress: string
+
+  paraUserId: string
+
+  // @ApiProperty()
+  // role: Role;
+}
+
+interface Participant {
+  id: string
+  userId: string
+  gameId: string
+  joinedAt: string
+  isWinner: boolean
+  txnId: string | null
+}
+
 interface Game {
   id: string
   title: string
-  sport: string
-  participants: number
+  participants: Participant[]
+  creatorId: string
+  depositAmount: number
+
+  currency: string
+  createdAt: Date
+
+  status: string
   maxParticipants: number
-  buyIn: number
-  prizePool: number
-  legs: number
-  timeLeft: string
-  status: 'waiting' | 'active' | 'completed'
-  host: { name: string; avatar: string }
+
+  maxBet: number
+  gameCode: string
+
+  matchupGroup: string
+  depositToken: string
+
+  isPrivate: boolean
+  type: 'parlay' | 'head_to_head' | 'pool'
+
+  userControlType: 'whitelist' | 'blacklist' | 'none'
+  gameModeId: string
+
+  gameMode: GameMode
+
+  creator: User
 }
 
 interface MatchUp {
@@ -185,34 +232,27 @@ function AdminPageContent() {
   }, [])
 
   // Mock data for games (using existing lobby structure)
-  const [games, setGames] = useState<Game[]>([
-    {
-      id: '1',
-      title: '🔥 NBA Sunday Showdown',
-      sport: 'NBA',
-      participants: 9,
-      maxParticipants: 12,
-      buyIn: 25,
-      prizePool: 280,
-      legs: 4,
-      timeLeft: '2h 15m',
-      status: 'active',
-      host: { name: 'Jack Sturt', avatar: 'JS' },
-    },
-    {
-      id: '2',
-      title: 'Monday Night Football',
-      sport: 'NFL',
-      participants: 11,
-      maxParticipants: 12,
-      buyIn: 50,
-      prizePool: 580,
-      legs: 5,
-      timeLeft: '45m',
-      status: 'active',
-      host: { name: 'Mike Chen', avatar: 'MC' },
-    },
-  ])
+  const [games, setGames] = useState<Game[]>([])
+
+  useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        const response = await fetch('/api/read-open-games', {
+          method: 'GET',
+          headers: {
+            'x-para-session': session || '',
+          },
+        })
+        const data = await response.json()
+
+        setGames(data)
+      } catch (error) {
+        console.error('Error fetching matchups:', error)
+        setGames([])
+      }
+    }
+    fetchGames()
+  }, [])
 
   const timeNow = new Date()
 
@@ -229,7 +269,6 @@ function AdminPageContent() {
           },
         })
         const data = await response.json()
-        console.log(data, 'matchups')
 
         setMatchUps(data)
       } catch (error) {
@@ -252,7 +291,6 @@ function AdminPageContent() {
           },
         })
         const data = await response.json()
-        console.log(data, 'data')
 
         setStats(data)
       } catch (error) {
@@ -331,7 +369,6 @@ function AdminPageContent() {
       body: JSON.stringify(apiData),
     })
     const result = await response.json()
-    console.log(result, 'result')
     addToast('Stat type created successfully!', 'success')
   }
 
@@ -401,7 +438,6 @@ function AdminPageContent() {
       startsAtTimestamp: new Date(newLine.gameDate).getTime(),
     }
 
-    console.log(apiData, 'apiData')
     const response = await fetch('/api/create-line', {
       method: 'POST',
       headers: {
@@ -412,7 +448,6 @@ function AdminPageContent() {
     })
 
     const result = await response.json()
-    console.log(result, 'result')
 
     if (result.error) {
       addToast(result.error, 'error')
@@ -504,24 +539,26 @@ function AdminPageContent() {
     })
 
     const result = await response.json()
-    console.log(result, 'result')
 
     addToast(`Line resolved successfully! (${actualValue})`, 'success')
   }
 
-  const handleResolveGame = (gameId: string, action: 'end' | 'cancel') => {
-    setGames(
-      games.map((game) =>
-        game.id === gameId
-          ? {
-              ...game,
-              status: action === 'end' ? 'completed' : ('cancelled' as any),
-            }
-          : game,
-      ),
-    )
-    const message = action === 'end' ? 'Game ended successfully!' : 'Game cancelled successfully!'
-    addToast(message, 'success')
+  const handleResolveGame = async (gameId: string) => {
+    const apiData = {
+      gameId: gameId,
+    }
+    const response = await fetch('/api/resolve-game', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-para-session': session || '',
+      },
+      body: JSON.stringify(apiData),
+    })
+
+    const result = await response.json()
+
+    addToast('Game resolved successfully!', 'success')
   }
 
   const handleCreateMatchUp = async () => {
@@ -557,7 +594,6 @@ function AdminPageContent() {
     })
 
     const result = await response.json()
-    console.log(result, 'result')
 
     setNewMatchUp({
       homeTeam: '',
@@ -569,7 +605,6 @@ function AdminPageContent() {
   }
 
   // Filter functions
-  console.log(lines, 'lines')
   const filteredLines = lines.filter((line) => {
     const matchesSearch =
       line.athlete.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -578,11 +613,12 @@ function AdminPageContent() {
     return matchesSearch && matchesSport
   })
 
-  const filteredGames = games.filter((game) => {
-    const matchesSearch = game.title.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesSport = selectedSport === 'all' || game.sport === selectedSport
-    return matchesSearch && matchesSport
-  })
+  const filteredGames = games
+  // .filter((game) => {
+  //   const matchesSearch = game.title.toLowerCase().includes(searchTerm.toLowerCase())
+  //   const matchesSport = selectedSport === 'all' || game.sport === selectedSport
+  //   return matchesSearch && matchesSport
+  // })
 
   return (
     <div className="bg-gray-900 min-h-screen">
@@ -1388,7 +1424,7 @@ function AdminPageContent() {
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
-                          <span className="text-lg">{sports.find((s) => s.name === game.sport)?.icon}</span>
+                          {/* <span className="text-lg">{sports.find((s) => s.name === game.sport)?.icon}</span> */}
                           <h4 className="text-white font-semibold">{game.title}</h4>
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -1404,34 +1440,34 @@ function AdminPageContent() {
                         </div>
                         <div className="flex items-center space-x-4 text-sm text-slate-400 mb-2">
                           <span>
-                            Players: {game.participants}/{game.maxParticipants}
+                            Players: {game.participants.length}/{game.maxParticipants}
                           </span>
-                          <span>Buy-in: ${game.buyIn}</span>
-                          <span>Pool: ${game.prizePool}</span>
+                          <span>Buy-in: ${game.depositAmount}</span>
+                          <span>Pool: ${game.depositAmount * game.participants.length}</span>
                         </div>
                         <div className="flex items-center space-x-2 text-sm">
                           <span className="text-slate-300">Host:</span>
-                          <span className="text-[#FFAB91]">{game.host.name}</span>
-                          <span className="text-slate-400">• {game.timeLeft} remaining</span>
+                          {/* <span className="text-[#FFAB91]">{game.host.name}</span>
+                          <span className="text-slate-400">• {game.timeLeft} remaining</span> */}
                         </div>
                       </div>
 
-                      {game.status === 'active' && (
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleResolveGame(game.id, 'end')}
-                            className="px-4 py-2 bg-[#00CED1] hover:bg-[#00CED1]/90 text-white font-semibold rounded-lg transition-colors"
-                          >
-                            End Game
-                          </button>
-                          <button
+                      {/* {game.status === 'active' && ( */}
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleResolveGame(game.id)}
+                          className="px-4 py-2 bg-[#00CED1] hover:bg-[#00CED1]/90 text-white font-semibold rounded-lg transition-colors"
+                        >
+                          End Game
+                        </button>
+                        {/* <button
                             onClick={() => handleResolveGame(game.id, 'cancel')}
                             className="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white font-semibold rounded-lg transition-colors"
                           >
                             Cancel
-                          </button>
-                        </div>
-                      )}
+                          </button> */}
+                      </div>
+                      {/* )} */}
                     </div>
                   </div>
                 ))}
