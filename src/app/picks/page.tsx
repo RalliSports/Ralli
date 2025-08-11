@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useSessionToken } from '@/hooks/use-session'
 import Image from 'next/image'
 import { useToast } from '@/components/ui/toast'
@@ -130,14 +130,13 @@ interface SelectedPick {
 
 function PicksContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const { addToast } = useToast()
 
   const { session } = useSessionToken()
   const [selectedPicks, setSelectedPicks] = useState<SelectedPick[]>([])
   const [bookmarkedAthletes, setBookmarkedAthletes] = useState<string[]>([])
   const [mounted, setMounted] = useState(false)
-  const [isConfirming, setIsConfirming] = useState(false)
+  const [isConfirming] = useState(false)
   const [showPaymentPopup, setShowPaymentPopup] = useState(false)
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
@@ -174,7 +173,7 @@ function PicksContent() {
       }
     }
     fetchAthletes()
-  }, [])
+  }, [session])
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -197,7 +196,7 @@ function PicksContent() {
     if (gameId) {
       fetchGame()
     }
-  }, [gameId])
+  }, [gameId, session])
 
   const toggleBookmark = (athleteId: string) => {
     setBookmarkedAthletes((prev) => {

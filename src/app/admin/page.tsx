@@ -229,7 +229,7 @@ function AdminPageContent() {
       }
     }
     fetchLines()
-  }, [])
+  }, [session])
 
   // Mock data for games (using existing lobby structure)
   const [games, setGames] = useState<Game[]>([])
@@ -252,7 +252,7 @@ function AdminPageContent() {
       }
     }
     fetchGames()
-  }, [])
+  }, [session])
 
   const timeNow = new Date()
 
@@ -277,7 +277,7 @@ function AdminPageContent() {
       }
     }
     fetchMatchups()
-  }, [])
+  }, [session])
 
   const [stats, setStats] = useState<Stat[]>([])
 
@@ -299,7 +299,7 @@ function AdminPageContent() {
       }
     }
     fetchStats()
-  }, [])
+  }, [session])
 
   // Form states
   const [newStat, setNewStat] = useState({
@@ -360,7 +360,7 @@ function AdminPageContent() {
       description: newStat.description,
       customId: newStat.customId,
     }
-    const response = await fetch('/api/create-stat', {
+    await fetch('/api/create-stat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -368,7 +368,6 @@ function AdminPageContent() {
       },
       body: JSON.stringify(apiData),
     })
-    const result = await response.json()
     addToast('Stat type created successfully!', 'success')
   }
 
@@ -457,79 +456,12 @@ function AdminPageContent() {
     addToast('Line created successfully!', 'success')
   }
 
-  const handleResolveLine = async (
-    lineId: string,
-    actualValue: number,
-    // result: 'over' | 'under' | 'cancel',
-    // resolutionReason?: string,
-  ) => {
-    // if (result === 'cancel') {
-    //   setLines(
-    //     lines.map((line) =>
-    //       line.id === lineId
-    //         ? {
-    //             ...line,
-    //             status: 'cancelled',
-    //             resolutionReason: resolutionReason || 'Cancelled by admin',
-    //           }
-    //         : line,
-    //     ),
-    //   )
-    //   addToast('Line cancelled successfully!', 'success')
-    //   return
-    // }
-
-    // const line = lines.find((l) => l.id === lineId)
-    // if (!line) return
-
-    // // Validation logic
-    // const shouldBeOver = actualValue > line.value
-    // const shouldBeUnder = actualValue < line.value
-    // const isPush = actualValue === line.value
-
-    // if (isPush) {
-    //   addToast(
-    //     `Actual value ${actualValue} equals line value ${line.value}. This should be a push, not resolved as ${result.toUpperCase()}`,
-    //     'error',
-    //   )
-    //   return
-    // }
-
-    // if (result === 'over' && !shouldBeOver) {
-    //   addToast(
-    //     `Error: Actual value ${actualValue} is under the line value ${line.value}. Cannot resolve as OVER.`,
-    //     'error',
-    //   )
-    //   return
-    // }
-
-    // if (result === 'under' && !shouldBeUnder) {
-    //   addToast(
-    //     `Error: Actual value ${actualValue} is over the line value ${line.value}. Cannot resolve as UNDER.`,
-    //     'error',
-    //   )
-    //   return
-    // }
-
-    // setLines(
-    //   lines.map((l) =>
-    //     l.id === lineId
-    //       ? {
-    //           ...l,
-    //           status: 'resolved',
-    //           actualValue,
-    //           resolutionReason:
-    //             resolutionReason || `Resolved as ${result.toUpperCase()}: actual ${actualValue} vs line ${line.value}`,
-    //         }
-    //       : l,
-    //   ),
-    // )
-
+  const handleResolveLine = async (lineId: string, actualValue: number) => {
     const apiData = {
       lineId: lineId,
       actualValue: actualValue,
     }
-    const response = await fetch('/api/resolve-line', {
+    await fetch('/api/resolve-line', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -537,8 +469,6 @@ function AdminPageContent() {
       },
       body: JSON.stringify(apiData),
     })
-
-    const result = await response.json()
 
     addToast(`Line resolved successfully! (${actualValue})`, 'success')
   }
@@ -547,7 +477,7 @@ function AdminPageContent() {
     const apiData = {
       gameId: gameId,
     }
-    const response = await fetch('/api/resolve-game', {
+    await fetch('/api/resolve-game', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -555,8 +485,6 @@ function AdminPageContent() {
       },
       body: JSON.stringify(apiData),
     })
-
-    const result = await response.json()
 
     addToast('Game resolved successfully!', 'success')
   }
@@ -584,7 +512,7 @@ function AdminPageContent() {
       gameDate: matchDate.toISOString(), // Convert to ISO string for API
     }
 
-    const response = await fetch('/api/create-matchup', {
+    await fetch('/api/create-matchup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -592,8 +520,6 @@ function AdminPageContent() {
       },
       body: JSON.stringify(apiData),
     })
-
-    const result = await response.json()
 
     setNewMatchUp({
       homeTeam: '',
@@ -989,7 +915,7 @@ function AdminPageContent() {
                         <div className="flex items-center space-x-4">
                           <div className="w-12 h-12 bg-gradient-to-br from-[#00CED1] to-[#FFAB91] rounded-full flex items-center justify-center overflow-hidden">
                             {player.picture ? (
-                              <img
+                              <Image
                                 src={player.picture}
                                 alt={player.name}
                                 className="w-full h-full object-cover"

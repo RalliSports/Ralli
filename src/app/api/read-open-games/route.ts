@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { backendUrl } from '@/constants'
 
 // fetch or get from backend/api/v1/games
@@ -51,7 +51,7 @@ interface Game {
   participants: Participant[]
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     if (!backendUrl) {
       return NextResponse.json({ error: 'Backend URL not configured' }, { status: 500 })

@@ -11,7 +11,7 @@ interface CreateBetRequest {
 }
 
 // Validation function
-function validateCreateBetData(data: any): data is CreateBetRequest {
+function validateCreateBetData(data: CreateBetRequest): data is CreateBetRequest {
   return (
     typeof data.gameId === 'string' &&
     Array.isArray(data.predictions) &&

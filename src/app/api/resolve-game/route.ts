@@ -6,7 +6,7 @@ interface ResolveGameRequest {
 }
 
 // Validation function
-function validateResolveGameData(data: any): data is ResolveGameRequest {
+function validateResolveGameData(data: ResolveGameRequest): data is ResolveGameRequest {
   return typeof data.gameId === 'string'
 }
 
