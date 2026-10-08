@@ -63,8 +63,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(body.startsAtTimestamp, 'startsAtTimestamp')
-
     // Make the request to the backend
     const response = await fetch(`${backendUrl}/api/v1/create-line`, {
       method: 'POST',
@@ -74,8 +72,6 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify(body),
     })
-
-    console.log(response, 'response')
 
     // Check if the backend request was successful
     if (!response.ok) {

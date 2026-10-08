@@ -163,7 +163,6 @@ export default function MainFeedPage() {
       setHasCheckedConnection(true)
       return
     }
-
     // Don't check again if we've already performed a connection check
     if (hasCheckedConnection) return
 
